@@ -24,14 +24,7 @@ const App = () => {
           name="Register"
           component={RegisterScreen}
           options={{
-            title: "Kayıt Ol", // Başlık
-            headerStyle: {
-              backgroundColor: "#000",
-            },
-            headerTintColor: "#fff",
-            headerTitleStyle: {
-              fontWeight: "bold",
-            },
+             headerShown: false ,
           }}
         />
       </Stack.Navigator>

@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   registerButton: {
     width: "100%",
     height: 50,
-    backgroundColor: "#000",
+    backgroundColor: "#2c2c2c",
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   loginButton: {
     width: "100%",
     height: 50,
-    backgroundColor: "#000",
+    backgroundColor: "#2c2c2c",
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,

@@ -8,7 +8,7 @@ import {
   Alert,
 } from "react-native";
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState("donor"); // "donor" or "receiver"
 
   const handleTabPress = (tab) => {
@@ -25,7 +25,7 @@ const LoginScreen = () => {
 
   const handleRegister = () => {
     Alert.alert("Kayıt Ol", "Kayıt ekranına yönlendiriliyorsunuz.");
-    
+    navigation.navigate("Register");
   };
 
   return (
@@ -66,7 +66,6 @@ const LoginScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Login Form */}
       <View style={styles.formContainer}>
         <Text>Email</Text>
         <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#ccc" />
