@@ -3,7 +3,12 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import LoginScreen from "./LoginScreen";
 import RegisterScreen from "./RegisterScreen";
-
+import BagisAlanAnaMenu from "./receiver/BagisAlanAnaMenu";
+import BagisAlanAcilDurumlar from "./receiver/BagisAlanAcilDurumlar";
+import BagisAlanEtkinlikler from "./receiver/BagisAlanEtkinlikler";
+import BagisAlanNakdiBagisTalebi from "./receiver/BagisAlanNakdiBagisTalebi";
+import BagisAlanEgitimYardimTalebi from "./receiver/BagisAlanEgitimYardimTalebi";
+import BagisAlanBagisDurumu from "./receiver/BagisAlanBagisDurumu";
 const Stack = createStackNavigator();
 
 const App = () => {
@@ -27,6 +32,12 @@ const App = () => {
              headerShown: false ,
           }}
         />
+      <Stack.Screen name="BagisAlanAnaMenu" component={BagisAlanAnaMenu} />
+      <Stack.Screen name="BagisAlanAcilDurumlar" component={BagisAlanAcilDurumlar} />
+      <Stack.Screen name="BagisAlanEtkinlikler" component={BagisAlanEtkinlikler}/>
+      <Stack.Screen name="BagisAlanNakdiBagisTalebi" component={BagisAlanNakdiBagisTalebi}/>
+      <Stack.Screen name="BagisAlanEgitimYardimTalebi" component={BagisAlanEgitimYardimTalebi}/>
+      <Stack.Screen name="BagisAlanBagisDurumu" component={BagisAlanBagisDurumu}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

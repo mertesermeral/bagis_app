@@ -7,7 +7,9 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "./firebase";
 
 const LoginScreen = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState("donor"); // "donor" or "receiver"
@@ -18,16 +20,49 @@ const LoginScreen = ({ navigation }) => {
     setActiveTab(tab);
   };
 
-  const handleLogin = () => {
-    const auth = getAuth();
-    signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        Alert.alert("Başarılı", `${activeTab === "donor" ? "Bağışçı" : "Bağış Alan"} olarak giriş yapıldı!`);
-        navigation.navigate("Home"); // Ana ekrana yönlendirme
-      })
-      .catch((error) => {
-        Alert.alert("Hata", error.message);
-      });
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Hata", "Lütfen email ve şifre alanlarını doldurun.");
+      return;
+    }
+
+    try {
+      // Kullanıcı giriş yapıyor
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Kullanıcının Firestore'daki rolünü alıyoruz
+      const docRef = doc(db, "users", user.uid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+        const role = userData.role; // Kullanıcının Firestore'daki rolü
+
+        // Seçili tab ile Firestore'dan alınan rolü karşılaştır
+        if (role !== activeTab) {
+          Alert.alert(
+            "Hata",
+            `Bu hesap ${role === "donor" ? "Bağışçı" : "Bağış Alan"} rolüne aittir. Lütfen doğru sekmeyi seçin.`
+          );
+          return;
+        }
+
+        Alert.alert("Başarılı", `${role === "donor" ? "Bağışçı" : "Bağış Alan"} olarak giriş yapıldı!`);
+
+        // Rol bilgisine göre yönlendirme
+        if (role === "donor") {
+          navigation.navigate("DonorHome"); // Bağışçı ana sayfası
+        } else if (role === "receiver") {
+          navigation.navigate("BagisAlanAnaMenu"); // Bağış alan ana sayfası
+        }
+      } else {
+        Alert.alert("Hata", "Kullanıcı bilgileri Firestore'da bulunamadı.");
+      }
+    } catch (error) {
+      console.error("Giriş sırasında hata oluştu:", error);
+      Alert.alert("Hata", error.message);
+    }
   };
 
   const handleRegister = () => {
@@ -37,6 +72,7 @@ const LoginScreen = ({ navigation }) => {
   const handleForgotPassword = () => {
     Alert.alert("Şifremi Unuttum", "Şifre sıfırlama işlemi başlatıldı.");
   };
+
   return (
     <View style={styles.container}>
       <View style={styles.tabContainer}>
@@ -105,8 +141,6 @@ const LoginScreen = ({ navigation }) => {
     </View>
   );
 };
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -181,7 +215,7 @@ const styles = StyleSheet.create({
     textAlign: "left",
     marginVertical: 10,
     textDecorationLine: "underline",
-    paddingBottom:"5%",
+    paddingBottom: "5%",
   },
   registerButton: {
     width: "100%",

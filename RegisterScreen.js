@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
-
+import { auth, db } from "./firebase"; 
 const RegisterScreen = ({ route, navigation }) => {
   const role = route?.params?.role || "donor"; // Varsayılan değer olarak 'donor' kullan
   const [firstName, setFirstName] = useState("");
