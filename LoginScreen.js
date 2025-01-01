@@ -34,6 +34,9 @@ const LoginScreen = ({ navigation }) => {
     navigation.navigate("Register", { role: activeTab }); // Seçili rolü Register ekranına gönder
   };
 
+  const handleForgotPassword = () => {
+    Alert.alert("Şifremi Unuttum", "Şifre sıfırlama işlemi başlatıldı.");
+  };
   return (
     <View style={styles.container}>
       <View style={styles.tabContainer}>
@@ -91,6 +94,9 @@ const LoginScreen = ({ navigation }) => {
         />
         <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
           <Text style={styles.loginButtonText}>Giriş Yap</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleForgotPassword}>
+          <Text style={styles.linkText}>Şifremi Unuttum</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
           <Text style={styles.registerButtonText}>Kayıt Ol</Text>
@@ -175,6 +181,7 @@ const styles = StyleSheet.create({
     textAlign: "left",
     marginVertical: 10,
     textDecorationLine: "underline",
+    paddingBottom:"5%",
   },
   registerButton: {
     width: "100%",
