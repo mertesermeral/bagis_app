@@ -17,28 +17,28 @@ const BagisAlanBagisDurumu = ({navigation}) => {
         {/* Eğitim Bağışı */}
         <View style={styles.card}>
           <Image
-            source={{ uri: 'https://via.placeholder.com/150' }} // Resmi buradan değiştirin
+            source={require('../assets/egitim.jpg')} // Use require for local image
             style={styles.cardImage}
           />
           <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>Eğitim Bağışı Talebi</Text>
-            <Text style={styles.cardAmount}>1000₺</Text>
-            <Text style={styles.cardStatus}>Bağış İşlemi Tamamlandı</Text>
-          </View>
+              <Text style={styles.cardTitle}>Eğitim Bağışı Talebi</Text>
+              <Text style={styles.cardAmount}>1000₺</Text>
+              <Text style={styles.cardStatus}>Bağış İşlemi Tamamlandı</Text>
         </View>
+      </View>
 
         {/* Gıda Bağışı */}
         <View style={styles.card}>
           <Image
-            source={{ uri: 'https://via.placeholder.com/150' }} // Resmi buradan değiştirin
+            source={require('../assets/gida.jpg')} // Use require for local image
             style={styles.cardImage}
           />
           <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>Gıda Bağışı Talebi</Text>
-            <Text style={styles.cardAmount}>900₺</Text>
-            <Text style={styles.cardStatus}>Talep Bekliyor...</Text>
-          </View>
+              <Text style={styles.cardTitle}>Eğitim Bağışı Talebi</Text>
+              <Text style={styles.cardAmount}>1000₺</Text>
+              <Text style={styles.cardStatus}>Bağış İşlemi Tamamlandı</Text>
         </View>
+      </View>
       </ScrollView>
 
       {/* Footer Navigation */}
