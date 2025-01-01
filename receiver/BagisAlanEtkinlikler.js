@@ -63,7 +63,17 @@ const BagisAlanEtkinlikler = ({ navigation }) => {
             <View style={styles.infoContainer}>
               <Text style={styles.title}>{event.title}</Text>
               <Text style={styles.organizer}>{event.organizer}</Text>
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() =>
+                  navigation.navigate('BagisAlanEtkinliklerDetay', {
+                    eventId: event.id,
+                    eventTitle: event.title,
+                    eventOrganizer: event.organizer,
+                    eventImage: event.image,
+                  })
+                }
+              >
                 <Text style={styles.buttonText}>Detaylar</Text>
               </TouchableOpacity>
             </View>
@@ -72,23 +82,24 @@ const BagisAlanEtkinlikler = ({ navigation }) => {
       </ScrollView>
 
       {/* Alt Menü */}
-             <View style={styles.footer}>
-                          <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanAnaMenu')}>
-                            <Icon name="home" size={24} color="#65558F" style={styles.iconCentered} />
-                            <Text style={styles.footerButtonText}>Ana Menü</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanBagisDurumu')}>
-                            <Icon name="donut-large" size={24} color="#65558F" style={styles.iconCentered} />
-                            <Text style={styles.footerButtonText}>Bağış Durumu</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanProfilim')}>
-                            <Icon name="person" size={24} color="#65558F" style={styles.iconCentered} />
-                            <Text style={styles.footerButtonText}>Profilim</Text>
-                          </TouchableOpacity>
-              </View>
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanAnaMenu')}>
+          <Icon name="home" size={24} color="#65558F" style={styles.iconCentered} />
+          <Text style={styles.footerButtonText}>Ana Menü</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanBagisDurumu')}>
+          <Icon name="donut-large" size={24} color="#65558F" style={styles.iconCentered} />
+          <Text style={styles.footerButtonText}>Bağış Durumu</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanProfilim')}>
+          <Icon name="person" size={24} color="#65558F" style={styles.iconCentered} />
+          <Text style={styles.footerButtonText}>Profilim</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {

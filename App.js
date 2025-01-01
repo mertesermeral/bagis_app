@@ -9,7 +9,8 @@ import BagisAlanEtkinlikler from "./receiver/BagisAlanEtkinlikler";
 import BagisAlanNakdiBagisTalebi from "./receiver/BagisAlanNakdiBagisTalebi";
 import BagisAlanEgitimYardimTalebi from "./receiver/BagisAlanEgitimYardimTalebi";
 import BagisAlanBagisDurumu from "./receiver/BagisAlanBagisDurumu";
-import BagisAlanProfilim from "./receiver/BagisAlanProfilim"
+import BagisAlanProfilim from "./receiver/BagisAlanProfilim";
+import BagisAlanEtkinliklerDetay from "./receiver/BagisAlanEtkinliklerDetay";
 const Stack = createStackNavigator();
 
 const App = () => {
@@ -40,6 +41,7 @@ const App = () => {
       <Stack.Screen name="BagisAlanEgitimYardimTalebi" component={BagisAlanEgitimYardimTalebi}/>
       <Stack.Screen name="BagisAlanBagisDurumu" component={BagisAlanBagisDurumu}/>
       <Stack.Screen name="BagisAlanProfilim" component={BagisAlanProfilim}/>
+      <Stack.Screen name="BagisAlanEtkinliklerDetay" component={BagisAlanEtkinliklerDetay}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
