@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,14 +7,47 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 
-const RegisterScreen = () => {
-  const handleRegister = () => {
-    Alert.alert("Kayıt Ol", "Kayıt işlemi başarıyla tamamlandı!");
-  };
+const RegisterScreen = ({ route, navigation }) => {
+  const role = route?.params?.role || "donor"; // Varsayılan değer olarak 'donor' kullan
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleGoToLogin = () => {
-    Alert.alert("Giriş Yap", "Giriş ekranına yönlendiriliyorsunuz.");
+  const handleRegister = async () => {
+    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+      Alert.alert("Hata", "Lütfen tüm alanları doldurun.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert("Hata", "Şifreler eşleşmiyor!");
+      return;
+    }
+
+    try {
+      const auth = getAuth();
+      const db = getFirestore();
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Kullanıcı bilgilerini Firestore'a kaydet
+      await setDoc(doc(db, "users", user.uid), {
+        firstName,
+        lastName,
+        email,
+        role, // Login ekranından gelen rol (donor veya receiver)
+      });
+
+      Alert.alert("Başarılı", "Kayıt işlemi tamamlandı!");
+      navigation.navigate("Login");
+    } catch (error) {
+      Alert.alert("Hata", error.message);
+    }
   };
 
   return (
@@ -23,52 +56,54 @@ const RegisterScreen = () => {
         <Text style={styles.label}>Ad</Text>
         <TextInput
           style={styles.input}
-          placeholder="Zorunlu Alan*"
+          placeholder="Ad"
           placeholderTextColor="#ccc"
+          value={firstName}
+          onChangeText={setFirstName}
         />
-
         <Text style={styles.label}>Soyad</Text>
         <TextInput
           style={styles.input}
-          placeholder="Zorunlu Alan*"
+          placeholder="Soyad"
           placeholderTextColor="#ccc"
+          value={lastName}
+          onChangeText={setLastName}
         />
-
         <Text style={styles.label}>Email</Text>
         <TextInput
           style={styles.input}
-          placeholder="Zorunlu Alan*"
+          placeholder="Email"
           placeholderTextColor="#ccc"
           keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
         />
-
         <Text style={styles.label}>Parola</Text>
         <TextInput
           style={styles.input}
-          placeholder="Zorunlu Alan*"
+          placeholder="Parola"
           placeholderTextColor="#ccc"
           secureTextEntry={true}
+          value={password}
+          onChangeText={setPassword}
         />
-
         <Text style={styles.label}>Parola Tekrar Giriniz</Text>
         <TextInput
           style={styles.input}
-          placeholder="Zorunlu Alan*"
+          placeholder="Parola Tekrar Giriniz"
           placeholderTextColor="#ccc"
           secureTextEntry={true}
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
         />
-
         <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
           <Text style={styles.registerButtonText}>Kayıt Ol</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.loginButton} onPress={handleGoToLogin}>
-          <Text style={styles.loginButtonText}>Giriş Yap</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -116,19 +151,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   registerButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  loginButton: {
-    width: "100%",
-    height: 50,
-    backgroundColor: "#2c2c2c",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 10,
-  },
-  loginButtonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",

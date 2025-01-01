@@ -7,30 +7,35 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 const LoginScreen = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState("donor"); // "donor" or "receiver"
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleTabPress = (tab) => {
     setActiveTab(tab);
   };
 
   const handleLogin = () => {
-    Alert.alert("Giriş Yap", "Giriş işlemi gerçekleştirildi!");
-  };
-
-  const handleForgotPassword = () => {
-    Alert.alert("Şifremi Unuttum", "Şifre sıfırlama işlemi başlatıldı.");
+    const auth = getAuth();
+    signInWithEmailAndPassword(auth, email, password)
+      .then(() => {
+        Alert.alert("Başarılı", `${activeTab === "donor" ? "Bağışçı" : "Bağış Alan"} olarak giriş yapıldı!`);
+        navigation.navigate("Home"); // Ana ekrana yönlendirme
+      })
+      .catch((error) => {
+        Alert.alert("Hata", error.message);
+      });
   };
 
   const handleRegister = () => {
-    Alert.alert("Kayıt Ol", "Kayıt ekranına yönlendiriliyorsunuz.");
-    navigation.navigate("Register");
+    navigation.navigate("Register", { role: activeTab }); // Seçili rolü Register ekranına gönder
   };
 
   return (
     <View style={styles.container}>
-      {/* Top Tab Buttons */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
           style={[
@@ -68,19 +73,24 @@ const LoginScreen = ({ navigation }) => {
 
       <View style={styles.formContainer}>
         <Text>Email</Text>
-        <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#ccc" />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor="#ccc"
+          value={email}
+          onChangeText={setEmail}
+        />
         <Text>Şifre</Text>
         <TextInput
           style={styles.input}
           placeholder="Şifre"
           placeholderTextColor="#ccc"
           secureTextEntry={true}
+          value={password}
+          onChangeText={setPassword}
         />
         <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
           <Text style={styles.loginButtonText}>Giriş Yap</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleForgotPassword}>
-          <Text style={styles.linkText}>Şifremi Unuttum</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
           <Text style={styles.registerButtonText}>Kayıt Ol</Text>
@@ -89,6 +99,8 @@ const LoginScreen = ({ navigation }) => {
     </View>
   );
 };
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -101,7 +113,7 @@ const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: "row",
     marginBottom: 20,
-    paddingBottom:"20%",
+    paddingBottom: "20%",
   },
   tabButton: {
     flex: 1,
@@ -133,7 +145,6 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 5,
     paddingBottom: "30%",
-    
   },
   input: {
     width: "100%",
