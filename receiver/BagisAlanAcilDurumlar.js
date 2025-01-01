@@ -81,7 +81,7 @@ const BagisAlanAcilDurumlar = ({ navigation }) => {
                       <Icon name="donut-large" size={24} color="#65558F" style={styles.iconCentered} />
                       <Text style={styles.footerButtonText}>Bağış Durumu</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Profilim')}>
+                    <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanProfilim')}>
                       <Icon name="person" size={24} color="#65558F" style={styles.iconCentered} />
                       <Text style={styles.footerButtonText}>Profilim</Text>
                     </TouchableOpacity>

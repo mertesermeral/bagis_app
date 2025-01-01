@@ -9,12 +9,13 @@ import BagisAlanEtkinlikler from "./receiver/BagisAlanEtkinlikler";
 import BagisAlanNakdiBagisTalebi from "./receiver/BagisAlanNakdiBagisTalebi";
 import BagisAlanEgitimYardimTalebi from "./receiver/BagisAlanEgitimYardimTalebi";
 import BagisAlanBagisDurumu from "./receiver/BagisAlanBagisDurumu";
+import BagisAlanProfilim from "./receiver/BagisAlanProfilim"
 const Stack = createStackNavigator();
 
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
         {/* Login Screen */}
         <Stack.Screen
           name="Login"
@@ -38,6 +39,7 @@ const App = () => {
       <Stack.Screen name="BagisAlanNakdiBagisTalebi" component={BagisAlanNakdiBagisTalebi}/>
       <Stack.Screen name="BagisAlanEgitimYardimTalebi" component={BagisAlanEgitimYardimTalebi}/>
       <Stack.Screen name="BagisAlanBagisDurumu" component={BagisAlanBagisDurumu}/>
+      <Stack.Screen name="BagisAlanProfilim" component={BagisAlanProfilim}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

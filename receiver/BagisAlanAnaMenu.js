@@ -63,7 +63,7 @@ const BagisAlanAnaMenu = ({ navigation }) => {
           <Icon name="donut-large" size={24} color="#65558F" />
           <Text style={styles.footerButtonText}>Bağış Durumu</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanAnaMenu')}>
+        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanProfilim')}>
           <Icon name="person" size={24} color="#65558F" />
           <Text style={styles.footerButtonText}>Profilim</Text>
         </TouchableOpacity>
