@@ -52,7 +52,7 @@ const LoginScreen = ({ navigation }) => {
 
         // Rol bilgisine göre yönlendirme
         if (role === "donor") {
-          navigation.navigate("DonorHome"); // Bağışçı ana sayfası
+          navigation.navigate("BagisciAnaMenu"); // Bağışçı ana sayfası
         } else if (role === "receiver") {
           navigation.navigate("BagisAlanAnaMenu"); // Bağış alan ana sayfası
         }
