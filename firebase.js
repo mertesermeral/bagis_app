@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { getStorage } from "firebase/storage"; // Firebase Storage eklendi
 
 import {
   API_KEY,
@@ -25,4 +26,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-export { app, auth, db };
+const storage = getStorage(app); // Firebase Storage servisi (Görsel yükleme)
+
+export { app, auth, db,storage };

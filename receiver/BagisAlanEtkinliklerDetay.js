@@ -2,81 +2,72 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const BagisAlanEtkinliklerDetay = ({ navigation }) => {
+const BagisAlanEtkinliklerDetay = ({ route, navigation }) => {
+  if (!route || !route.params || !route.params.event) {
+    return <Text>Hata: Etkinlik bilgisi bulunamadı.</Text>;
+  }
+
+  const { event } = route.params;
+  
   return (
     <View style={styles.container}>
-      {/* Header */}
       {/* Üst Başlık */}
-           <View style={styles.header}>
-             <Text style={styles.headerText}>Etkinlikler</Text>
-           </View>
-
-      {/* Üst Sekmeler */}
-            <View style={styles.tabContainer}>
-              <TouchableOpacity
-                style={styles.tabButton}
-                onPress={() => navigation.navigate('BagisAlanAnaMenu')}
-              >
-                <Text style={styles.tabText}>Yardım Ekranı</Text>
-              </TouchableOpacity>
-      
-              <TouchableOpacity
-                style={styles.tabButton}
-                onPress={() => navigation.navigate('BagisAlanAcilDurumlar')}
-              >
-                <Text style={styles.tabText}>Acil Durumlar</Text>
-              </TouchableOpacity>
-      
-              <TouchableOpacity
-                style={[styles.tabButton, styles.activeTab]}
-                onPress={() => navigation.navigate('BagisAlanEtkinlikler')}
-              >
-                <Text style={[styles.tabText, styles.activeTabText]}>Etkinlikler</Text>
-              </TouchableOpacity>
-            </View>
-
-      {/* Content */}
-      <View style={styles.content}>
-      <Image
-        source={require('../assets/indir.jpeg')} // Local image
-        style={styles.eventImage}
-         resizeMode="cover"
-        />
-
-        <Text style={styles.eventTitle}>Dora Huzurevi Ataşehir Şubesi</Text>
-        <Text style={styles.eventAuthor}>Mert Eser Meral</Text>
-        <Text style={styles.eventDescription}>
-          Huzurevi ziyareti etkinliği kapsamında, yaşlılarımızla sohbet edebilir, onların
-          anılarını dinleyebilir ve birlikte güzel vakit geçirebilirsiniz. Bu etkinlik,
-          yalnızca bir ziyaret değil, aynı zamanda sevgi ve dayanışmayı hissettirmek için
-          harika bir fırsat. Siz de bu anlamlı etkinliğe katılarak huzurevindeki
-          büyüklerimizin gönüllerine dokunabilir, onlara unutamayacakları bir gün
-          yaşatabilirsiniz.
-        </Text>
-        <Text style={styles.eventDetails}>
-          Etkinlik Tarihi ve Saati: 12 Ocak / 14.00{'\n'}
-          Yer: Dora Huzurevi Ataşehir Şubesi
-        </Text>
-        <Text style={styles.eventFooter}>
-          Hep birlikte bir fark yaratmak için sizi de aramızda görmekten mutluluk duyarız!
-        </Text>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Etkinlikler</Text>
       </View>
 
-      {/* Footer Navigation */}
+      {/* Üst Sekmeler */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={styles.tabButton}
+          onPress={() => navigation.navigate('BagisAlanAnaMenu')}
+        >
+          <Text style={styles.tabText}>Yardım Ekranı</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.tabButton}
+          onPress={() => navigation.navigate('BagisAlanAcilDurumlar')}
+        >
+          <Text style={styles.tabText}>Acil Durumlar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.tabButton, styles.activeTab]}
+          onPress={() => navigation.navigate('BagisAlanEtkinlikler')}
+        >
+          <Text style={[styles.tabText, styles.activeTabText]}>Etkinlikler</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* İçerik */}
+      <View style={styles.content}>
+        {event.imageUrl ? (
+          <Image source={{ uri: event.imageUrl }} style={styles.image} />
+        ) : (
+          <Text style={styles.noImageText}>Görsel bulunamadı</Text>
+        )}
+        <Text style={styles.title}>{event.eventName}</Text>
+        <Text style={styles.organizer}>Düzenleyen: {event.organizer}</Text>
+        <Text style={styles.description}>{event.description}</Text>
+        <Text style={styles.date}>Tarih: {event.date}</Text>
+      </View>
+
+      {/* Alt Menü */}
       <View style={styles.footer}>
-              <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanAnaMenu')}>
-                <Icon name="home" size={24} color="#65558F" style={styles.iconCentered} />
-                <Text style={styles.footerButtonText}>Ana Menü</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanBagisDurumu')}>
-                <Icon name="donut-large" size={24} color="#65558F" style={styles.iconCentered} />
-                <Text style={styles.footerButtonText}>Bağış Durumu</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanProfilim')}>
-                <Icon name="person" size={24} color="#65558F" style={styles.iconCentered} />
-                <Text style={styles.footerButtonText}>Profilim</Text>
-              </TouchableOpacity>
-            </View>
+        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanAnaMenu')}>
+          <Icon name="home" size={24} color="#65558F" style={styles.iconCentered} />
+          <Text style={styles.footerButtonText}>Ana Menü</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanBagisDurumu')}>
+          <Icon name="donut-large" size={24} color="#65558F" style={styles.iconCentered} />
+          <Text style={styles.footerButtonText}>Bağış Durumu</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanProfilim')}>
+          <Icon name="person" size={24} color="#65558F" style={styles.iconCentered} />
+          <Text style={styles.footerButtonText}>Profilim</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -91,19 +82,13 @@ const styles = StyleSheet.create({
     paddingVertical: 30,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+    alignItems: 'center',
   },
   headerText: {
     fontSize: 20,
     fontWeight: 'bold',
-    textAlign: 'center',
     color: '#65558F',
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  
   tabContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -118,14 +103,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
   },
-  tabs: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 10,
-    backgroundColor: '#FEF7FF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
   tabText: {
     fontSize: 14,
     fontWeight: '500',
@@ -135,75 +112,43 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: '#65558F',
   },
-  inactiveTab: {
-    color: '#888',
-  },
-  scrollContainer: {
-    flex: 1,
-    padding: 16,
-  },
-  card: {
-    flexDirection: 'row',
-    backgroundColor: '#F8F8F8',
-    padding: 16,
-    borderRadius: 10,
-    marginBottom: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 2,
-  },
-  eventImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 10,
-    marginRight: 16,
-  },
   content: {
     flex: 1,
     padding: 16,
+    alignItems: 'center',
   },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#65558F',
-  },
-  eventImage: {
+  image: {
     width: '100%',
     height: 250,
     borderRadius: 10,
     marginBottom: 16,
-    overflow: 'hidden',
   },
-  
-  eventTitle: {
+  noImageText: {
+    fontSize: 14,
+    color: '#888',
+    marginBottom: 16,
+  },
+  title: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 8,
   },
-  eventAuthor: {
-    fontSize: 14,
+  organizer: {
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#888',
-    marginBottom: 16,
+    marginBottom: 5,
   },
-  eventDescription: {
+  description: {
     fontSize: 14,
     color: '#333',
-    marginBottom: 16,
+    marginBottom: 5,
     lineHeight: 20,
   },
-  eventDetails: {
+  date: {
     fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
-  },
-  eventFooter: {
-    fontSize: 14,
-    color: '#333',
-    lineHeight: 20,
+    color: '#888',
   },
   footer: {
     flexDirection: 'row',
@@ -222,15 +167,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#000',
   },
-  footerText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#65558F',
-  },
-  activeFooter: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#65558F',
-    paddingBottom: 4,
+  iconCentered: {
+    marginBottom: 4,
   },
 });
 
