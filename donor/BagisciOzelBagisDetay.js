@@ -32,7 +32,7 @@ const OzelBagisDetay = ({ navigation }) => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.tabButton}
-          onPress={() => navigation.navigate('BagisciEtkinlikler')}
+          onPress={() => navigation.navigate('BagisAlanEtkinlikler')}
         >
           <Text style={styles.tabText}>Etkinlikler</Text>
         </TouchableOpacity>

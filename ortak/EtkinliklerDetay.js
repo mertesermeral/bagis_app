@@ -1,3 +1,5 @@
+//Bagis Alan Detay Ekranı
+
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -29,7 +31,7 @@ const BagisAlanEtkinliklerDetay = ({ route, navigation }) => {
           style={styles.tabButton}
           onPress={() => navigation.navigate('BagisAlanAcilDurumlar')}
         >
-          <Text style={styles.tabText}>Acil Durumlar</Text>
+          <Text style={styles.tabText}>Acil Durumlarr</Text>
         </TouchableOpacity>
 
         <TouchableOpacity

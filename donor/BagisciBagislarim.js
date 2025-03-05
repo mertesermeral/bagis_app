@@ -47,7 +47,7 @@ const BagisciBagislarim = ({ navigation }) => {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tabButton, styles.activeTab]}
-          onPress={() => navigation.navigate('BagisciEtkinlikler')}
+          onPress={() => navigation.navigate('BagisAlanEtkinlikler')}
         >
           <Text style={[styles.tabText, styles.activeTabText]}>Etkinlikler</Text>
         </TouchableOpacity>
