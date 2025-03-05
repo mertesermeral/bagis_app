@@ -1,3 +1,5 @@
+//Bagis Alan Etkinlikler Sayfasi
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Image, Modal, TextInput, Button } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -118,7 +120,7 @@ const BagisAlanEtkinlikler = ({ navigation }) => {
         ))}
       </ScrollView>
 
-      <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+      <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('EtkinlikEkle')}>
         <Text style={styles.addButtonText}>+ Etkinlik Ekle</Text>
       </TouchableOpacity>
 

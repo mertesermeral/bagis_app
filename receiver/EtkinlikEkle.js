@@ -1,84 +1,151 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
-import firestore from '@react-native-firebase/firestore';
-import storage from '@react-native-firebase/storage';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ScrollView } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { db, storage } from '../firebase';
+import { collection, addDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const EtkinlikEkle = ({ navigation }) => {
-  const [etkinlikAdi, setEtkinlikAdi] = useState('');
-  const [duzenleyen, setDuzenleyen] = useState('');
-  const [aciklama, setAciklama] = useState('');
-  const [tarih, setTarih] = useState('');
-  const [imageUri, setImageUri] = useState(null);
+  const [eventName, setEventName] = useState('');
+  const [organizer, setOrganizer] = useState('');
+  const [description, setDescription] = useState('');
+  const [date, setDate] = useState('');
+  const [location, setLocation] = useState('');
+  const [image, setImage] = useState(null);
 
-  const selectImage = () => {
-    launchImageLibrary({ mediaType: 'photo' }, response => {
-      if (!response.didCancel) {
-        setImageUri(response.assets[0].uri);
-      }
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
     });
+    if (!result.canceled && result.assets.length > 0) {
+      setImage(result.assets[0].uri);
+    }
   };
 
-  const handleSubmit = async () => {
-    if (!etkinlikAdi || !duzenleyen || !aciklama || !tarih) {
-      alert("Tüm alanları doldurun!");
+  const handleAddEvent = async () => {
+    if (!eventName || !organizer || !description || !date || !location || !image) {
+      Alert.alert('Hata', 'Lütfen tüm alanları doldurun!');
       return;
     }
+    try {
+      const response = await fetch(image);
+      const blob = await response.blob();
+      const storageRef = ref(storage, `event_images/${Date.now()}.jpg`);
+      await uploadBytes(storageRef, blob);
+      const imageUrl = await getDownloadURL(storageRef);
 
-    let imageUrl = "";
-    if (imageUri) {
-      const imageRef = storage().ref(`etkinlikler/${Date.now()}.jpg`);
-      await imageRef.putFile(imageUri);
-      imageUrl = await imageRef.getDownloadURL();
+      await addDoc(collection(db, 'events'), {
+        eventName,
+        organizer,
+        description,
+        date,
+        location,
+        imageUrl,
+      });
+
+      Alert.alert('Başarılı', 'Etkinlik başarıyla eklendi!');
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert('Hata', 'Bir hata oluştu, tekrar deneyin.');
     }
-
-    await firestore().collection('etkinlikler').add({
-      etkinlikAdi,
-      duzenleyen,
-      aciklama,
-      tarih,
-      imageUrl
-    });
-
-    alert("Etkinlik eklendi!");
-    navigation.goBack();
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Etkinlik Adı:</Text>
-      <TextInput style={styles.input} value={etkinlikAdi} onChangeText={setEtkinlikAdi} />
-
-      <Text style={styles.label}>Düzenleyen:</Text>
-      <TextInput style={styles.input} value={duzenleyen} onChangeText={setDuzenleyen} />
-
-      <Text style={styles.label}>Açıklama:</Text>
-      <TextInput style={styles.input} value={aciklama} onChangeText={setAciklama} multiline />
-
-      <Text style={styles.label}>Tarih:</Text>
-      <TextInput style={styles.input} value={tarih} onChangeText={setTarih} />
-
-      <TouchableOpacity style={styles.imagePicker} onPress={selectImage}>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.header}>Yeni Etkinlik Ekle</Text>
+      <TextInput
+        style={styles.input}
+        placeholder='Etkinlik Başlığı'
+        value={eventName}
+        onChangeText={setEventName}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder='Düzenleyen Adı Soyadı'
+        value={organizer}
+        onChangeText={setOrganizer}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder='Etkinlik Açıklaması'
+        value={description}
+        onChangeText={setDescription}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder='Etkinlik Tarihi (GG.AA.YYYY)'
+        value={date}
+        onChangeText={setDate}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder='Etkinlik Konumu'
+        value={location}
+        onChangeText={setLocation}
+      />
+      <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
         <Text style={styles.imagePickerText}>Fotoğraf Seç</Text>
       </TouchableOpacity>
-      {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
-
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitButtonText}>Etkinlik Ekle</Text>
+      {image && <Image source={{ uri: image }} style={styles.imagePreview} />}
+      <TouchableOpacity style={styles.addButton} onPress={handleAddEvent}>
+        <Text style={styles.addButtonText}>Etkinliği Kaydet</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-  label: { fontSize: 16, fontWeight: 'bold', marginTop: 10 },
-  input: { borderWidth: 1, borderColor: '#ddd', padding: 10, borderRadius: 5, marginTop: 5 },
-  imagePicker: { backgroundColor: '#65558F', padding: 10, borderRadius: 5, marginTop: 10, alignItems: 'center' },
-  imagePickerText: { color: '#fff', fontWeight: 'bold' },
-  image: { width: 100, height: 100, borderRadius: 10, marginTop: 10 },
-  submitButton: { backgroundColor: '#28A745', padding: 12, borderRadius: 5, alignItems: 'center', marginTop: 20 },
-  submitButtonText: { color: '#fff', fontWeight: 'bold' }
+  container: {
+    flexGrow: 1,
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  header: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#65558F',
+  },
+  input: {
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    marginBottom: 10,
+  },
+  imagePicker: {
+    backgroundColor: '#65558F',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  imagePickerText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+  },
+  imagePreview: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'cover',
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  addButton: {
+    backgroundColor: '#65558F',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  addButtonText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+  },
 });
 
 export default EtkinlikEkle;

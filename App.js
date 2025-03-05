@@ -6,6 +6,7 @@ import RegisterScreen from "./RegisterScreen";
 import BagisAlanAnaMenu from "./receiver/BagisAlanAnaMenu";
 import BagisAlanAcilDurumlar from "./receiver/BagisAlanAcilDurumlar";
 import BagisAlanEtkinlikler from "./receiver/BagisAlanEtkinlikler";
+import EtkinlikEkle from './receiver/EtkinlikEkle';
 import BagisAlanNakdiBagisTalebi from "./receiver/BagisAlanNakdiBagisTalebi";
 import BagisAlanEgitimYardimTalebi from "./receiver/BagisAlanEgitimYardimTalebi";
 import BagisAlanBagisDurumu from "./receiver/BagisAlanBagisDurumu";
@@ -23,6 +24,7 @@ import BagisciAcilDurumTalebiOlustur from "./donor/BagisciAcilDurumTalebiOlustur
 import BagisciAcilDurumDetay from "./donor/BagisciAcilDurumDetay";
 import BagisciOzelBagisDetay from "./donor/BagisciOzelBagisDetay";
 import BagisciEtkinliklerDetay from "./donor/BagisciEtkinliklerDetay";
+
 
 
 
@@ -53,6 +55,7 @@ const App = () => {
       <Stack.Screen name="BagisAlanAnaMenu" component={BagisAlanAnaMenu} />
       <Stack.Screen name="BagisAlanAcilDurumlar" component={BagisAlanAcilDurumlar} />
       <Stack.Screen name="BagisAlanEtkinlikler" component={BagisAlanEtkinlikler}/>
+      <Stack.Screen name="EtkinlikEkle" component={EtkinlikEkle} />
       <Stack.Screen name="BagisAlanNakdiBagisTalebi" component={BagisAlanNakdiBagisTalebi}/>
       <Stack.Screen name="BagisAlanEgitimYardimTalebi" component={BagisAlanEgitimYardimTalebi}/>
       <Stack.Screen name="BagisAlanBagisDurumu" component={BagisAlanBagisDurumu}/>
