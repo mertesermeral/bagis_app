@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,15 +6,40 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Switch,
 } from "react-native";
+import * as SecureStore from "expo-secure-store"; // SecureStore import
+
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
 
 const LoginScreen = ({ navigation }) => {
-  const [activeTab, setActiveTab] = useState("donor"); // "donor" or "receiver"
+  const [activeTab, setActiveTab] = useState("donor");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+
+  // SecureStore'dan kayıtlı bilgileri yükle
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const savedEmail = await SecureStore.getItemAsync("email");
+        const savedPassword = await SecureStore.getItemAsync("password");
+        const savedRememberMe = await SecureStore.getItemAsync("rememberMe");
+
+        if (savedRememberMe === "true") {
+          setEmail(savedEmail || "");
+          setPassword(savedPassword || "");
+          setRememberMe(true);
+        }
+      } catch (error) {
+        console.log("Veri yüklenirken hata oluştu:", error);
+      }
+    };
+
+    loadUserData();
+  }, []);
 
   const handleTabPress = (tab) => {
     setActiveTab(tab);
@@ -27,19 +52,16 @@ const LoginScreen = ({ navigation }) => {
     }
 
     try {
-      // Kullanıcı giriş yapıyor
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Kullanıcının Firestore'daki rolünü alıyoruz
       const docRef = doc(db, "users", user.uid);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
         const userData = docSnap.data();
-        const role = userData.role; // Kullanıcının Firestore'daki rolü
+        const role = userData.role;
 
-        // Seçili tab ile Firestore'dan alınan rolü karşılaştır
         if (role !== activeTab) {
           Alert.alert(
             "Hata",
@@ -50,11 +72,21 @@ const LoginScreen = ({ navigation }) => {
 
         Alert.alert("Başarılı", `${role === "donor" ? "Bağışçı" : "Bağış Alan"} olarak giriş yapıldı!`);
 
-        // Rol bilgisine göre yönlendirme
+        // Beni Hatırla özelliği - SecureStore kullanarak güvenli saklama
+        if (rememberMe) {
+          await SecureStore.setItemAsync("email", email);
+          await SecureStore.setItemAsync("password", password);
+          await SecureStore.setItemAsync("rememberMe", "true");
+        } else {
+          await SecureStore.deleteItemAsync("email");
+          await SecureStore.deleteItemAsync("password");
+          await SecureStore.setItemAsync("rememberMe", "false");
+        }
+
         if (role === "donor") {
-          navigation.navigate("BagisciAnaMenu"); // Bağışçı ana sayfası
+          navigation.navigate("BagisciAnaMenu");
         } else if (role === "receiver") {
-          navigation.navigate("BagisAlanAnaMenu"); // Bağış alan ana sayfası
+          navigation.navigate("BagisAlanAnaMenu");
         }
       } else {
         Alert.alert("Hata", "Kullanıcı bilgileri Firestore'da bulunamadı.");
@@ -66,7 +98,7 @@ const LoginScreen = ({ navigation }) => {
   };
 
   const handleRegister = () => {
-    navigation.navigate("Register", { role: activeTab }); // Seçili rolü Register ekranına gönder
+    navigation.navigate("Register", { role: activeTab });
   };
 
   const handleForgotPassword = () => {
@@ -77,34 +109,18 @@ const LoginScreen = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.tabContainer}>
         <TouchableOpacity
-          style={[
-            styles.tabButton,
-            activeTab === "donor" && styles.activeTabButton,
-          ]}
+          style={[styles.tabButton, activeTab === "donor" && styles.activeTabButton]}
           onPress={() => handleTabPress("donor")}
         >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "donor" && styles.activeTabText,
-            ]}
-          >
+          <Text style={[styles.tabText, activeTab === "donor" && styles.activeTabText]}>
             Bağışçı Giriş
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[
-            styles.tabButton,
-            activeTab === "receiver" && styles.activeTabButton,
-          ]}
+          style={[styles.tabButton, activeTab === "receiver" && styles.activeTabButton]}
           onPress={() => handleTabPress("receiver")}
         >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "receiver" && styles.activeTabText,
-            ]}
-          >
+          <Text style={[styles.tabText, activeTab === "receiver" && styles.activeTabText]}>
             Bağış Alan Giriş
           </Text>
         </TouchableOpacity>
@@ -124,16 +140,24 @@ const LoginScreen = ({ navigation }) => {
           style={styles.input}
           placeholder="Şifre"
           placeholderTextColor="#ccc"
-          secureTextEntry={true}
+          secureTextEntry
           value={password}
           onChangeText={setPassword}
         />
+
+        <View style={styles.rememberMeContainer}>
+          <Switch value={rememberMe} onValueChange={setRememberMe} />
+          <Text style={{ marginLeft: 10 }}>Beni Hatırla</Text>
+        </View>
+
         <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
           <Text style={styles.loginButtonText}>Giriş Yap</Text>
         </TouchableOpacity>
+
         <TouchableOpacity onPress={handleForgotPassword}>
           <Text style={styles.linkText}>Şifremi Unuttum</Text>
         </TouchableOpacity>
+
         <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
           <Text style={styles.registerButtonText}>Kayıt Ol</Text>
         </TouchableOpacity>
@@ -229,6 +253,11 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  rememberMeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
   },
 });
 
