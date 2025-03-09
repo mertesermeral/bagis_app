@@ -6,112 +6,153 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
-import { auth, db } from "./firebase"; 
-const RegisterScreen = ({ route, navigation }) => {
-  const role = route?.params?.role || "donor"; // Varsayılan değer olarak 'donor' kullan
+import { auth, db } from "./firebase";
+
+const RegisterScreen = ({ navigation }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [tcNo, setTcNo] = useState("");
+  const [birthYear, setBirthYear] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
+  const [role, setRole] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  
   const handleRegister = async () => {
-    if (!firstName || !lastName || !email || !password || !confirmPassword) {
-      Alert.alert("Hata", "Lütfen tüm alanları doldurun.");
+    if (isLoading) return;
+    setIsLoading(true);
+
+    if (!firstName || !lastName || !email || !phone || !tcNo || !birthYear || !password || !confirmPassword || !role) {
+      Alert.alert("Hata", "Lütfen tüm alanları doldurun ve bir rol seçin.");
+      setIsLoading(false);
+      return;
+    }
+    
+    if (password.length < 6) {
+      Alert.alert("Hata", "Şifre en az 6 karakter olmalıdır.");
+      setIsLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
       Alert.alert("Hata", "Şifreler eşleşmiyor!");
+      setIsLoading(false);
       return;
     }
 
     try {
-      const auth = getAuth();
-      const db = getFirestore();
+      const response = await fetch("https://us-central1-bagis-app.cloudfunctions.net/api/validate-tc", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tcNo,
+          firstName,
+          lastName,
+          birthYear,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        Alert.alert("Kimlik Doğrulama Başarısız", "Girdiğiniz bilgiler doğrulanamadı.");
+        setIsLoading(false);
+        return;
+      }
+
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Kullanıcı bilgilerini Firestore'a kaydet
       await setDoc(doc(db, "users", user.uid), {
         firstName,
         lastName,
         email,
-        role, // Login ekranından gelen rol (donor veya receiver)
+        phone,
+        tcNo,
+        birthYear,
+        role,
       });
 
       Alert.alert("Başarılı", "Kayıt işlemi tamamlandı!");
-      navigation.navigate("Login");
+      navigation.reset({ index: 0, routes: [{ name: "Login" }] });
     } catch (error) {
       Alert.alert("Hata", error.message);
     }
+
+    setIsLoading(false);
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.formContainer}>
-        <Text style={styles.label}>Ad</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ad"
-          placeholderTextColor="#ccc"
-          value={firstName}
-          onChangeText={setFirstName}
-        />
-        <Text style={styles.label}>Soyad</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Soyad"
-          placeholderTextColor="#ccc"
-          value={lastName}
-          onChangeText={setLastName}
-        />
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#ccc"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <Text style={styles.label}>Parola</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Parola"
-          placeholderTextColor="#ccc"
-          secureTextEntry={true}
-          value={password}
-          onChangeText={setPassword}
-        />
-        <Text style={styles.label}>Parola Tekrar Giriniz</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Parola Tekrar Giriniz"
-          placeholderTextColor="#ccc"
-          secureTextEntry={true}
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-        />
-        <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
-          <Text style={styles.registerButtonText}>Kayıt Ol</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <View style={styles.formContainer}>
+          <Text style={styles.label}>TC Kimlik Numarası</Text>
+          <TextInput style={styles.input} value={tcNo} onChangeText={setTcNo} keyboardType="numeric" maxLength={11} />
+          
+          <Text style={styles.label}>Ad</Text>
+          <TextInput style={styles.input} value={firstName} onChangeText={setFirstName} />
+          
+          <Text style={styles.label}>Soyad</Text>
+          <TextInput style={styles.input} value={lastName} onChangeText={setLastName} />
+          
+          <Text style={styles.label}>Doğum Yılı</Text>
+          <TextInput style={styles.input} value={birthYear} onChangeText={setBirthYear} keyboardType="numeric" maxLength={4} />
+          
+          <Text style={styles.label}>Email</Text>
+          <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+          
+          <Text style={styles.label}>Telefon</Text>
+          <TextInput style={styles.input} value={phone} onChangeText={setPhone} keyboardType="phone-pad" maxLength={10} />
+          
+          <Text style={styles.label}>Rol Seçiniz</Text>
+          <View style={styles.roleContainer}>
+            <TouchableOpacity
+              style={[styles.roleButton, role === "donor" && styles.activeRoleButton]}
+              onPress={() => setRole("donor")}
+            >
+              <Text style={[styles.roleButtonText, role === "donor" && styles.activeRoleButtonText]}>Bağışçı</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.roleButton, role === "receiver" && styles.activeRoleButton]}
+              onPress={() => setRole("receiver")}
+            >
+              <Text style={[styles.roleButtonText, role === "receiver" && styles.activeRoleButtonText]}>Bağış Alan</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <Text style={styles.label}>Parola</Text>
+          <TextInput style={styles.input} value={password} onChangeText={setPassword} secureTextEntry={true} />
+          
+          <Text style={styles.label}>Parola Tekrar</Text>
+          <TextInput style={styles.input} value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry={true} />
+          
+          <TouchableOpacity style={styles.registerButton} onPress={handleRegister} disabled={isLoading}>
+            <Text style={styles.registerButtonText}>{isLoading ? "Kayıt Yapılıyor..." : "Kayıt Ol"}</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#f4f4f4",
+    flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+    backgroundColor: "#f4f4f4",
   },
   formContainer: {
     width: "100%",
@@ -128,7 +169,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     marginBottom: 5,
-    color: "#000",
   },
   input: {
     width: "100%",
@@ -139,7 +179,30 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     paddingHorizontal: 10,
     fontSize: 16,
-    backgroundColor: "#fff",
+  },
+  roleContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 15,
+  },
+  roleButton: {
+    flex: 1,
+    padding: 10,
+    marginHorizontal: 5,
+    backgroundColor: "#ccc",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+ 
+  roleButtonText: {
+    color: "black",
+    fontSize: 16,
+  },
+  activeRoleButton: {
+    backgroundColor: "#2c2c2c",
+  },
+  activeRoleButtonText: {
+    color: "white",
   },
   registerButton: {
     width: "100%",
@@ -148,7 +211,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
-    marginBottom: 10,
   },
   registerButtonText: {
     color: "#fff",
