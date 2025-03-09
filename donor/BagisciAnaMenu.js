@@ -26,7 +26,7 @@ const BagisAnaMenu = ({ navigation }) => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.tabButton}
-          onPress={() => navigation.navigate('BagisciAcilDurumlar')}
+          onPress={() => navigation.navigate('AcilDurumlar')}
         >
           <Text style={styles.tabText}>Acil Durumlar</Text>
         </TouchableOpacity>

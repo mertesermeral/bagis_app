@@ -14,13 +14,13 @@ import BagisAlanProfilim from "./receiver/BagisAlanProfilim";
 import BagisAlanEtkinliklerDetay from "./ortak/EtkinliklerDetay";
 import BagisciAnaMenu from "./donor/BagisciAnaMenu";
 import BagisciOzelBagis from "./donor/BagisciOzelBagis";
-import BagisciAcilDurumlar from "./donor/BagisciAcilDurumlar";
+import AcilDurumlar from "./AcilDurumlar/AcilDurumlar";
 import BagisciEgitimYardimlari from "./donor/BagisciEgitimYardimlari";
 import BagisciEgitimOdeme from "./donor/BagisciEgitimOdeme";
 import BagisciBagislarim from "./donor/BagisciBagislarim";
 import BagisciProfilim from "./donor/BagisciProfilim";
-import BagisciAcilDurumTalebiOlustur from "./donor/BagisciAcilDurumTalebiOlustur";
-import BagisciAcilDurumDetay from "./donor/BagisciAcilDurumDetay";
+import AcilDurumTalebiOlustur from "./AcilDurumlar/AcilDurumTalebiOlustur";
+import AcilDurumDetay from "./AcilDurumlar/AcilDurumDetay";
 import BagisciOzelBagisDetay from "./donor/BagisciOzelBagisDetay";
 
 
@@ -61,9 +61,9 @@ const App = () => {
       <Stack.Screen name="BagisAlanEtkinliklerDetay" component={BagisAlanEtkinliklerDetay}/>
       <Stack.Screen name="BagisciAnaMenu" component={BagisciAnaMenu}/>
       <Stack.Screen name="BagisciOzelBagis" component={BagisciOzelBagis}/>
-      <Stack.Screen name="BagisciAcilDurumlar" component={BagisciAcilDurumlar}/>
-      <Stack.Screen name="BagisciAcilDurumTalebiOlustur" component={BagisciAcilDurumTalebiOlustur}/>
-      <Stack.Screen name="BagisciAcilDurumDetay" component={BagisciAcilDurumDetay}/>
+      <Stack.Screen name="AcilDurumlar" component={AcilDurumlar}/>
+      <Stack.Screen name="AcilDurumTalebiOlustur" component={AcilDurumTalebiOlustur}/>
+      <Stack.Screen name="AcilDurumDetay" component={AcilDurumDetay}/>
       <Stack.Screen name="BagisciEgitimYardimlari" component={BagisciEgitimYardimlari}/>
       <Stack.Screen name="BagisciEgitimOdeme" component={BagisciEgitimOdeme}/>
       <Stack.Screen name="BagisciBagislarim" component={BagisciBagislarim}/>

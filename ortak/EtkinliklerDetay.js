@@ -1,8 +1,12 @@
-//Bagis Alan Detay Ekranı
-
-import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { 
+  View, Text, StyleSheet, Image, TouchableOpacity, TextInput, FlatList, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard 
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { db, auth } from '../firebase';
+import { collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, where, getDoc } from 'firebase/firestore';
+
+const defaultProfileImage = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
 
 const BagisAlanEtkinliklerDetay = ({ route, navigation }) => {
   if (!route || !route.params || !route.params.event) {
@@ -10,168 +14,242 @@ const BagisAlanEtkinliklerDetay = ({ route, navigation }) => {
   }
 
   const { event } = route.params;
-  
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [editingComment, setEditingComment] = useState(null);
+  const [editedText, setEditedText] = useState('');
+  const userId = auth.currentUser?.uid;
+
+  useEffect(() => {
+    const fetchComments = async () => {
+      const q = query(collection(db, 'comments'), where('eventId', '==', event.id));
+      const querySnapshot = await getDocs(q);
+
+      const commentList = await Promise.all(querySnapshot.docs.map(async (docSnap) => {
+        const commentData = docSnap.data();
+        const userDocRef = doc(db, 'users', commentData.userId);
+        const userDoc = await getDoc(userDocRef);
+
+        const userData = userDoc.exists() 
+          ? userDoc.data() 
+          : { firstName: 'Bilinmeyen', lastName: 'Kullanıcı', profileImage: defaultProfileImage };
+
+        return {
+          id: docSnap.id,
+          ...commentData,
+          userName: `${userData.firstName} ${userData.lastName}`,
+          userProfileImage: userData.profileImage || defaultProfileImage,
+        };
+      }));
+
+      setComments(commentList);
+    };
+
+    fetchComments();
+  }, [event.id]);
+
+  const addComment = async () => {
+    if (!newComment.trim()) {
+      Alert.alert('Hata', 'Lütfen bir yorum giriniz.');
+      return;
+    }
+
+    try {
+      const userDocRef = doc(db, 'users', userId);
+      const userDoc = await getDoc(userDocRef);
+      const userData = userDoc.exists() 
+        ? userDoc.data() 
+        : { firstName: 'Bilinmeyen', lastName: 'Kullanıcı', profileImage: defaultProfileImage };
+
+      const docRef = await addDoc(collection(db, 'comments'), {
+        eventId: event.id,
+        userId,
+        text: newComment,
+        createdAt: new Date(),
+      });
+
+      setComments([
+        ...comments,
+        { 
+          id: docRef.id, 
+          userId, 
+          text: newComment, 
+          userName: `${userData.firstName} ${userData.lastName}`,
+          userProfileImage: userData.profileImage || defaultProfileImage,
+        }
+      ]);
+
+      setNewComment('');
+      Keyboard.dismiss(); // Klavyeyi kapat
+    } catch (error) {
+      Alert.alert('Hata', 'Yorum eklenirken hata oluştu.');
+    }
+  };
+
+  const deleteComment = async (commentId, commentUserId) => {
+    if (commentUserId !== userId && event.organizerId !== userId) {
+      Alert.alert('Yetkisiz', 'Bu yorumu sadece yazan kişi veya etkinlik sahibi silebilir.');
+      return;
+    }
+    try {
+      await deleteDoc(doc(db, 'comments', commentId));
+      setComments(comments.filter(comment => comment.id !== commentId));
+    } catch (error) {
+      Alert.alert('Hata', 'Yorum silinirken hata oluştu.');
+    }
+  };
+
+  const startEditing = (comment) => {
+    setEditingComment(comment.id);
+    setEditedText(comment.text);
+  };
+
+  const saveEditedComment = async (commentId) => {
+    if (!editedText.trim()) {
+      Alert.alert('Hata', 'Yorum boş bırakılamaz.');
+      return;
+    }
+    try {
+      await updateDoc(doc(db, 'comments', commentId), { text: editedText });
+      setComments(comments.map(comment => (comment.id === commentId ? { ...comment, text: editedText } : comment)));
+      setEditingComment(null);
+      setEditedText('');
+    } catch (error) {
+      Alert.alert('Hata', 'Yorum güncellenirken hata oluştu.');
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      {/* Üst Başlık */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Etkinlikler</Text>
-      </View>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === "ios" ? "padding" : "height"} 
+      style={styles.container}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.headerText}>Etkinlikler</Text>
+          </View>
 
-      {/* Üst Sekmeler */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('BagisAlanAnaMenu')}
-        >
-          <Text style={styles.tabText}>Yardım Ekranı</Text>
-        </TouchableOpacity>
+          <FlatList
+            ListHeaderComponent={
+              <View style={styles.content}>
+                {event.imageUrl ? (
+                  <Image source={{ uri: event.imageUrl }} style={styles.image} />
+                ) : (
+                  <Text style={styles.noImageText}>Görsel bulunamadı</Text>
+                )}
+                <Text style={styles.title}>{event.eventName}</Text>
+                <Text style={styles.organizer}>Düzenleyen: {event.organizer}</Text>
+                <Text style={styles.description}>{event.description}</Text>
+                <Text style={styles.date}>Tarih: {event.date}</Text>
+                <Text style={styles.commentsHeader}>Yorumlar</Text>
+              </View>
+            }
+            data={comments}
+            keyExtractor={item => item.id}
+            renderItem={({ item }) => (
+              <View style={styles.commentItem}>
+                <Image source={{ uri: item.userProfileImage }} style={styles.profileImage} />
+                <View style={styles.commentContent}>
+                  <Text style={styles.userName}>{item.userName}</Text>
+                  {editingComment === item.id ? (
+                    <TextInput 
+                      style={styles.commentInput} 
+                      value={editedText} 
+                      onChangeText={setEditedText} 
+                      onBlur={() => saveEditedComment(item.id)}
+                    />
+                  ) : (
+                    <Text style={styles.commentText}>{item.text}</Text>
+                  )}
+                </View>
+                <View style={styles.commentActions}>
+                  {item.userId === userId && (
+                    <TouchableOpacity onPress={() => startEditing(item)}>
+                      <Icon name="edit" size={20} color="blue" />
+                    </TouchableOpacity>
+                  )}
+                  {(item.userId === userId || event.organizerId === userId) && (
+                    <TouchableOpacity onPress={() => deleteComment(item.id, item.userId)}>
+                      <Icon name="delete" size={20} color="red" />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+            )}
+          />
 
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('BagisAlanAcilDurumlar')}
-        >
-          <Text style={styles.tabText}>Acil Durumlarr</Text>
-        </TouchableOpacity>
+<View style={styles.addCommentContainer}>
+  <TextInput
+    style={styles.commentInput}
+    placeholder="Yorum yaz..."
+    value={newComment}
+    onChangeText={setNewComment}
+    multiline={true}
+    numberOfLines={4}
+  />
+  <TouchableOpacity style={styles.addCommentButton} onPress={addComment}>
+    <Text style={styles.addCommentButtonText}>Gönder</Text>
+  </TouchableOpacity>
+</View>
 
-        <TouchableOpacity
-          style={[styles.tabButton, styles.activeTab]}
-          onPress={() => navigation.navigate('BagisAlanEtkinlikler')}
-        >
-          <Text style={[styles.tabText, styles.activeTabText]}>Etkinlikler</Text>
-        </TouchableOpacity>
-      </View>
 
-      {/* İçerik */}
-      <View style={styles.content}>
-        {event.imageUrl ? (
-          <Image source={{ uri: event.imageUrl }} style={styles.image} />
-        ) : (
-          <Text style={styles.noImageText}>Görsel bulunamadı</Text>
-        )}
-        <Text style={styles.title}>{event.eventName}</Text>
-        <Text style={styles.organizer}>Düzenleyen: {event.organizer}</Text>
-        <Text style={styles.description}>{event.description}</Text>
-        <Text style={styles.date}>Tarih: {event.date}</Text>
-      </View>
-
-      {/* Alt Menü */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanAnaMenu')}>
-          <Icon name="home" size={24} color="#65558F" style={styles.iconCentered} />
-          <Text style={styles.footerButtonText}>Ana Menü</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanBagisDurumu')}>
-          <Icon name="donut-large" size={24} color="#65558F" style={styles.iconCentered} />
-          <Text style={styles.footerButtonText}>Bağış Durumu</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanProfilim')}>
-          <Icon name="person" size={24} color="#65558F" style={styles.iconCentered} />
-          <Text style={styles.footerButtonText}>Profilim</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  container: { flex: 1, backgroundColor: '#fff' },
+  header: { backgroundColor: '#FEF7FF', paddingVertical: 30, borderBottomWidth: 1, borderBottomColor: '#ddd', alignItems: 'center' },
+  headerText: { fontSize: 20, fontWeight: 'bold', color: '#65558F' },
+  content: { padding: 16, alignItems: 'center' },
+  image: { width: '100%', height: 250, borderRadius: 10, marginBottom: 16 },
+  commentsSection: { padding: 16 },
+  commentItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, backgroundColor: '#f8f8f8', padding: 10, borderRadius: 10 },
+  profileImage: { width: 40, height: 40, borderRadius: 20, marginRight: 10 },
+  commentContent: { flex: 1 },
+  userName: { fontWeight: 'bold', color: '#333', marginBottom: 2 },
+  commentActions: { flexDirection: 'row', gap: 10 },
+  commentText: { color: '#555' },
+  commentInput: { flex: 1, borderWidth: 1, borderColor: '#ddd', padding: 8, borderRadius: 5, marginRight: 10 },
+  addCommentButton: { backgroundColor: '#65558F', padding: 10, borderRadius: 5 },
+  addCommentButtonText: { color: '#fff' },
+  addCommentContainer: {
+    flexDirection: 'row', // Yorum kutusu ve butonu yan yana getirir
+    alignItems: 'center', // İçeriği dikey olarak hizalar
+    paddingHorizontal: 10,
+    paddingVertical: 8,
     backgroundColor: '#fff',
   },
-  header: {
-    backgroundColor: '#FEF7FF',
-    paddingVertical: 30,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    alignItems: 'center',
+  
+  commentInput: {
+    flex: 1, // Tüm alanı kaplamasını sağlar
+    borderWidth: 1,
+    borderColor: '#ddd',
+    padding: 12,
+    borderRadius: 8,
+    minHeight: 50,
+    maxHeight: 120,
+    textAlignVertical: 'top', // Yazıyı yukarıdan başlatır
+    marginRight: 10, // Butonla arasında boşluk bırakır
   },
-  headerText: {
-    fontSize: 20,
+  
+  addCommentButton: {
+    backgroundColor: '#65558F',
+    paddingVertical: 14, // Butonun yüksekliğini artırır
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  
+  addCommentButtonText: {
+    color: '#fff',
     fontWeight: 'bold',
-    color: '#65558F',
   },
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FEF7FF',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  tabButton: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 10,
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#65558F',
-  },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#65558F',
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-    alignItems: 'center',
-  },
-  image: {
-    width: '100%',
-    height: 250,
-    borderRadius: 10,
-    marginBottom: 16,
-  },
-  noImageText: {
-    fontSize: 14,
-    color: '#888',
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  organizer: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#888',
-    marginBottom: 5,
-  },
-  description: {
-    fontSize: 14,
-    color: '#333',
-    marginBottom: 5,
-    lineHeight: 20,
-  },
-  date: {
-    fontSize: 14,
-    color: '#888',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#f8f8f8',
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
-  },
-  footerButton: {
-    alignItems: 'center',
-  },
-  footerButtonText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  iconCentered: {
-    marginBottom: 4,
-  },
+  
+  
 });
 
 export default BagisAlanEtkinliklerDetay;
