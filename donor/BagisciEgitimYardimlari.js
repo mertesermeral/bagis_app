@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import NavigationTabs from '../Navigator/Navigation';
 
 const BagisciNakdiBagis = ({ navigation }) => {
   const donations = [
@@ -27,14 +26,7 @@ const BagisciNakdiBagis = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Üst Başlık */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Vedat Doğan</Text>
-      </View>
-
-     {/* Üst Sekmeler */}
-     <NavigationTabs role="donor" activeTab="BagisciAnaMenu" />
-
+      
 
       {/* Nakdi Bağış Listesi */}
       <ScrollView style={styles.content}>

@@ -8,19 +8,18 @@ import {
   Alert,
   Switch,
 } from "react-native";
-import * as SecureStore from "expo-secure-store"; // SecureStore import
+import * as SecureStore from "expo-secure-store";
 
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = ({ navigation, setUserRole }) => {
   const [activeTab, setActiveTab] = useState("donor");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
 
-  // SecureStore'dan kayıtlı bilgileri yükle
   useEffect(() => {
     const loadUserData = async () => {
       try {
@@ -41,10 +40,6 @@ const LoginScreen = ({ navigation }) => {
     loadUserData();
   }, []);
 
-  const handleTabPress = (tab) => {
-    setActiveTab(tab);
-  };
-
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert("Hata", "Lütfen email ve şifre alanlarını doldurun.");
@@ -58,9 +53,13 @@ const LoginScreen = ({ navigation }) => {
       const docRef = doc(db, "users", user.uid);
       const docSnap = await getDoc(docRef);
 
-      if (docSnap.exists()) {
-        const userData = docSnap.data();
-        const role = userData.role;
+      if (docSnap.exists() && docSnap.data().role) {
+        const role = docSnap.data().role;
+
+        if (role !== "donor" && role !== "receiver") {
+          Alert.alert("Hata", "Geçersiz kullanıcı rolü.");
+          return;
+        }
 
         if (role !== activeTab) {
           Alert.alert(
@@ -70,9 +69,12 @@ const LoginScreen = ({ navigation }) => {
           return;
         }
 
+        // Kullanıcı rolünü App.js'deki state'e atıyoruz.
+        setUserRole(role);
+
         Alert.alert("Başarılı", `${role === "donor" ? "Bağışçı" : "Bağış Alan"} olarak giriş yapıldı!`);
 
-        // Beni Hatırla özelliği - SecureStore kullanarak güvenli saklama
+        // Kullanıcı bilgilerini SecureStore içine kaydet
         if (rememberMe) {
           await SecureStore.setItemAsync("email", email);
           await SecureStore.setItemAsync("password", password);
@@ -83,13 +85,14 @@ const LoginScreen = ({ navigation }) => {
           await SecureStore.setItemAsync("rememberMe", "false");
         }
 
-        if (role === "donor") {
-          navigation.navigate("BagisciAnaMenu");
-        } else if (role === "receiver") {
-          navigation.navigate("BagisAlanAnaMenu");
-        }
+        // Kullanıcıyı yönlendir
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "MainTabs", params: { userRole: role } }],
+        });
+
       } else {
-        Alert.alert("Hata", "Kullanıcı bilgileri Firestore'da bulunamadı.");
+        Alert.alert("Hata", "Kullanıcı Firestore'da bulunamadı veya rol bilgisi eksik.");
       }
     } catch (error) {
       console.error("Giriş sırasında hata oluştu:", error);
@@ -110,7 +113,7 @@ const LoginScreen = ({ navigation }) => {
       <View style={styles.tabContainer}>
         <TouchableOpacity
           style={[styles.tabButton, activeTab === "donor" && styles.activeTabButton]}
-          onPress={() => handleTabPress("donor")}
+          onPress={() => setActiveTab("donor")}
         >
           <Text style={[styles.tabText, activeTab === "donor" && styles.activeTabText]}>
             Bağışçı Giriş
@@ -118,7 +121,7 @@ const LoginScreen = ({ navigation }) => {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tabButton, activeTab === "receiver" && styles.activeTabButton]}
-          onPress={() => handleTabPress("receiver")}
+          onPress={() => setActiveTab("receiver")}
         >
           <Text style={[styles.tabText, activeTab === "receiver" && styles.activeTabText]}>
             Bağış Alan Giriş
@@ -253,11 +256,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
-  },
-  rememberMeContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 15,
   },
 });
 

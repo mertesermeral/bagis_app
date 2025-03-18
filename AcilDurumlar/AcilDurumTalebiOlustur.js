@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, TextInput, Alert, Image } from 'react-native';
+import { Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, TextInput, Alert, Image } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { db, storage, auth } from '../firebase';

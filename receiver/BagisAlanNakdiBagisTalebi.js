@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import NavigationTabs from '../Navigator/Navigation';
 
 
 const BagisAlanAnaMenu = ({ navigation }) => {
@@ -12,8 +11,7 @@ const BagisAlanAnaMenu = ({ navigation }) => {
         <Text style={styles.headerText}>Yardım Ekranı</Text>
       </View>
 
-      {/* Üst Sekmeler */}
-      <NavigationTabs role="receiver" activeTab="BagisAlanAnaMenu" />
+      
 
 
       {/* Orta Butonlar */}

@@ -1,25 +1,17 @@
-//Bagis Alan Etkinlikler Sayfasi
+//Etkinlikler Sayfasi
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Image, Modal, TextInput, Button } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { db, storage } from '../firebase.js';
-import { doc, getDoc, collection, addDoc, getDocs } from "firebase/firestore";
-import * as ImagePicker from 'expo-image-picker';
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import NavigationTabs from '../Navigator/Navigation';
+import { db } from '../firebase.js';
+import { doc, getDoc, collection, getDocs } from "firebase/firestore";
+
 import { auth } from '../firebase'; // 🔥 auth'u import etmeyi unutma!
 
 
-const BagisAlanEtkinlikler = ({ navigation }) => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [eventName, setEventName] = useState('');
-  const [organizer, setOrganizer] = useState('');
-  const [description, setDescription] = useState('');
-  const [date, setDate] = useState('');
-  const [image, setImage] = useState(null);
+const Etkinlikler = ({ navigation }) => {
+  
   const [events, setEvents] = useState([]);
-  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
     const fetchUserRole = async () => {
@@ -49,65 +41,8 @@ const BagisAlanEtkinlikler = ({ navigation }) => {
 
   }, []);
 
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-    if (!result.canceled && result.assets.length > 0) {
-      setImage(result.assets[0].uri);
-    }
-  };
-
-  const handleAddEvent = async () => {
-    if (!eventName || !organizer || !description || !date || !image) {
-      alert("Lütfen tüm alanları doldurun!");
-      return;
-    }
-    try {
-      const response = await fetch(image);
-      const blob = await response.blob();
-      const storageRef = ref(storage, `event_images/${Date.now()}.jpg`);
-      await uploadBytes(storageRef, blob);
-      const imageUrl = await getDownloadURL(storageRef);
-
-      await addDoc(collection(db, "events"), {
-        eventName,
-        organizer,
-        description,
-        date,
-        imageUrl,
-      });
-
-      alert("Etkinlik başarıyla eklendi!");
-      setModalVisible(false);
-      setEventName('');
-      setOrganizer('');
-      setDescription('');
-      setDate('');
-      setImage(null);
-    } catch (error) {
-      alert("Bir hata oluştu, tekrar deneyin.");
-    }
-  };
-
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Etkinlikler</Text>
-      </View>
-
-
-
-      {/* Kullanıcı Rolüne Göre Üst Sekmeler */}
-      {userRole === null ? (
-        <Text style={styles.loadingText}>Yükleniyor...</Text>
-      ) : (
-        <NavigationTabs role={userRole} activeTab="BagisAlanEtkinlikler" />
-      )}
-
 
       <ScrollView style={styles.scrollContainer}>
         {events.map(event => (
@@ -260,4 +195,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BagisAlanEtkinlikler;
+export default Etkinlikler;
