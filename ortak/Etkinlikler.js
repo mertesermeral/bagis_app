@@ -4,9 +4,12 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Image, Modal, TextInput, Button } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { db, storage } from '../firebase.js';
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import { doc, getDoc, collection, addDoc, getDocs } from "firebase/firestore";
 import * as ImagePicker from 'expo-image-picker';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import NavigationTabs from '../Navigator/Navigation';
+import { auth } from '../firebase'; // 🔥 auth'u import etmeyi unutma!
+
 
 const BagisAlanEtkinlikler = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -16,14 +19,34 @@ const BagisAlanEtkinlikler = ({ navigation }) => {
   const [date, setDate] = useState('');
   const [image, setImage] = useState(null);
   const [events, setEvents] = useState([]);
+  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            setUserRole(userDoc.data().role);
+          } else {
+            setUserRole("receiver"); // Varsayılan değer
+          }
+        }
+      } catch (error) {
+        console.error("Kullanıcı rolü alınırken hata oluştu:", error);
+        setUserRole("receiver"); // Hata durumunda varsayılan olarak receiver ata
+      }
+    };
+
     const fetchEvents = async () => {
       const querySnapshot = await getDocs(collection(db, "events"));
       const eventList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setEvents(eventList);
     };
     fetchEvents();
+    fetchUserRole();
+
   }, []);
 
   const pickImage = async () => {
@@ -76,30 +99,15 @@ const BagisAlanEtkinlikler = ({ navigation }) => {
         <Text style={styles.headerText}>Etkinlikler</Text>
       </View>
 
-      {/* Üst Sekmeler */}
-            <View style={styles.tabContainer}>
-              <TouchableOpacity
-                style={[styles.tabButton, styles.activeTab]}
-                onPress={() => navigation.navigate('BagisAlanAnaMenu')}
-              >
-                <Text style={[styles.tabText, styles.activeTabText]}>Yardım Ekranı</Text>
-              </TouchableOpacity>
-      
-      
-              <TouchableOpacity
-                style={styles.tabButton}
-                onPress={() => navigation.navigate('BagisAlanAcilDurumlar')}
-              >
-                <Text style={styles.tabText}>Acil Durumlar</Text>
-              </TouchableOpacity>
-      
-              <TouchableOpacity
-                style={styles.tabButton}
-                onPress={() => navigation.navigate('BagisAlanEtkinlikler')}
-              >
-                <Text style={styles.tabText}>Etkinlikler</Text>
-              </TouchableOpacity>
-            </View>
+
+
+      {/* Kullanıcı Rolüne Göre Üst Sekmeler */}
+      {userRole === null ? (
+        <Text style={styles.loadingText}>Yükleniyor...</Text>
+      ) : (
+        <NavigationTabs role={userRole} activeTab="BagisAlanEtkinlikler" />
+      )}
+
 
       <ScrollView style={styles.scrollContainer}>
         {events.map(event => (

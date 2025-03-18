@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import NavigationTabs from '../Navigator/Navigation';
 
 const BagisciBagislarim = ({ navigation }) => {
   const donations = [
@@ -26,32 +27,7 @@ const BagisciBagislarim = ({ navigation }) => {
       </View>
 
       {/* Üst Sekmeler */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('BagisciAnaMenu')}
-        >
-          <Text style={styles.tabText}>Nakdi Bağış</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('BagisciOzelBagis')}
-        >
-          <Text style={styles.tabText}>Özel Bağış</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('AcilDurumlar')}
-        >
-          <Text style={styles.tabText}>Acil Durumlar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tabButton, styles.activeTab]}
-          onPress={() => navigation.navigate('BagisAlanEtkinlikler')}
-        >
-          <Text style={[styles.tabText, styles.activeTabText]}>Etkinlikler</Text>
-        </TouchableOpacity>
-      </View>
+      <NavigationTabs role="donor" activeTab="" />
 
       {/* Bağışlarım Listesi */}
       <ScrollView style={styles.content}>

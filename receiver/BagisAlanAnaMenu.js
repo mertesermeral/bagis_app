@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import NavigationTabs from '../Navigator/Navigation';
 
 const BagisAlanAnaMenu = ({ navigation }) => {
   return (
@@ -11,33 +12,11 @@ const BagisAlanAnaMenu = ({ navigation }) => {
       </View>
 
       {/* Üst Sekmeler */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tabButton, styles.activeTab]}
-          onPress={() => navigation.navigate('BagisAlanAnaMenu')}
-        >
-          <Text style={[styles.tabText, styles.activeTabText]}>Yardım Ekranı</Text>
-        </TouchableOpacity>
-
-
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('BagisAlanAcilDurumlar')}
-        >
-          <Text style={styles.tabText}>Acil Durumlar</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('BagisAlanEtkinlikler')}
-        >
-          <Text style={styles.tabText}>Etkinlikler</Text>
-        </TouchableOpacity>
-      </View>
+      <NavigationTabs role="receiver" activeTab="BagisAlanAnaMenu" />
 
       {/* Orta Butonlar */}
       <View style={styles.buttonContainer}>
-        {[
+        {[ 
           { label: 'NAKDİ BAĞIŞ TALEBİ', route: 'BagisAlanNakdiBagisTalebi' },
           { label: 'ÖZEL BAĞIŞ TALEBİ', route: 'OzelBagis' },
           { label: 'ACİL DURUM TALEBİ', route: 'AcilDurum' },
@@ -67,7 +46,6 @@ const BagisAlanAnaMenu = ({ navigation }) => {
           <Icon name="person" size={24} color="#65558F" />
           <Text style={styles.footerButtonText}>Profilim</Text>
         </TouchableOpacity>
-
       </View>
     </SafeAreaView>
   );
@@ -89,33 +67,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#65558F',
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FEF7FF',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  tabButton: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 10,
-  },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#65558F',
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#65558F',
-  },
-  activeTabText: {
-    color: '#65558F',
-    fontWeight: 'bold',
   },
   buttonContainer: {
     flex: 1,
@@ -145,16 +96,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#ddd',
   },
-  footerText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#65558F',
-  },
-  activeFooter: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#65558F',
-    paddingBottom: 4,
-  },
   footerButton: {
     flex: 1,
     alignItems: 'center',
@@ -164,7 +105,7 @@ const styles = StyleSheet.create({
   footerButtonText: {
     fontSize: 12,
     color: '#65558F',
-    marginTop: 4, // Add some spacing between the icon and text
+    marginTop: 4,
   },
 });
 

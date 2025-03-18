@@ -4,7 +4,6 @@ import { createStackNavigator } from "@react-navigation/stack";
 import LoginScreen from "./LoginScreen";
 import RegisterScreen from "./RegisterScreen";
 import BagisAlanAnaMenu from "./receiver/BagisAlanAnaMenu";
-import BagisAlanAcilDurumlar from "./receiver/BagisAlanAcilDurumlar";
 import BagisAlanEtkinlikler from "./ortak/Etkinlikler";
 import EtkinlikEkle from './ortak/EtkinlikEkle';
 import BagisAlanNakdiBagisTalebi from "./receiver/BagisAlanNakdiBagisTalebi";
@@ -22,7 +21,7 @@ import BagisciProfilim from "./donor/BagisciProfilim";
 import AcilDurumTalebiOlustur from "./AcilDurumlar/AcilDurumTalebiOlustur";
 import AcilDurumDetay from "./AcilDurumlar/AcilDurumDetay";
 import BagisciOzelBagisDetay from "./donor/BagisciOzelBagisDetay";
-
+import Navigation from "./Navigator/Navigation";
 
 
 
@@ -51,7 +50,6 @@ const App = () => {
           }}
         />
       <Stack.Screen name="BagisAlanAnaMenu" component={BagisAlanAnaMenu} />
-      <Stack.Screen name="BagisAlanAcilDurumlar" component={BagisAlanAcilDurumlar} />
       <Stack.Screen name="BagisAlanEtkinlikler" component={BagisAlanEtkinlikler}/>
       <Stack.Screen name="EtkinlikEkle" component={EtkinlikEkle} />
       <Stack.Screen name="BagisAlanNakdiBagisTalebi" component={BagisAlanNakdiBagisTalebi}/>
@@ -69,7 +67,7 @@ const App = () => {
       <Stack.Screen name="BagisciBagislarim" component={BagisciBagislarim}/>
       <Stack.Screen name="BagisciProfilim" component={BagisciProfilim}/>
       <Stack.Screen name="BagisciOzelBagisDetay" component={BagisciOzelBagisDetay}/>
-
+      <Stack.Screen name="Navigation" component={Navigation}/>
       
 
       </Stack.Navigator>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import NavigationTabs from '../Navigator/Navigation';
 
 const BagisAnaMenu = ({ navigation }) => {
   return (
@@ -11,32 +12,8 @@ const BagisAnaMenu = ({ navigation }) => {
       </View>
 
       {/* Üst Sekmeler */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tabButton, styles.activeTab]}
-          onPress={() => navigation.navigate('BagisciAnaMenu')}
-        >
-          <Text style={[styles.tabText, styles.activeTabText]}>Nakdi Bağış</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('BagisciOzelBagis')}
-        >
-          <Text style={styles.tabText}>Özel Bağış</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('AcilDurumlar')}
-        >
-          <Text style={styles.tabText}>Acil Durumlar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => navigation.navigate('BagisAlanEtkinlikler')}
-        >
-          <Text style={styles.tabText}>Etkinlikler</Text>
-        </TouchableOpacity>
-      </View>
+      <NavigationTabs role="donor" activeTab="BagisciAnaMenu" />
+
 
       {/* Orta Liste */}
       <View style={styles.buttonContainer}>

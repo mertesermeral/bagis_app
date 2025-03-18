@@ -1,19 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Image } from 'react-native';
 import { db } from '../firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, getDocs } from "firebase/firestore";
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import NavigationTabs from '../Navigator/Navigation';
+import { auth } from '../firebase'; // 🔥 auth'u import etmeyi unutma!
 
 const BagisciAcilDurumlar = ({ navigation }) => {
   const [emergencies, setEmergencies] = useState([]);
-
+  const [userRole, setUserRole] = useState(null);
+  
   useEffect(() => {
+
+    const fetchUserRole = async () => {
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            setUserRole(userDoc.data().role);
+          } else {
+            setUserRole("receiver"); // Varsayılan değer
+          }
+        }
+      } catch (error) {
+        console.error("Kullanıcı rolü alınırken hata oluştu:", error);
+        setUserRole("receiver"); // Hata durumunda varsayılan olarak receiver ata
+      }
+    };
+
     const fetchEmergencies = async () => {
       const querySnapshot = await getDocs(collection(db, 'emergencies'));
       const emergencyList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setEmergencies(emergencyList);
     };
     fetchEmergencies();
+    fetchUserRole();
+
   }, []);
 
   return (
@@ -22,20 +45,12 @@ const BagisciAcilDurumlar = ({ navigation }) => {
         <Text style={styles.headerText}>Vedat Doğan</Text>
       </View>
 
-      <View style={styles.tabContainer}>
-        <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate('BagisciAnaMenu')}>
-          <Text style={styles.tabText}>Nakdi Bağış</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate('BagisciOzelBagis')}>
-          <Text style={styles.tabText}>Özel Bağış</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.tabButton, styles.activeTab]} onPress={() => navigation.navigate('BagisciAcilDurumlar')}>
-          <Text style={[styles.tabText, styles.activeTabText]}>Acil Durumlar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate('BagisAlanEtkinlikler')}>
-          <Text style={styles.tabText}>Etkinlikler</Text>
-        </TouchableOpacity>
-      </View>
+       {/* Kullanıcı Rolüne Göre Üst Sekmeler */}
+       {userRole === null ? (
+        <Text style={styles.loadingText}>Yükleniyor...</Text>
+      ) : (
+        <NavigationTabs role={userRole} activeTab="AcilDurumlar" />
+      )}
 
       <ScrollView style={styles.content}>
         {emergencies.map((emergency) => (
