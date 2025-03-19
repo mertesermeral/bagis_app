@@ -1,48 +1,34 @@
-//Etkinlikler Sayfasi
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Image, Modal, TextInput, Button } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { db } from '../firebase.js';
-import { doc, getDoc, collection, getDocs } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 
-import { auth } from '../firebase'; // 🔥 auth'u import etmeyi unutma!
-
-
-const Etkinlikler = ({ navigation }) => {
+const Etkinlikler = ({ navigation,userRole }) => {
   
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    const fetchUserRole = async () => {
+    const fetchEvents = async () => {
       try {
-        const user = auth.currentUser;
-        if (user) {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            setUserRole(userDoc.data().role);
-          } else {
-            setUserRole("receiver"); // Varsayılan değer
-          }
-        }
+        const querySnapshot = await getDocs(collection(db, "events"));
+        const eventList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setEvents(eventList);
       } catch (error) {
-        console.error("Kullanıcı rolü alınırken hata oluştu:", error);
-        setUserRole("receiver"); // Hata durumunda varsayılan olarak receiver ata
+        console.error("Etkinlikler alınırken hata oluştu:", error);
       }
     };
 
-    const fetchEvents = async () => {
-      const querySnapshot = await getDocs(collection(db, "events"));
-      const eventList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setEvents(eventList);
-    };
     fetchEvents();
-    fetchUserRole();
-
   }, []);
+
 
   return (
     <SafeAreaView style={styles.container}>
+
+     <View style={styles.roleContainer}>
+        <Text style={styles.roleText}>Kullanıcı Rolü: <Text style={styles.roleHighlight}>{userRole}</Text></Text>
+      </View>
 
       <ScrollView style={styles.scrollContainer}>
         {events.map(event => (
@@ -192,6 +178,22 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#65558F',
     marginTop: 4, // Add some spacing between the icon and text
+  },
+
+
+  roleContainer: {
+    backgroundColor: '#EFEFEF',
+    padding: 10,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  roleText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  roleHighlight: {
+    color: '#65558F',
   },
 });
 

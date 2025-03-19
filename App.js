@@ -15,7 +15,6 @@ import BagisAlanEgitimYardimTalebi from "./receiver/BagisAlanEgitimYardimTalebi"
 import BagisAlanBagisDurumu from "./receiver/BagisAlanBagisDurumu";
 import BagisAlanProfilim from "./receiver/BagisAlanProfilim";
 import BagisAlanEtkinliklerDetay from "./Etkinlikler/EtkinliklerDetay";
-import BagisAlanAcilDurumlar from "./AcilDurumlar/AcilDurumlar";
 
 // **Bağışçı (Donor) Sayfaları**
 import BagisciAnaMenu from "./donor/BagisciAnaMenu";
@@ -27,7 +26,6 @@ import BagisciEgitimOdeme from "./donor/BagisciEgitimOdeme";
 import BagisciOzelBagisDetay from "./donor/BagisciOzelBagisDetay";
 
 // **Acil Durum Sayfaları**
-import AcilDurumlar from "./AcilDurumlar/AcilDurumlar";
 import AcilDurumTalebiOlustur from "./AcilDurumlar/AcilDurumTalebiOlustur";
 import AcilDurumDetay from "./AcilDurumlar/AcilDurumDetay";
 
@@ -35,83 +33,85 @@ import AcilDurumDetay from "./AcilDurumlar/AcilDurumDetay";
 import LoginScreen from "./LoginScreen";
 import RegisterScreen from "./RegisterScreen";
 
+
+// 📌 **Ortak Etkinlikler ve Acil Durumlar Sayfalarını Dahil Et**
+import OrtakEtkinlikler from "./Etkinlikler/Etkinlikler"; 
+import OrtakAcilDurumlar from "./AcilDurumlar/AcilDurumlar";
+
+
 // **Stack ve Tab Navigator oluşturma**
 const Stack = createStackNavigator();
 const Tab = createMaterialTopTabNavigator();
 
 // **Bağış Alan (Receiver) Üst Sekme Navigasyonu**
-const ReceiverTabNavigator = () => {
-  return (
-    <Tab.Navigator
-      initialRouteName="Yardım Ekranı"
-      screenOptions={{
-        tabBarStyle: { backgroundColor: "#65558F" },
-        tabBarActiveTintColor: "#fff",
-        tabBarInactiveTintColor: "#ddd",
-        tabBarIndicatorStyle: { backgroundColor: "#fff" },
-      }}
-    >
-      <Tab.Screen name="Yardım Ekranı" component={BagisAlanAnaMenu} />
-      <Tab.Screen name="Acil Durumlar" component={BagisAlanAcilDurumlar} />
-      <Tab.Screen name="Etkinlikler" component={BagisAlanEtkinlikler} />
-    </Tab.Navigator>
-  );
-};
+const ReceiverTabNavigator = ({ userRole }) => (
+  <Tab.Navigator
+    screenOptions={{
+      tabBarStyle: { backgroundColor: "#65558F" },
+      tabBarActiveTintColor: "#fff",
+      tabBarInactiveTintColor: "#ddd",
+      tabBarIndicatorStyle: { backgroundColor: "#fff" },
+    }}
+  >
+    <Tab.Screen name="Yardım Ekranı" component={BagisAlanAnaMenu} />
+    <Tab.Screen name="Etkinlikler">
+      {props => <OrtakEtkinlikler {...props} userRole={userRole} />}
+    </Tab.Screen>
+    <Tab.Screen name="Acil Durumlar">
+      {props => <OrtakAcilDurumlar {...props} userRole={userRole} />}
+    </Tab.Screen>
+  </Tab.Navigator>
+);
 
 // **Bağışçı (Donor) Üst Sekme Navigasyonu**
-const DonorTabNavigator = () => {
-  return (
-    <Tab.Navigator
-      screenOptions={{
-        tabBarStyle: { backgroundColor: "#65558F" },
-        tabBarActiveTintColor: "#fff",
-        tabBarInactiveTintColor: "#ddd",
-        tabBarIndicatorStyle: { backgroundColor: "#fff" },
-      }}
-    >
-      <Tab.Screen name="Nakdi Bağış" component={BagisciAnaMenu} />
-      <Tab.Screen name="Özel Bağış" component={BagisciOzelBagis} />
-      <Tab.Screen name="Acil Durumlar" component={AcilDurumlar} />
-      <Tab.Screen name="Etkinlikler" component={BagisAlanEtkinlikler} />
-    </Tab.Navigator>
-  );
-};
+const DonorTabNavigator = ({ userRole }) => (
+  <Tab.Navigator
+    screenOptions={{
+      tabBarStyle: { backgroundColor: "#65558F" },
+      tabBarActiveTintColor: "#fff",
+      tabBarInactiveTintColor: "#ddd",
+      tabBarIndicatorStyle: { backgroundColor: "#fff" },
+    }}
+  >
+    <Tab.Screen name="Nakdi Bağış" component={BagisciAnaMenu} />
+    <Tab.Screen name="Özel Bağış" component={BagisciOzelBagis} />
+    <Tab.Screen name="Etkinlikler">
+      {props => <OrtakEtkinlikler {...props} userRole={userRole} />}
+    </Tab.Screen>
+    <Tab.Screen name="Acil Durumlar">
+      {props => <OrtakAcilDurumlar {...props} userRole={userRole} />}
+    </Tab.Screen>
+  </Tab.Navigator>
+);
+
 
 // **MainTabs Ekranı**
 const MainTabs = ({ route }) => {
-  return route.params.userRole === "donor" ? <DonorTabNavigator /> : <ReceiverTabNavigator />;
+  return route.params?.userRole === "donor" ? (
+    <DonorTabNavigator userRole={route.params?.userRole} />
+  ) : (
+    <ReceiverTabNavigator userRole={route.params?.userRole} />
+  );
 };
-
 const App = () => {
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          const dbInstance = getFirestore();
-          const docRef = doc(dbInstance, "users", user.uid);
+          const docRef = doc(db, "users", user.uid);
           const docSnap = await getDoc(docRef);
-
           if (docSnap.exists() && docSnap.data().role) {
-            const fetchedRole = docSnap.data().role;
-            if (fetchedRole === "donor" || fetchedRole === "receiver") {
-              setUserRole(fetchedRole);
-            } else {
-              console.error("Geçersiz kullanıcı rolü:", fetchedRole);
-              setUserRole(null);
-            }
+            setUserRole(docSnap.data().role);
           } else {
             console.error("Kullanıcı Firestore'da bulunamadı veya rol eksik.");
-            setUserRole(null);
           }
         } catch (error) {
           console.error("Kullanıcı rolü alınırken hata oluştu:", error);
-          setUserRole(null);
         }
-      } else {
-        setUserRole(null);
       }
       setLoading(false);
     });
@@ -126,7 +126,7 @@ const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {!userRole ? (
+      {!userRole ? (
           <>
             <Stack.Screen name="Login">
               {(props) => <LoginScreen {...props} setUserRole={setUserRole} />}
