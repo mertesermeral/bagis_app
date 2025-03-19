@@ -8,19 +8,23 @@ import LoginScreen from "./LoginScreen";
 import RegisterScreen from "./RegisterScreen";
 import BagisAlanAnaMenu from "./receiver/BagisAlanAnaMenu";
 import BagisAlanEtkinlikler from "./Etkinlikler/Etkinlikler";
-import EtkinlikEkle from './Etkinlikler/EtkinlikEkle';
+import EtkinlikEkle from "./Etkinlikler/EtkinlikEkle";
 import BagisAlanNakdiBagisTalebi from "./receiver/BagisAlanNakdiBagisTalebi";
 import BagisAlanEgitimYardimTalebi from "./receiver/BagisAlanEgitimYardimTalebi";
 import BagisAlanBagisDurumu from "./receiver/BagisAlanBagisDurumu";
 import BagisAlanProfilim from "./receiver/BagisAlanProfilim";
 import BagisAlanEtkinliklerDetay from "./Etkinlikler/EtkinliklerDetay";
+
+// **Bağışçı (Donor) Sayfaları**
 import BagisciAnaMenu from "./donor/BagisciAnaMenu";
 import BagisciOzelBagis from "./donor/BagisciOzelBagis";
-import AcilDurumlar from "./AcilDurumlar/AcilDurumlar";
-import BagisciEgitimYardimlari from "./donor/BagisciEgitimYardimlari";
-import BagisciEgitimOdeme from "./donor/BagisciEgitimOdeme";
 import BagisciBagislarim from "./donor/BagisciBagislarim";
 import BagisciProfilim from "./donor/BagisciProfilim";
+import BagisciEgitimYardimlari from "./donor/BagisciEgitimYardimlari";
+import BagisciEgitimOdeme from "./donor/BagisciEgitimOdeme";
+import BagisciOzelBagisDetay from "./donor/BagisciOzelBagisDetay";
+
+// **Acil Durum Sayfaları**
 import AcilDurumTalebiOlustur from "./AcilDurumlar/AcilDurumTalebiOlustur";
 import AcilDurumDetay from "./AcilDurumlar/AcilDurumDetay";
 import BagisciOzelBagisDetay from "./donor/BagisciOzelBagisDetay";

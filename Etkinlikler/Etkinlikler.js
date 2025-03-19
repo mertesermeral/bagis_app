@@ -2,95 +2,27 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Image, Modal, TextInput, Button } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { db, storage } from '../firebase.js';
-import { doc, getDoc, collection, addDoc, getDocs } from "firebase/firestore";
-import * as ImagePicker from 'expo-image-picker';
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import NavigationTabs from '../Navigator/Navigation';
-import { auth } from '../firebase'; // 🔥 auth'u import etmeyi unutma!
+import { db } from '../firebase.js';
+import { collection, getDocs } from "firebase/firestore";
 
-
-const BagisAlanEtkinlikler = ({ navigation }) => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [eventName, setEventName] = useState('');
-  const [organizer, setOrganizer] = useState('');
-  const [description, setDescription] = useState('');
-  const [date, setDate] = useState('');
-  const [image, setImage] = useState(null);
+const Etkinlikler = ({ navigation,userRole }) => {
+  
   const [events, setEvents] = useState([]);
-  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
-    const fetchUserRole = async () => {
+    const fetchEvents = async () => {
       try {
-        const user = auth.currentUser;
-        if (user) {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            setUserRole(userDoc.data().role);
-          } else {
-            setUserRole("receiver"); // Varsayılan değer
-          }
-        }
+        const querySnapshot = await getDocs(collection(db, "events"));
+        const eventList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setEvents(eventList);
       } catch (error) {
-        console.error("Kullanıcı rolü alınırken hata oluştu:", error);
-        setUserRole("receiver"); // Hata durumunda varsayılan olarak receiver ata
+        console.error("Etkinlikler alınırken hata oluştu:", error);
       }
     };
 
-    const fetchEvents = async () => {
-      const querySnapshot = await getDocs(collection(db, "events"));
-      const eventList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setEvents(eventList);
-    };
     fetchEvents();
-    fetchUserRole();
-
   }, []);
 
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-    if (!result.canceled && result.assets.length > 0) {
-      setImage(result.assets[0].uri);
-    }
-  };
-
-  const handleAddEvent = async () => {
-    if (!eventName || !organizer || !description || !date || !image) {
-      alert("Lütfen tüm alanları doldurun!");
-      return;
-    }
-    try {
-      const response = await fetch(image);
-      const blob = await response.blob();
-      const storageRef = ref(storage, `event_images/${Date.now()}.jpg`);
-      await uploadBytes(storageRef, blob);
-      const imageUrl = await getDownloadURL(storageRef);
-
-      await addDoc(collection(db, "events"), {
-        eventName,
-        organizer,
-        description,
-        date,
-        imageUrl,
-      });
-
-      alert("Etkinlik başarıyla eklendi!");
-      setModalVisible(false);
-      setEventName('');
-      setOrganizer('');
-      setDescription('');
-      setDate('');
-      setImage(null);
-    } catch (error) {
-      alert("Bir hata oluştu, tekrar deneyin.");
-    }
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -244,6 +176,22 @@ const styles = StyleSheet.create({
     color: '#65558F',
     marginTop: 4, // Add some spacing between the icon and text
   },
+
+
+  roleContainer: {
+    backgroundColor: '#EFEFEF',
+    padding: 10,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  roleText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  roleHighlight: {
+    color: '#65558F',
+  },
 });
 
-export default BagisAlanEtkinlikler;
+export default Etkinlikler;
