@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Image, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const BagisciOzelBagis = ({ navigation }) => {
+const BagisAlanOzelBagis = ({ navigation }) => {
   const donations = [
     {
       id: 1,
@@ -183,4 +183,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BagisciOzelBagis;
+export default BagisAlanOzelBagis;

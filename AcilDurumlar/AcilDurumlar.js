@@ -5,16 +5,37 @@ import { doc, getDoc, collection, addDoc, getDocs } from "firebase/firestore";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { auth } from '../firebase'; // 🔥 auth'u import etmeyi unutma!
 
-const BagisciAcilDurumlar = ({ navigation,userRole }) => {
+const BagisciAcilDurumlar = ({ navigation }) => {
   const [emergencies, setEmergencies] = useState([]);
+  const [userRole, setUserRole] = useState(null);
   
   useEffect(() => {
+
+    const fetchUserRole = async () => {
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            setUserRole(userDoc.data().role);
+          } else {
+            setUserRole("receiver"); // Varsayılan değer
+          }
+        }
+      } catch (error) {
+        console.error("Kullanıcı rolü alınırken hata oluştu:", error);
+        setUserRole("receiver"); // Hata durumunda varsayılan olarak receiver ata
+      }
+    };
+
     const fetchEmergencies = async () => {
       const querySnapshot = await getDocs(collection(db, 'emergencies'));
       const emergencyList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setEmergencies(emergencyList);
     };
     fetchEmergencies();
+    fetchUserRole();
+
   }, []);
 
   return (

@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-na
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const BagisciAnaMenu = ({ navigation }) => {
-const BagisciAnaMenu = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       {/* Orta Liste */}
@@ -101,5 +100,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BagisciAnaMenu;
 export default BagisciAnaMenu;

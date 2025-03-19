@@ -1,49 +1,79 @@
-
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Image, Modal, TextInput, Button } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { db } from '../firebase.js';
-import { collection, getDocs } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs } from "firebase/firestore";
+import { auth } from '../firebase';
 
-const Etkinlikler = ({ navigation,userRole }) => {
-  
+const BagisAlanEtkinlikler = ({ navigation }) => {
   const [events, setEvents] = useState([]);
+  const [userRole, setUserRole] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            setUserRole(userDoc.data().role);
+          } else {
+            setUserRole("receiver"); // Varsayılan değer
+          }
+        }
+      } catch (error) {
+        console.error("Kullanıcı rolü alınırken hata oluştu:", error);
+        setUserRole("receiver"); // Hata durumunda varsayılan olarak receiver ata
+      }
+    };
+
     const fetchEvents = async () => {
       try {
+        setLoading(true);
         const querySnapshot = await getDocs(collection(db, "events"));
         const eventList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setEvents(eventList);
+        setEvents(eventList || []);
       } catch (error) {
         console.error("Etkinlikler alınırken hata oluştu:", error);
+        setEvents([]);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchEvents();
+    fetchUserRole();
+
   }, []);
 
-
+  
   return (
     <SafeAreaView style={styles.container}>
       
       <ScrollView style={styles.scrollContainer}>
-        {events.map(event => (
-          <View key={event.id} style={styles.card}>
-            <Image source={{ uri: event.imageUrl }} style={styles.eventImage} />
-            <View style={styles.infoContainer}>
-              <Text style={styles.title}>{event.eventName}</Text>
-              <Text style={styles.organizer}>Düzenleyen: {event.organizer}</Text>
-              <Text style={styles.description}>{event.description}</Text>
-              <Text style={styles.date}>Tarih: {event.date}</Text>
-              <TouchableOpacity 
-                style={styles.detailsButton} 
-                onPress={() => navigation.navigate('BagisAlanEtkinliklerDetay', { event })}>
-                <Text style={styles.detailsButtonText}>Detayları Gör</Text>
-              </TouchableOpacity>
+        {loading ? (
+          <Text style={styles.loadingText}>Etkinlikler yükleniyor...</Text>
+        ) : events && events.length > 0 ? (
+          events.map(event => (
+            <View key={event.id} style={styles.card}>
+              <Image source={{ uri: event.imageUrl }} style={styles.eventImage} />
+              <View style={styles.infoContainer}>
+                <Text style={styles.title}>{event.eventName}</Text>
+                <Text style={styles.organizer}>Düzenleyen: {event.organizer}</Text>
+                <Text style={styles.description}>{event.description}</Text>
+                <Text style={styles.date}>Tarih: {event.date}</Text>
+                <TouchableOpacity 
+                  style={styles.detailsButton} 
+                  onPress={() => navigation.navigate('BagisAlanEtkinliklerDetay', { event })}>
+                  <Text style={styles.detailsButtonText}>Detayları Gör</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        ))}
+          ))
+        ) : (
+          <Text style={styles.noEventText}>Henüz etkinlik bulunmamaktadır.</Text>
+        )}
       </ScrollView>
 
       <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('EtkinlikEkle')}>
@@ -176,22 +206,16 @@ const styles = StyleSheet.create({
     color: '#65558F',
     marginTop: 4, // Add some spacing between the icon and text
   },
-
-
-  roleContainer: {
-    backgroundColor: '#EFEFEF',
-    padding: 10,
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  roleText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  roleHighlight: {
+  loadingText: {
+    textAlign: 'center',
+    padding: 20,
     color: '#65558F',
+  },
+  noEventText: {
+    textAlign: 'center',
+    padding: 20,
+    color: '#666',
   },
 });
 
-export default Etkinlikler;
+export default BagisAlanEtkinlikler;

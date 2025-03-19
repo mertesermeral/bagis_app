@@ -22,6 +22,7 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
 
+  // SecureStore'dan kayıtlı bilgileri yükle
   useEffect(() => {
     const loadUserData = async () => {
       try {
@@ -41,6 +42,10 @@ const LoginScreen = ({ navigation }) => {
 
     loadUserData();
   }, []);
+
+  const handleTabPress = (tab) => {
+    setActiveTab(tab);
+  };
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -118,7 +123,7 @@ const LoginScreen = ({ navigation }) => {
       <View style={styles.tabContainer}>
         <TouchableOpacity
           style={[styles.tabButton, activeTab === "donor" && styles.activeTabButton]}
-          onPress={() => setActiveTab("donor")}
+          onPress={() => handleTabPress("donor")}
         >
           <Text style={[styles.tabText, activeTab === "donor" && styles.activeTabText]}>
             Bağışçı Giriş
@@ -126,7 +131,7 @@ const LoginScreen = ({ navigation }) => {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tabButton, activeTab === "receiver" && styles.activeTabButton]}
-          onPress={() => setActiveTab("receiver")}
+          onPress={() => handleTabPress("receiver")}
         >
           <Text style={[styles.tabText, activeTab === "receiver" && styles.activeTabText]}>
             Bağış Alan Giriş
@@ -261,6 +266,11 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  rememberMeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
   },
 });
 
