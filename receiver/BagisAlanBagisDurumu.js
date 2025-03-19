@@ -1,7 +1,5 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const BagisAlanBagisDurumu = ({navigation}) => {
   return (
@@ -11,7 +9,7 @@ const BagisAlanBagisDurumu = ({navigation}) => {
           {/* Eğitim Bağışı */}
           <View style={styles.card}>
             <Image
-              source={require('../assets/egitim.jpg')} // Use require for local image
+              source={require('../assets/egitim.jpg')}
               style={styles.cardImage}
             />
             <View style={styles.cardContent}>
@@ -24,7 +22,7 @@ const BagisAlanBagisDurumu = ({navigation}) => {
           {/* Gıda Bağışı */}
           <View style={styles.card}>
             <Image
-              source={require('../assets/gida.jpg')} // Use require for local image
+              source={require('../assets/gida.jpg')}
               style={styles.cardImage}
             />
             <View style={styles.cardContent}>
@@ -35,22 +33,6 @@ const BagisAlanBagisDurumu = ({navigation}) => {
           </View>
         </ScrollView>
       </ScrollView>
-
-      {/* Footer Navigation */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanAnaMenu')}>
-          <Icon name="home" size={24} color="#65558F" style={styles.iconCentered} />
-          <Text style={styles.footerButtonText}>Ana Menü</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisDurumu')}>
-          <Icon name="donut-large" size={24} color="#65558F" style={styles.iconCentered} />
-          <Text style={styles.footerButtonText}>Bağış Durumu</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanProfilim')}>
-          <Icon name="person" size={24} color="#65558F" style={styles.iconCentered} />
-          <Text style={styles.footerButtonText}>Profilim</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 };
@@ -95,24 +77,7 @@ const styles = StyleSheet.create({
   cardStatus: {
     fontSize: 14,
     color: '#888',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#f8f8f8',
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
-  },
-  footerButton: {
-    alignItems: 'center',
-  },
-  footerButtonText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#000',
-  },
+  }
 });
 
 export default BagisAlanBagisDurumu;

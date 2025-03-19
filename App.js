@@ -24,6 +24,7 @@ import BagisciProfilim from "./donor/BagisciProfilim";
 import AcilDurumTalebiOlustur from "./AcilDurumlar/AcilDurumTalebiOlustur";
 import AcilDurumDetay from "./AcilDurumlar/AcilDurumDetay";
 import BagisciOzelBagisDetay from "./donor/BagisciOzelBagisDetay";
+import { DonorBottomTabs, ReceiverBottomTabs } from './navigation/BottomTabs';
 
 const Stack = createStackNavigator();
 const Tab = createMaterialTopTabNavigator();
@@ -54,7 +55,8 @@ const ReceiverTabs = () => (
     initialRouteName="AnaMenu"
     screenOptions={{ 
       tabBarLabelStyle: { fontSize: 14 }, 
-      tabBarStyle: { backgroundColor: "#FEF7FF" } 
+      tabBarStyle: { backgroundColor: "#FEF7FF" },
+      tabBarIndicatorStyle: { backgroundColor: "#65558F" }
     }}
   >
     <Tab.Screen 
@@ -65,6 +67,15 @@ const ReceiverTabs = () => (
     <Tab.Screen name="Acil Durumlar" component={AcilDurumlar} />
     <Tab.Screen name="Etkinlikler" component={BagisAlanEtkinlikler} />
   </Tab.Navigator>
+);
+
+// Wrapper bileşenleri
+const DonorTabsWrapper = (props) => (
+  <DonorBottomTabs MainComponent={DonorTabs} {...props} />
+);
+
+const ReceiverTabsWrapper = (props) => (
+  <ReceiverBottomTabs MainComponent={ReceiverTabs} {...props} />
 );
 
 const MainApp = () => {
@@ -81,11 +92,20 @@ const MainApp = () => {
     >
       <Stack.Screen name="LoginScreen" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
-      <Stack.Screen name="DonorTabs" component={DonorTabs} />
-      <Stack.Screen name="ReceiverTabs" component={ReceiverTabs} />
       
-      {/* Diğer ekranlar */}
-      <Stack.Screen name="EtkinlikEkle" component={EtkinlikEkle} />
+      {/* Bottom tab'li ana ekranlar */}
+      <Stack.Screen 
+        name="DonorTabs" 
+        component={DonorTabsWrapper}
+      />
+      <Stack.Screen 
+        name="ReceiverTabs" 
+        component={ReceiverTabsWrapper}
+        options={{ headerShown: false }}
+      />
+      
+      {/* Diğer ekranlar (modal olarak açılacak) */}
+      <Stack.Screen name="EtkinlikEkle" component={EtkinlikEkle} options={{ presentation: 'modal' }} />
       <Stack.Screen name="BagisAlanNakdiBagisTalebi" component={BagisAlanNakdiBagisTalebi} />
       <Stack.Screen name="BagisAlanEgitimYardimTalebi" component={BagisAlanEgitimYardimTalebi} />
       <Stack.Screen name="BagisAlanBagisDurumu" component={BagisAlanBagisDurumu} />
@@ -95,8 +115,8 @@ const MainApp = () => {
       <Stack.Screen name="BagisciEgitimOdeme" component={BagisciEgitimOdeme} />
       <Stack.Screen name="BagisciBagislarim" component={BagisciBagislarim} />
       <Stack.Screen name="BagisciProfilim" component={BagisciProfilim} />
-      <Stack.Screen name="AcilDurumTalebiOlustur" component={AcilDurumTalebiOlustur} />
-      <Stack.Screen name="AcilDurumDetay" component={AcilDurumDetay} />
+      <Stack.Screen name="AcilDurumTalebiOlustur" component={AcilDurumTalebiOlustur} options={{ presentation: 'modal' }} />
+      <Stack.Screen name="AcilDurumDetay" component={AcilDurumDetay} options={{ presentation: 'modal' }} />
       <Stack.Screen name="BagisciOzelBagisDetay" component={BagisciOzelBagisDetay} />
     </Stack.Navigator>
   );

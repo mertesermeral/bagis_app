@@ -83,22 +83,6 @@ const BagisAlanEtkinlikler = ({ navigation }) => {
       </TouchableOpacity>
 
 
-        {/* Alt Menü */}
-              <View style={styles.footer}>
-                <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanAnaMenu')}>
-                  <Icon name="home" size={24} color="#65558F" />
-                  <Text style={styles.footerButtonText}>Ana Menü</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanBagisDurumu')}>
-                  <Icon name="donut-large" size={24} color="#65558F" />
-                  <Text style={styles.footerButtonText}>Bağış Durumu</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanProfilim')}>
-                  <Icon name="person" size={24} color="#65558F" />
-                  <Text style={styles.footerButtonText}>Profilim</Text>
-                </TouchableOpacity>
-        
-        </View>
 
     </SafeAreaView>
   );

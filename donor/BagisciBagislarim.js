@@ -38,21 +38,7 @@ const BagisciBagislarim = ({ navigation }) => {
         ))}
       </ScrollView>
 
-      {/* Alt Menü */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisciAnaMenu')}>
-          <Icon name="home" size={24} color="#65558F" />
-          <Text style={styles.footerButtonText}>Ana Menü</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisciBagislarim')}>
-          <Icon name="donut-large" size={24} color="#65558F" />
-          <Text style={styles.footerButtonText}>Bağışlarım</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisciProfilim')}>
-          <Icon name="person" size={24} color="#65558F" />
-          <Text style={styles.footerButtonText}>Profilim</Text>
-        </TouchableOpacity>
-      </View>
+      
     </SafeAreaView>
   );
 };
