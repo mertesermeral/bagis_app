@@ -82,7 +82,10 @@ const RegisterScreen = ({ navigation }) => {
       });
 
       Alert.alert("Başarılı", "Kayıt işlemi tamamlandı!");
-      navigation.reset({ index: 0, routes: [{ name: "Login" }] });
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "LoginScreen" }]
+      });
     } catch (error) {
       Alert.alert("Hata", error.message);
     }
