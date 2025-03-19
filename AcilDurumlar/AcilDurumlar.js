@@ -1,30 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Image } from 'react-native';
 import { db } from '../firebase';
-import { collection, getDocs } from "firebase/firestore";
+import { doc, getDoc, collection, addDoc, getDocs } from "firebase/firestore";
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { auth } from '../firebase'; // 🔥 auth'u import etmeyi unutma!
 
 const BagisciAcilDurumlar = ({ navigation,userRole }) => {
-  const [emergencies, setEvents] = useState([]);
+  const [emergencies, setEmergencies] = useState([]);
   
   useEffect(() => {
-      const fetchEvents = async () => {
-        try {
-          const querySnapshot = await getDocs(collection(db, "events"));
-          const eventList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          setEvents(eventList);
-        } catch (error) {
-          console.error("Etkinlikler alınırken hata oluştu:", error);
-        }
-      };
-  
-      fetchEvents();
-    }, []);
+    const fetchEmergencies = async () => {
+      const querySnapshot = await getDocs(collection(db, 'emergencies'));
+      const emergencyList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setEmergencies(emergencyList);
+    };
+    fetchEmergencies();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
-      
-       <View style={styles.roleContainer}>
+      <View style={styles.roleContainer}>
               <Text style={styles.roleText}>Kullanıcı Rolü: <Text style={styles.roleHighlight}>{userRole}</Text></Text>
             </View>
 
