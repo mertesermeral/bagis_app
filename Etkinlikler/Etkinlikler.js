@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Image, RefreshControl } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { db } from '../firebase.js';
 import {collection, getDocs } from "firebase/firestore";
@@ -10,10 +10,23 @@ const BagisAlanEtkinlikler = ({ navigation }) => {
   const { role } = useAuth(); // Hook'u en üstte çağır
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    fetchEvents().then(() => setRefreshing(false));
+  }, []);
 
   useEffect(() => {
     fetchEvents();
-  }, []);
+
+    // Ekrana her dönüşte verileri yenile
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchEvents();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   const fetchEvents = async () => {
     try {
@@ -32,10 +45,18 @@ const BagisAlanEtkinlikler = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       
-      <ScrollView style={styles.scrollContainer}>
-        {loading ? (
-          <Text style={styles.loadingText}>Etkinlikler yükleniyor...</Text>
-        ) : events && events.length > 0 ? (
+      <ScrollView 
+        style={styles.scrollContainer}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#65558F"]}
+            tintColor="#65558F"
+          />
+        }
+      >
+        { events && events.length > 0 ? (
           events.map(event => (
             <View key={event.id} style={styles.card}>
               <Image source={{ uri: event.imageUrl }} style={styles.eventImage} />

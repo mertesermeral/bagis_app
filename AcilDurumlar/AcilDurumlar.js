@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Image, RefreshControl } from 'react-native';
 import { db } from '../firebase';
 import { collection, getDocs } from "firebase/firestore";
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -8,11 +8,23 @@ import { useAuth } from '../AuthContext';
 const BagisciAcilDurumlar = ({ navigation }) => {
   const { role } = useAuth(); // Hook'u en üstte çağır
   const [emergencies, setEmergencies] = useState([]);
-  
-  useEffect(() => {
-    // Hook'ları koşullu çağırmayın
-    fetchEmergencies();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    fetchEmergencies().then(() => setRefreshing(false));
   }, []);
+
+  useEffect(() => {
+    fetchEmergencies();
+
+    // Ekrana her dönüşte verileri yenile
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchEmergencies();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   const fetchEmergencies = async () => {
     try {
@@ -26,10 +38,17 @@ const BagisciAcilDurumlar = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      
-     
-
-      <ScrollView style={styles.content}>
+      <ScrollView 
+        style={styles.content}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#65558F"]}
+            tintColor="#65558F"
+          />
+        }
+      >
         {emergencies.map((emergency) => (
           <View key={emergency.id} style={styles.card}>
             <Image source={{ uri: emergency.imageUrl }} style={styles.cardImage} />
