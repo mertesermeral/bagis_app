@@ -2,52 +2,33 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { db } from '../firebase.js';
-import { doc, getDoc, collection, getDocs } from "firebase/firestore";
-import { auth } from '../firebase';
+import {collection, getDocs } from "firebase/firestore";
+
+import { useAuth } from '../AuthContext';
 
 const BagisAlanEtkinlikler = ({ navigation }) => {
+  const { role } = useAuth(); // Hook'u en üstte çağır
   const [events, setEvents] = useState([]);
-  const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const user = auth.currentUser;
-        if (user) {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            setUserRole(userDoc.data().role);
-          } else {
-            setUserRole("receiver"); // Varsayılan değer
-          }
-        }
-      } catch (error) {
-        console.error("Kullanıcı rolü alınırken hata oluştu:", error);
-        setUserRole("receiver"); // Hata durumunda varsayılan olarak receiver ata
-      }
-    };
-
-    const fetchEvents = async () => {
-      try {
-        setLoading(true);
-        const querySnapshot = await getDocs(collection(db, "events"));
-        const eventList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setEvents(eventList || []);
-      } catch (error) {
-        console.error("Etkinlikler alınırken hata oluştu:", error);
-        setEvents([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchEvents();
-    fetchUserRole();
-
   }, []);
 
-  
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      const querySnapshot = await getDocs(collection(db, "events"));
+      const eventList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setEvents(eventList || []);
+    } catch (error) {
+      console.error("Etkinlikler alınırken hata oluştu:", error);
+      setEvents([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       

@@ -1,42 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Image } from 'react-native';
 import { db } from '../firebase';
-import { doc, getDoc, collection, addDoc, getDocs } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { auth } from '../firebase'; // 🔥 auth'u import etmeyi unutma!
+import { useAuth } from '../AuthContext';
 
 const BagisciAcilDurumlar = ({ navigation }) => {
+  const { role } = useAuth(); // Hook'u en üstte çağır
   const [emergencies, setEmergencies] = useState([]);
-  const [userRole, setUserRole] = useState(null);
   
   useEffect(() => {
+    // Hook'ları koşullu çağırmayın
+    fetchEmergencies();
+  }, []);
 
-    const fetchUserRole = async () => {
-      try {
-        const user = auth.currentUser;
-        if (user) {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            setUserRole(userDoc.data().role);
-          } else {
-            setUserRole("receiver"); // Varsayılan değer
-          }
-        }
-      } catch (error) {
-        console.error("Kullanıcı rolü alınırken hata oluştu:", error);
-        setUserRole("receiver"); // Hata durumunda varsayılan olarak receiver ata
-      }
-    };
-
-    const fetchEmergencies = async () => {
+  const fetchEmergencies = async () => {
+    try {
       const querySnapshot = await getDocs(collection(db, 'emergencies'));
       const emergencyList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setEmergencies(emergencyList);
-    };
-    fetchEmergencies();
-    fetchUserRole();
-
-  }, []);
+    } catch (error) {
+      console.error("Error fetching emergencies:", error);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
