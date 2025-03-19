@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import NavigationTabs from '../Navigator/Navigation';
 
 const BagisciBagislarim = ({ navigation }) => {
   const donations = [
@@ -25,9 +24,6 @@ const BagisciBagislarim = ({ navigation }) => {
       <View style={styles.header}>
         <Text style={styles.headerText}>Vedat Doğan</Text>
       </View>
-
-      {/* Üst Sekmeler */}
-      <NavigationTabs role="donor" activeTab="" />
 
       {/* Bağışlarım Listesi */}
       <ScrollView style={styles.content}>

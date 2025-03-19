@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import NavigationTabs from '../Navigator/Navigation';
 
 const BagisciNakdiBagis = ({ navigation }) => {
   const donations = [
@@ -27,16 +26,6 @@ const BagisciNakdiBagis = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Üst Başlık */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Vedat Doğan</Text>
-      </View>
-
-     {/* Üst Sekmeler */}
-     <NavigationTabs role="donor" activeTab="BagisciAnaMenu" />
-
-
-      {/* Nakdi Bağış Listesi */}
       <ScrollView style={styles.content}>
         {donations.map((donation) => (
           <View key={donation.id} style={styles.card}>
@@ -85,45 +74,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-  },
-  header: {
-    backgroundColor: '#FEF7FF',
-    paddingVertical: 30,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  headerText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#65558F',
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FEF7FF',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  tabButton: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 10,
-  },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#65558F',
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#65558F',
-  },
-  activeTabText: {
-    color: '#65558F',
-    fontWeight: 'bold',
   },
   content: {
     flex: 1,

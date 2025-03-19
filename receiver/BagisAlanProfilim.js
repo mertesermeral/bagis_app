@@ -1,87 +1,87 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const BagisAlanProfilim = ({ navigation }) => {
   return (
-    <View style={styles.container}>
-      {/* Profile Header */}
-      <View style={styles.header}>
-        <Image
-          source={{ uri: 'https://via.placeholder.com/100' }} // Replace with actual profile image URL
-          style={styles.profileImage}
-        />
-        <View style={styles.profileInfo}>
-          <Text style={styles.profileName}>Beyza Ulas</Text>
-          <Text style={styles.profileRole}>Bağış Alan</Text>
-        </View>
-      </View>
-
-      {/* Content */}
-      <ScrollView contentContainerStyle={styles.contentContainer}>
-        {/* Ayarlar Section */}
-        <Text style={styles.sectionTitle}>AYARLAR</Text>
-        <View style={styles.section}>
-          <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('HesapAyarları')}>
-            <Icon name="bookmark-border" size={20} color="#333" />
-            <Text style={styles.rowText}>Hesap Ayarları</Text>
-            <Icon name="chevron-right" size={24} color="#333" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Gizlilik')}>
-            <Icon name="bookmark-border" size={20} color="#333" />
-            <Text style={styles.rowText}>Gizlilik ve Güvenlik</Text>
-            <Icon name="chevron-right" size={24} color="#333" />
-          </TouchableOpacity>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.content}>
+        <View style={styles.profileContainer}>
+          <Image
+            source={{ uri: 'https://via.placeholder.com/100' }} // Replace with actual profile image URL
+            style={styles.profileImage}
+          />
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileName}>Beyza Ulas</Text>
+            <Text style={styles.profileRole}>Bağış Alan</Text>
+          </View>
         </View>
 
-        {/* Genel Section */}
-        <Text style={styles.sectionTitle}>GENEL</Text>
-        <View style={styles.section}>
-          <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Yardım')}>
-            <Icon name="bookmark-border" size={20} color="#333" />
-            <Text style={styles.rowText}>YARDIM</Text>
-            <Icon name="chevron-right" size={24} color="#333" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Lisanslar')}>
-            <Icon name="bookmark-border" size={20} color="#333" />
-            <Text style={styles.rowText}>LİSANSLAR</Text>
-            <Icon name="chevron-right" size={24} color="#333" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('YasalBilgilendirme')}>
-            <Icon name="bookmark-border" size={20} color="#333" />
-            <Text style={styles.rowText}>YASAL BİLGİLENDİRME</Text>
-            <Icon name="chevron-right" size={24} color="#333" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Iletisim')}>
-            <Icon name="bookmark-border" size={20} color="#333" />
-            <Text style={styles.rowText}>İLETİŞİM</Text>
-            <Icon name="chevron-right" size={24} color="#333" />
-          </TouchableOpacity>
-        </View>
+        {/* Content */}
+        <ScrollView contentContainerStyle={styles.contentContainer}>
+          {/* Ayarlar Section */}
+          <Text style={styles.sectionTitle}>AYARLAR</Text>
+          <View style={styles.section}>
+            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('HesapAyarları')}>
+              <Icon name="bookmark-border" size={20} color="#333" />
+              <Text style={styles.rowText}>Hesap Ayarları</Text>
+              <Icon name="chevron-right" size={24} color="#333" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Gizlilik')}>
+              <Icon name="bookmark-border" size={20} color="#333" />
+              <Text style={styles.rowText}>Gizlilik ve Güvenlik</Text>
+              <Icon name="chevron-right" size={24} color="#333" />
+            </TouchableOpacity>
+          </View>
 
-        {/* Logout Button */}
-        <TouchableOpacity style={styles.logoutButton} onPress={() => navigation.navigate('Logout')}>
-          <Text style={styles.logoutButtonText}>Çıkış Yap</Text>
-        </TouchableOpacity>
+          {/* Genel Section */}
+          <Text style={styles.sectionTitle}>GENEL</Text>
+          <View style={styles.section}>
+            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Yardım')}>
+              <Icon name="bookmark-border" size={20} color="#333" />
+              <Text style={styles.rowText}>YARDIM</Text>
+              <Icon name="chevron-right" size={24} color="#333" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Lisanslar')}>
+              <Icon name="bookmark-border" size={20} color="#333" />
+              <Text style={styles.rowText}>LİSANSLAR</Text>
+              <Icon name="chevron-right" size={24} color="#333" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('YasalBilgilendirme')}>
+              <Icon name="bookmark-border" size={20} color="#333" />
+              <Text style={styles.rowText}>YASAL BİLGİLENDİRME</Text>
+              <Icon name="chevron-right" size={24} color="#333" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Iletisim')}>
+              <Icon name="bookmark-border" size={20} color="#333" />
+              <Text style={styles.rowText}>İLETİŞİM</Text>
+              <Icon name="chevron-right" size={24} color="#333" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Logout Button */}
+          <TouchableOpacity style={styles.logoutButton} onPress={() => navigation.navigate('Logout')}>
+            <Text style={styles.logoutButtonText}>Çıkış Yap</Text>
+          </TouchableOpacity>
+        </ScrollView>
       </ScrollView>
 
       {/* Footer Navigation */}
-        <View style={styles.footer}>
-            <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanAnaMenu')}>
-              <Icon name="home" size={24} color="#65558F" />
-              <Text style={styles.footerButtonText}>Ana Menü</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanBagisDurumu')}>
-              <Icon name="donut-large" size={24} color="#65558F" />
-              <Text style={styles.footerButtonText}>Bağış Durumu</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanProfilim')}>
-              <Icon name="person" size={24} color="#65558F" />
-              <Text style={styles.footerButtonText}>Profilim</Text>
-            </TouchableOpacity>
-    
-        </View>
-    </View>
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanAnaMenu')}>
+          <Icon name="home" size={24} color="#65558F" />
+          <Text style={styles.footerButtonText}>Ana Menü</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanBagisDurumu')}>
+          <Icon name="donut-large" size={24} color="#65558F" />
+          <Text style={styles.footerButtonText}>Bağış Durumu</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanProfilim')}>
+          <Icon name="person" size={24} color="#65558F" />
+          <Text style={styles.footerButtonText}>Profilim</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -90,7 +90,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  header: {
+  content: {
+    flex: 1,
+    padding: 16,
+  },
+  profileContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
@@ -99,7 +103,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
-  
   profileImage: {
     width: 60,
     height: 60,

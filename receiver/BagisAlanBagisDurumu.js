@@ -1,62 +1,57 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const BagisAlanBagisDurumu = ({navigation}) => {
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      {/* Üst Başlık */}
-           <View style={styles.header}>
-             <Text style={styles.headerText}>Bağış Durumu Ekranı</Text>
-           </View>
-     
-      {/* Main Content */}
-      <ScrollView contentContainerStyle={styles.contentContainer}>
-        {/* Eğitim Bağışı */}
-        <View style={styles.card}>
-          <Image
-            source={require('../assets/egitim.jpg')} // Use require for local image
-            style={styles.cardImage}
-          />
-          <View style={styles.cardContent}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.content}>
+        <ScrollView contentContainerStyle={styles.contentContainer}>
+          {/* Eğitim Bağışı */}
+          <View style={styles.card}>
+            <Image
+              source={require('../assets/egitim.jpg')} // Use require for local image
+              style={styles.cardImage}
+            />
+            <View style={styles.cardContent}>
               <Text style={styles.cardTitle}>Eğitim Bağışı Talebi</Text>
               <Text style={styles.cardAmount}>1000₺</Text>
               <Text style={styles.cardStatus}>Bağış İşlemi Tamamlandı</Text>
-        </View>
-      </View>
+            </View>
+          </View>
 
-        {/* Gıda Bağışı */}
-        <View style={styles.card}>
-          <Image
-            source={require('../assets/gida.jpg')} // Use require for local image
-            style={styles.cardImage}
-          />
-          <View style={styles.cardContent}>
+          {/* Gıda Bağışı */}
+          <View style={styles.card}>
+            <Image
+              source={require('../assets/gida.jpg')} // Use require for local image
+              style={styles.cardImage}
+            />
+            <View style={styles.cardContent}>
               <Text style={styles.cardTitle}>Eğitim Bağışı Talebi</Text>
               <Text style={styles.cardAmount}>1000₺</Text>
               <Text style={styles.cardStatus}>Bağış İşlemi Tamamlandı</Text>
-        </View>
-      </View>
+            </View>
+          </View>
+        </ScrollView>
       </ScrollView>
 
       {/* Footer Navigation */}
       <View style={styles.footer}>
-              <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanAnaMenu')}>
-                <Icon name="home" size={24} color="#65558F" style={styles.iconCentered} />
-                <Text style={styles.footerButtonText}>Ana Menü</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisDurumu')}>
-                <Icon name="donut-large" size={24} color="#65558F" style={styles.iconCentered} />
-                <Text style={styles.footerButtonText}>Bağış Durumu</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanProfilim')}>
-                <Icon name="person" size={24} color="#65558F" style={styles.iconCentered} />
-                <Text style={styles.footerButtonText}>Profilim</Text>
-              </TouchableOpacity>
-            </View>
-    </View>
+        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanAnaMenu')}>
+          <Icon name="home" size={24} color="#65558F" style={styles.iconCentered} />
+          <Text style={styles.footerButtonText}>Ana Menü</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisDurumu')}>
+          <Icon name="donut-large" size={24} color="#65558F" style={styles.iconCentered} />
+          <Text style={styles.footerButtonText}>Bağış Durumu</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisAlanProfilim')}>
+          <Icon name="person" size={24} color="#65558F" style={styles.iconCentered} />
+          <Text style={styles.footerButtonText}>Profilim</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -65,25 +60,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  header: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 30,
-    backgroundColor: '#FEF7FF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  
-  headerText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#65558F',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000',
+  content: {
+    flex: 1,
+    padding: 16,
   },
   contentContainer: {
     padding: 16,

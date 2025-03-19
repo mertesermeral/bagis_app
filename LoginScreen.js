@@ -9,12 +9,14 @@ import {
   Switch,
 } from "react-native";
 import * as SecureStore from "expo-secure-store"; // SecureStore import
-
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
+import { useAuth } from './AuthContext';
 
 const LoginScreen = ({ navigation }) => {
+  const { setRole } = useAuth();
   const [activeTab, setActiveTab] = useState("donor");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -54,46 +56,57 @@ const LoginScreen = ({ navigation }) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-
       const docRef = doc(db, "users", user.uid);
       const docSnap = await getDoc(docRef);
 
-      if (docSnap.exists()) {
-        const userData = docSnap.data();
-        const role = userData.role;
-
-        if (role !== activeTab) {
-          Alert.alert(
-            "Hata",
-            `Bu hesap ${role === "donor" ? "Bağışçı" : "Bağış Alan"} rolüne aittir. Lütfen doğru sekmeyi seçin.`
-          );
-          return;
-        }
-
-        Alert.alert("Başarılı", `${role === "donor" ? "Bağışçı" : "Bağış Alan"} olarak giriş yapıldı!`);
-
-        // Beni Hatırla özelliği - SecureStore kullanarak güvenli saklama
-        if (rememberMe) {
-          await SecureStore.setItemAsync("email", email);
-          await SecureStore.setItemAsync("password", password);
-          await SecureStore.setItemAsync("rememberMe", "true");
-        } else {
-          await SecureStore.deleteItemAsync("email");
-          await SecureStore.deleteItemAsync("password");
-          await SecureStore.setItemAsync("rememberMe", "false");
-        }
-
-        if (role === "donor") {
-          navigation.navigate("BagisciAnaMenu");
-        } else if (role === "receiver") {
-          navigation.navigate("BagisAlanAnaMenu");
-        }
-      } else {
-        Alert.alert("Hata", "Kullanıcı bilgileri Firestore'da bulunamadı.");
+      if (!docSnap.exists()) {
+        Alert.alert("Hata", "Kullanıcı bilgileri bulunamadı.");
+        return;
       }
+
+      const userData = docSnap.data();
+      
+      if (userData.role !== activeTab) {
+        Alert.alert(
+          "Hata",
+          `Bu hesap ${userData.role === "donor" ? "Bağışçı" : "Bağış Alan"} rolüne aittir. Lütfen doğru sekmeyi seçin.`
+        );
+        await auth.signOut();
+        return;
+      }
+
+      // Remember Me işlemi
+      if (rememberMe) {
+        await SecureStore.setItemAsync("email", email);
+        await SecureStore.setItemAsync("password", password);
+        await SecureStore.setItemAsync("rememberMe", "true");
+      } else {
+        await SecureStore.deleteItemAsync("email");
+        await SecureStore.deleteItemAsync("password");
+        await SecureStore.setItemAsync("rememberMe", "false");
+      }
+
+      // Önce navigation yap
+      const targetScreen = userData.role === "donor" ? 'DonorTabs' : 'ReceiverTabs';
+      navigation.reset({
+        index: 0,
+        routes: [{ name: targetScreen }],
+      });
+
+      // Rol bilgisini set et
+      setRole(userData.role);
+
+      // En son bildirim göster
+      setTimeout(() => {
+        Alert.alert(
+          "Başarılı", 
+          `${userData.role === "donor" ? "Bağışçı" : "Bağış Alan"} olarak giriş yapıldı!`
+        );
+      }, 100);
+
     } catch (error) {
       console.error("Giriş sırasında hata oluştu:", error);
-      Alert.alert("Hata", error.message);
+      Alert.alert("Hata", "Giriş yapılırken bir hata oluştu. Email ve şifrenizi kontrol edin.");
     }
   };
 

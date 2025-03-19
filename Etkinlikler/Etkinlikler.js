@@ -1,4 +1,3 @@
-//Bagis Alan Etkinlikler Sayfasi
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Image, Modal, TextInput, Button } from 'react-native';
@@ -95,20 +94,7 @@ const BagisAlanEtkinlikler = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Etkinlikler</Text>
-      </View>
-
-
-
-      {/* Kullanıcı Rolüne Göre Üst Sekmeler */}
-      {userRole === null ? (
-        <Text style={styles.loadingText}>Yükleniyor...</Text>
-      ) : (
-        <NavigationTabs role={userRole} activeTab="BagisAlanEtkinlikler" />
-      )}
-
-
+      
       <ScrollView style={styles.scrollContainer}>
         {events.map(event => (
           <View key={event.id} style={styles.card}>

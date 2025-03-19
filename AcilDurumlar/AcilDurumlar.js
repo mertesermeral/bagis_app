@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Ima
 import { db } from '../firebase';
 import { doc, getDoc, collection, addDoc, getDocs } from "firebase/firestore";
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import NavigationTabs from '../Navigator/Navigation';
 import { auth } from '../firebase'; // 🔥 auth'u import etmeyi unutma!
 
 const BagisciAcilDurumlar = ({ navigation }) => {
@@ -41,16 +40,8 @@ const BagisciAcilDurumlar = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Vedat Doğan</Text>
-      </View>
-
-       {/* Kullanıcı Rolüne Göre Üst Sekmeler */}
-       {userRole === null ? (
-        <Text style={styles.loadingText}>Yükleniyor...</Text>
-      ) : (
-        <NavigationTabs role={userRole} activeTab="AcilDurumlar" />
-      )}
+      
+     
 
       <ScrollView style={styles.content}>
         {emergencies.map((emergency) => (

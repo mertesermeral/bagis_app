@@ -37,24 +37,9 @@ const BagisciAcilDurumDetay = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-              <Text style={styles.headerText}>Vedat Doğan</Text>
-      </View>
       
-            <View style={styles.tabContainer}>
-              <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate('BagisciAnaMenu')}>
-                <Text style={styles.tabText}>Nakdi Bağış</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate('BagisciOzelBagis')}>
-                <Text style={styles.tabText}>Özel Bağış</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.tabButton, styles.activeTab]} onPress={() => navigation.navigate('BagisciAcilDurumlar')}>
-                <Text style={[styles.tabText, styles.activeTabText]}>Acil Durumlar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate('BagisAlanEtkinlikler')}>
-                <Text style={styles.tabText}>Etkinlikler</Text>
-              </TouchableOpacity>
-            </View>
+      
+            
 
       <ScrollView contentContainerStyle={styles.content}>
         <Image source={{ uri: emergency.imageUrl }} style={styles.image} />
