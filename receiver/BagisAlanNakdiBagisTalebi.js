@@ -17,12 +17,22 @@ const BagisTalepFormu = () => {
   const [sehir, setSehir] = useState('');
   const [aboneNo, setAboneNo] = useState('');
   const [faturaTutari, setFaturaTutari] = useState('');
+  const [gidaTuru, setGidaTuru] = useState('');
+  const [ozelGidaTalebi, setOzelGidaTalebi] = useState('');
+  const [haneSayisi, setHaneSayisi] = useState('');
+  const [gelirDurumu, setGelirDurumu] = useState('');
+  const [adres, setAdres] = useState('');
   const [belge, setBelge] = useState(null);
   const [belgeURL, setBelgeURL] = useState('');
 
   const egitimSeviyeleri = ['Üniversite Öğrencisi', 'Lise Öğrencisi', 'İlkokul Öğrencisi'];
   const faturaTurleri = ['Elektrik', 'Su', 'Doğalgaz'];
   const sehirler = ['İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Antalya', 'Diğer'];
+  const gidaTurleri = ['Gıda Paketi', 'Alışveriş Kartı'];
+  const gelirDurumlari = ['Düzenli Gelir Var', 'Düzenli Gelir Yok'];
+  const gidaPaketiIcerigi = [
+    "Pirinç", "Un", "Yağ", "Şeker", "Tuz", "Makarna", "Bakliyat", "Çay", "Süt", "Konserve Gıdalar"
+  ];
 
   const handleBelgeSec = async () => {
     try {
@@ -106,10 +116,33 @@ const BagisTalepFormu = () => {
         faturaTutari: parseFloat(faturaTutari),
       };
     }
+
+    if (bagisTuru === 'Gıda Yardımı Talebi') {
+      if (
+        gidaTuru === '' ||
+        haneSayisi.trim() === '' ||
+        isNaN(haneSayisi) ||
+        gelirDurumu === '' ||
+        adres.trim() === '' ||
+        !belge
+      ) {
+        Alert.alert("Eksik veya Hatalı Bilgi", "Lütfen tüm alanları doğru şekilde doldurun.");
+        return;
+      }
+
+      basvuruData = {
+        ...basvuruData,
+        gidaTuru,
+        haneSayisi: parseInt(haneSayisi),
+        gelirDurumu,
+        adres,
+        ozelGidaTalebi,
+      };
+    }
   
     try {
       await addDoc(collection(db, 'bagisBasvurulari'), basvuruData);
-  
+
       Alert.alert("Başarılı", "Başvurunuz başarıyla gönderildi!");
       
       setBagisTuru('');
@@ -121,9 +154,14 @@ const BagisTalepFormu = () => {
       setSehir('');
       setAboneNo('');
       setFaturaTutari('');
+      setGidaTuru('');
+      setHaneSayisi('');
+      setGelirDurumu('');
+      setOzelGidaTalebi('');
+      setAdres('');
       setBelge(null);
       setBelgeURL('');
-  
+
     } catch (e) {
       console.error("Kayıt hatası:", e);
       Alert.alert("Hata", "Başvuru sırasında bir sorun oluştu.");
@@ -139,6 +177,7 @@ const BagisTalepFormu = () => {
         <Picker.Item label="Seçiniz..." value="" />
         <Picker.Item label="Eğitim Yardım Talebi" value="Eğitim Yardım Talebi" />
         <Picker.Item label="Fatura Yardımı Talebi" value="Fatura Yardımı Talebi" />
+        <Picker.Item label="Gıda Yardımı Talebi" value="Gıda Yardımı Talebi" />
       </Picker>
     </View>
 
@@ -234,14 +273,70 @@ const BagisTalepFormu = () => {
             )}
           </>
       )}
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitButtonText}>Başvuruyu Gönder</Text>
-        </TouchableOpacity>
 
+
+      {bagisTuru === 'Gıda Yardımı Talebi' && (
+        <>
+          <Text style={styles.label}>Gıda Türü</Text>
+          <View style={styles.pickerWrapper}>
+            <Picker selectedValue={gidaTuru} onValueChange={(value) => setGidaTuru(value)}>
+              <Picker.Item label="Seçiniz..." value="" />
+              {gidaTurleri.map((tur) => <Picker.Item key={tur} label={tur} value={tur} />)}
+            </Picker>
+          </View>
+
+          <Text style={styles.label}>Hane Sayısı</Text>
+          <TextInput style={styles.input} value={haneSayisi} onChangeText={setHaneSayisi} keyboardType="numeric" />
+
+          <Text style={styles.label}>Gelir Durumu</Text>
+          <View style={styles.pickerWrapper}>
+            <Picker selectedValue={gelirDurumu} onValueChange={(value) => setGelirDurumu(value)}>
+              <Picker.Item label="Seçiniz..." value="" />
+              {gelirDurumlari.map((gelir) => <Picker.Item key={gelir} label={gelir} value={gelir} />)}
+            </Picker>
+          </View>
+
+          <Text style={styles.label}>Adres</Text>
+          <TextInput style={styles.input} value={adres} onChangeText={setAdres} placeholder="Adresinizi girin" />
+
+          {gidaTuru === 'Gıda Paketi' && (
+            <>
+              <Text style={styles.label}>Gıda Paketi İçeriği</Text>
+              <View style={styles.icerikListesi}>
+                {gidaPaketiIcerigi.map((urun, index) => (
+                  <Text key={index} style={styles.icerikItem}>• {urun}</Text>
+                ))}
+              </View>
+
+              <Text style={styles.label}>Özel Gıda Talebi (Opsiyonel)</Text>
+              <TextInput 
+                style={styles.input} 
+                value={ozelGidaTalebi} 
+                onChangeText={setOzelGidaTalebi} 
+                placeholder="Özel ihtiyacınız varsa yazın"
+              />
+            </>
+          )}
+          <Text style={styles.label}>Gıda Yardımı Belgesi (PDF)</Text>
+          <TouchableOpacity style={styles.belgeButton} onPress={handleBelgeSec}>
+            <Text style={styles.belgeButtonText}>Belge Seç</Text>
+          </TouchableOpacity>
+
+          {belge && (
+            <View style={styles.belgeOnay}>
+              <AntDesign name="file1" size={24} color="#65558F" />
+              <Text style={styles.belgeAdi}>{belge.name}</Text>
+            </View>
+          )}
+        </>
+      )}
+
+      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+        <Text style={styles.submitButtonText}>Başvuruyu Gönder</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     padding: 20,
