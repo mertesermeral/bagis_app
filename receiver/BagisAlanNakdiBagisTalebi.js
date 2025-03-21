@@ -54,8 +54,16 @@ const BagisTalepFormu = () => {
       Alert.alert("Eksik Bilgi", "Lütfen bağış türünü seçin.");
       return;
     }
-
-    if (bagisTuru === 'Eğitim Yardım Talebi' && (
+  
+    let basvuruData = {
+      bagisTuru,
+      belgeAdi: belge.name,
+      belgeURL: await uploadPDFToFirebase(belge),
+      tarih: new Date().toISOString(),
+    };
+  
+    if (bagisTuru === 'Eğitim Yardım Talebi') {
+      if (
         egitimSeviyesi === '' ||
         tcNo.length !== 11 ||
         isNaN(tcNo) ||
@@ -63,43 +71,47 @@ const BagisTalepFormu = () => {
         isNaN(miktar) ||
         aciklama.trim() === '' ||
         !belge
-      )) {
+      ) {
         Alert.alert("Eksik veya Hatalı Bilgi", "Lütfen tüm alanları doğru şekilde doldurun.");
         return;
+      }
+  
+      basvuruData = {
+        ...basvuruData,
+        egitimSeviyesi,
+        tcNo,
+        miktar: parseFloat(miktar),
+        aciklama,
+      };
     }
-
-    if (bagisTuru === 'Fatura Yardımı Talebi' && (
+  
+    if (bagisTuru === 'Fatura Yardımı Talebi') {
+      if (
         faturaTuru === '' ||
         sehir === '' ||
         aboneNo.trim() === '' ||
         faturaTutari.trim() === '' ||
         isNaN(faturaTutari) ||
         !belge
-      )) {
+      ) {
         Alert.alert("Eksik veya Hatalı Bilgi", "Lütfen tüm alanları doğru şekilde doldurun.");
         return;
+      }
+  
+      basvuruData = {
+        ...basvuruData,
+        faturaTuru,
+        sehir,
+        aboneNo,
+        faturaTutari: parseFloat(faturaTutari),
+      };
     }
-
+  
     try {
-      const uploadedURL = await uploadPDFToFirebase(belge);
-      setBelgeURL(uploadedURL);
-
-      await addDoc(collection(db, 'bagisBasvurulari'), {
-        bagisTuru,
-        egitimSeviyesi: bagisTuru === 'Eğitim Yardım Talebi' ? egitimSeviyesi : '',
-        tcNo: bagisTuru === 'Eğitim Yardım Talebi' ? tcNo : '',
-        miktar: bagisTuru === 'Eğitim Yardım Talebi' ? parseFloat(miktar) : '',
-        aciklama: bagisTuru === 'Eğitim Yardım Talebi' ? aciklama : '',
-        faturaTuru: bagisTuru === 'Fatura Yardımı Talebi' ? faturaTuru : '',
-        sehir: bagisTuru === 'Fatura Yardımı Talebi' ? sehir : '',
-        aboneNo: bagisTuru === 'Fatura Yardımı Talebi' ? aboneNo : '',
-        faturaTutari: bagisTuru === 'Fatura Yardımı Talebi' ? parseFloat(faturaTutari) : '',
-        belgeAdi: belge.name,
-        belgeURL: uploadedURL,
-        tarih: new Date().toISOString(),
-      });
-
+      await addDoc(collection(db, 'bagisBasvurulari'), basvuruData);
+  
       Alert.alert("Başarılı", "Başvurunuz başarıyla gönderildi!");
+      
       setBagisTuru('');
       setEgitimSeviyesi('');
       setTcNo('');
@@ -111,11 +123,13 @@ const BagisTalepFormu = () => {
       setFaturaTutari('');
       setBelge(null);
       setBelgeURL('');
+  
     } catch (e) {
       console.error("Kayıt hatası:", e);
       Alert.alert("Hata", "Başvuru sırasında bir sorun oluştu.");
     }
   };
+  
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
