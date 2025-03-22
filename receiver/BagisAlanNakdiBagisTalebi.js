@@ -71,8 +71,6 @@ const BagisTalepFormu = () => {
   
     let basvuruData = {
       bagisTuru,
-      belgeAdi: belge.name,
-      belgeURL: await uploadPDFToFirebase(belge),
       tarih: new Date().toISOString(),
     };
   
@@ -176,7 +174,7 @@ const BagisTalepFormu = () => {
         return;
       }
     
-      const belgeURL = belge ? await uploadPDFToFirebase(belge) : '';
+      const uploadedBelgeURL = belge ? await uploadPDFToFirebase(belge) : '';
     
       basvuruData = {
         ...basvuruData,
@@ -184,9 +182,10 @@ const BagisTalepFormu = () => {
         digerAciklama,
         digerMiktar: digerMiktar ? parseFloat(digerMiktar) : '',
         belgeAdi: belge?.name || '',
-        belgeURL,
+        belgeURL: uploadedBelgeURL,
       };
     }
+    
   
     try {
       await addDoc(collection(db, 'bagisBasvurulari'), basvuruData);
