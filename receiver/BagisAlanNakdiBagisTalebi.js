@@ -23,6 +23,9 @@ const BagisTalepFormu = () => {
   const [gelirDurumu, setGelirDurumu] = useState('');
   const [adres, setAdres] = useState('');
   const [kiraTutari, setKiraTutari] = useState('');
+  const [digerBaslik, setDigerBaslik] = useState('');
+  const [digerAciklama, setDigerAciklama] = useState('');
+  const [digerMiktar, setDigerMiktar] = useState('');
   const [belge, setBelge] = useState(null);
   const [belgeURL, setBelgeURL] = useState('');
 
@@ -166,6 +169,24 @@ const BagisTalepFormu = () => {
         belgeURL: await uploadPDFToFirebase(belge),
       };
     }
+
+    if (bagisTuru === 'Diğer') {
+      if (digerBaslik.trim() === '' || digerAciklama.trim() === '') {
+        Alert.alert("Eksik Bilgi", "Lütfen başlık ve açıklama alanlarını doldurun.");
+        return;
+      }
+    
+      const belgeURL = belge ? await uploadPDFToFirebase(belge) : '';
+    
+      basvuruData = {
+        ...basvuruData,
+        digerBaslik,
+        digerAciklama,
+        digerMiktar: digerMiktar ? parseFloat(digerMiktar) : '',
+        belgeAdi: belge?.name || '',
+        belgeURL,
+      };
+    }
   
     try {
       await addDoc(collection(db, 'bagisBasvurulari'), basvuruData);
@@ -207,6 +228,7 @@ const BagisTalepFormu = () => {
         <Picker.Item label="Fatura Yardımı Talebi" value="Fatura Yardımı Talebi" />
         <Picker.Item label="Gıda Yardımı Talebi" value="Gıda Yardımı Talebi" />
         <Picker.Item label="Kira Yardımı Talebi" value="Kira Yardımı Talebi" />
+        <Picker.Item label="Diğer (Spesifik Talep)" value="Diğer" />
 
       </Picker>
     </View>
@@ -402,7 +424,38 @@ const BagisTalepFormu = () => {
           )}
         </>
       )}
-
+      
+      {bagisTuru === 'Diğer' && (
+        <>
+          <Text style={styles.label}>Talep Başlığı</Text>
+          <TextInput style={styles.input} value={digerBaslik} onChangeText={setDigerBaslik} placeholder="Örn: Medikal cihaz yardımı" />
+      
+          <Text style={styles.label}>Talep Açıklaması</Text>
+          <TextInput
+            style={[styles.input, { height: 100 }]}
+            value={digerAciklama}
+            onChangeText={setDigerAciklama}
+            multiline
+            placeholder="Detaylı olarak talebinizi yazınız"
+          />
+      
+          <Text style={styles.label}>Gereken Miktar (TL) (Opsiyonel)</Text>
+          <TextInput style={styles.input} value={digerMiktar} onChangeText={setDigerMiktar} keyboardType="numeric" placeholder="Örn: 1500" />
+      
+          <Text style={styles.label}>İlgili Belge (PDF) (Varsa)</Text>
+          <TouchableOpacity style={styles.belgeButton} onPress={handleBelgeSec}>
+            <Text style={styles.belgeButtonText}>Belge Seç</Text>
+          </TouchableOpacity>
+      
+          {belge && (
+            <View style={styles.belgeOnay}>
+              <AntDesign name="file1" size={24} color="#65558F" />
+              <Text style={styles.belgeAdi}>{belge.name}</Text>
+            </View>
+          )}
+        </>
+      )}  
+      
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.submitButtonText}>Başvuruyu Gönder</Text>
       </TouchableOpacity>
