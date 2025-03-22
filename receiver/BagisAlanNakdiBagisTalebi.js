@@ -22,6 +22,7 @@ const BagisTalepFormu = () => {
   const [haneSayisi, setHaneSayisi] = useState('');
   const [gelirDurumu, setGelirDurumu] = useState('');
   const [adres, setAdres] = useState('');
+  const [kiraTutari, setKiraTutari] = useState('');
   const [belge, setBelge] = useState(null);
   const [belgeURL, setBelgeURL] = useState('');
 
@@ -139,6 +140,32 @@ const BagisTalepFormu = () => {
         ozelGidaTalebi,
       };
     }
+    if (bagisTuru === 'Kira Yardımı Talebi') {
+      if (
+        sehir === '' ||
+        adres.trim() === '' ||
+        haneSayisi.trim() === '' ||
+        isNaN(haneSayisi) ||
+        gelirDurumu === '' ||
+        kiraTutari.trim() === '' ||
+        isNaN(kiraTutari) ||
+        !belge
+      ) {
+        Alert.alert("Eksik veya Hatalı Bilgi", "Lütfen tüm alanları doğru şekilde doldurun.");
+        return;
+      }
+
+      basvuruData = {
+        ...basvuruData,
+        sehir,
+        adres,
+        haneSayisi: parseInt(haneSayisi),
+        gelirDurumu,
+        kiraTutari: parseFloat(kiraTutari),
+        belgeAdi: belge?.name || '',
+        belgeURL: await uploadPDFToFirebase(belge),
+      };
+    }
   
     try {
       await addDoc(collection(db, 'bagisBasvurulari'), basvuruData);
@@ -159,6 +186,7 @@ const BagisTalepFormu = () => {
       setGelirDurumu('');
       setOzelGidaTalebi('');
       setAdres('');
+      setKiraTutari('');
       setBelge(null);
       setBelgeURL('');
 
@@ -178,6 +206,8 @@ const BagisTalepFormu = () => {
         <Picker.Item label="Eğitim Yardım Talebi" value="Eğitim Yardım Talebi" />
         <Picker.Item label="Fatura Yardımı Talebi" value="Fatura Yardımı Talebi" />
         <Picker.Item label="Gıda Yardımı Talebi" value="Gıda Yardımı Talebi" />
+        <Picker.Item label="Kira Yardımı Talebi" value="Kira Yardımı Talebi" />
+
       </Picker>
     </View>
 
@@ -273,8 +303,7 @@ const BagisTalepFormu = () => {
             )}
           </>
       )}
-
-
+      
       {bagisTuru === 'Gıda Yardımı Talebi' && (
         <>
           <Text style={styles.label}>Gıda Türü</Text>
@@ -318,6 +347,49 @@ const BagisTalepFormu = () => {
             </>
           )}
           <Text style={styles.label}>Gıda Yardımı Belgesi (PDF)</Text>
+          <TouchableOpacity style={styles.belgeButton} onPress={handleBelgeSec}>
+            <Text style={styles.belgeButtonText}>Belge Seç</Text>
+          </TouchableOpacity>
+
+          {belge && (
+            <View style={styles.belgeOnay}>
+              <AntDesign name="file1" size={24} color="#65558F" />
+              <Text style={styles.belgeAdi}>{belge.name}</Text>
+            </View>
+          )}
+        </>
+      )}
+
+      {bagisTuru === 'Kira Yardımı Talebi' && (
+        <>
+
+          <Text style={styles.label}>Şehir</Text>
+          <View style={styles.pickerWrapper}>
+          <Picker selectedValue={sehir} onValueChange={setSehir}>
+            <Picker.Item label="Seçiniz..." value="" />
+            {sehirler.map((s) => <Picker.Item key={s} label={s} value={s} />)}
+          </Picker>
+          </View>
+
+
+          <Text style={styles.label}>Adres</Text>
+          <TextInput style={styles.input} value={adres} onChangeText={setAdres} placeholder="Adresinizi girin" />
+
+          <Text style={styles.label}>Hane Sayısı</Text>
+          <TextInput style={styles.input} value={haneSayisi} onChangeText={setHaneSayisi} keyboardType="numeric" />
+
+          <Text style={styles.label}>Gelir Durumu</Text>
+          <View style={styles.pickerWrapper}>
+          <Picker selectedValue={gelirDurumu} onValueChange={setGelirDurumu}>
+            <Picker.Item label="Seçiniz..." value="" />
+            {gelirDurumlari.map((gelir) => <Picker.Item key={gelir} label={gelir} value={gelir} />)}
+          </Picker>
+          </View>
+
+          <Text style={styles.label}>Kira Tutarı (TL)</Text>
+          <TextInput style={styles.input} value={kiraTutari} onChangeText={setKiraTutari} keyboardType="numeric" />
+
+          <Text style={styles.label}>Kira Kontratı Belgesi (PDF)</Text>
           <TouchableOpacity style={styles.belgeButton} onPress={handleBelgeSec}>
             <Text style={styles.belgeButtonText}>Belge Seç</Text>
           </TouchableOpacity>
