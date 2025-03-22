@@ -125,8 +125,7 @@ const BagisTalepFormu = () => {
         haneSayisi.trim() === '' ||
         isNaN(haneSayisi) ||
         gelirDurumu === '' ||
-        adres.trim() === '' ||
-        !belge
+        adres.trim() === ''
       ) {
         Alert.alert("Eksik veya Hatalı Bilgi", "Lütfen tüm alanları doğru şekilde doldurun.");
         return;
@@ -138,8 +137,12 @@ const BagisTalepFormu = () => {
         haneSayisi: parseInt(haneSayisi),
         gelirDurumu,
         adres,
-        ozelGidaTalebi,
       };
+
+      // Sadece Gıda Paketi seçildiyse özel talep alanını ekleyelim
+      if (gidaTuru === 'Gıda Paketi') {
+        basvuruData.ozelGidaTalebi = ozelGidaTalebi;
+      }
     }
     if (bagisTuru === 'Kira Yardımı Talebi') {
       if (
