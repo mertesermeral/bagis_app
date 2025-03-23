@@ -25,6 +25,7 @@ import AcilDurumTalebiOlustur from "./AcilDurumlar/AcilDurumTalebiOlustur";
 import AcilDurumDetay from "./AcilDurumlar/AcilDurumDetay";
 import BagisciOzelBagisDetay from "./donor/BagisciOzelBagisDetay";
 import { DonorBottomTabs, ReceiverBottomTabs } from './navigation/BottomTabs';
+import AdminPanel from "./Admin/AdminPanel";
 
 const Stack = createStackNavigator();
 const Tab = createMaterialTopTabNavigator();
@@ -92,7 +93,8 @@ const MainApp = () => {
     >
       <Stack.Screen name="LoginScreen" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
-      
+      <Stack.Screen name="AdminPanel" component={AdminPanel} />
+
       {/* Bottom tab'li ana ekranlar */}
       <Stack.Screen 
         name="DonorTabs" 
