@@ -97,6 +97,8 @@ const BagisTalepFormu = () => {
         tcNo,
         miktar: parseFloat(miktar),
         aciklama,
+        belgeAdi: belge?.name || '',
+        belgeURL: await uploadPDFToFirebase(belge),
       };
     }
   
@@ -119,6 +121,8 @@ const BagisTalepFormu = () => {
         sehir,
         aboneNo,
         faturaTutari: parseFloat(faturaTutari),
+        belgeAdi: belge?.name || '',
+        belgeURL: await uploadPDFToFirebase(belge),
       };
     }
 
@@ -140,6 +144,8 @@ const BagisTalepFormu = () => {
         haneSayisi: parseInt(haneSayisi),
         gelirDurumu,
         adres,
+        belgeAdi: belge?.name || '',
+        belgeURL: await uploadPDFToFirebase(belge),
       };
 
       // Sadece Gıda Paketi seçildiyse özel talep alanını ekleyelim
