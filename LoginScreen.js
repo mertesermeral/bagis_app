@@ -92,7 +92,7 @@ const LoginScreen = ({ navigation }) => {
     if (userData.role === "donor") {
       targetScreen = "DonorTabs";
     } else if (userData.role === "admin") {
-      targetScreen = "AdminPanel"; // Admin panel route
+      targetScreen = "AdminTabs"; // Admin panel route
     }
 
     navigation.reset({
@@ -111,7 +111,7 @@ const LoginScreen = ({ navigation }) => {
         if (userData.role === "donor") {
           rolMetni = "Bağışçı";
         } else if (userData.role === "admin") {
-          rolMetni = "Admin";
+          rolMetni = "AdminTabs";
         }
       
         Alert.alert("Başarılı", `${rolMetni} olarak giriş yapıldı!`);

@@ -23,7 +23,11 @@ import AcilDurumTalebiOlustur from "./AcilDurumlar/AcilDurumTalebiOlustur";
 import AcilDurumDetay from "./AcilDurumlar/AcilDurumDetay";
 import BagisciOzelBagisDetay from "./donor/BagisciOzelBagisDetay";
 import { DonorBottomTabs, ReceiverBottomTabs } from './navigation/BottomTabs';
+import { AdminBottomTabs } from './navigation/BottomTabs'; 
 import AdminPanel from "./Admin/AdminPanel";
+import Fonlar from "./Admin/Fonlar";
+import BekleyenTalepler from "./Admin/BekleyenTalepler";
+import OnaylananTalepler from "./Admin/OnaylananTalepler";
 import Profile from "./components/Profile";
 import HesapAyarlari from './components/HesapAyarlari';
 
@@ -70,6 +74,21 @@ const ReceiverTabs = () => (
   </Tab.Navigator>
 );
 
+const AdminTabs = () => (
+  <Tab.Navigator
+    initialRouteName="Fonlar"
+    screenOptions={{
+      tabBarLabelStyle: { fontSize: 14 },
+      tabBarStyle: { backgroundColor: "#FEF7FF" },
+      tabBarIndicatorStyle: { backgroundColor: "#65558F" },
+    }}
+  >
+    <Tab.Screen name="Fonlar" component={Fonlar} />
+    <Tab.Screen name="Bekleyen Talepler" component={BekleyenTalepler} />
+    <Tab.Screen name="Onaylanan Talepler" component={OnaylananTalepler} />
+  </Tab.Navigator>
+);
+
 // Wrapper bileşenleri
 const DonorTabsWrapper = (props) => (
   <DonorBottomTabs MainComponent={DonorTabs} {...props} />
@@ -78,6 +97,11 @@ const DonorTabsWrapper = (props) => (
 const ReceiverTabsWrapper = (props) => (
   <ReceiverBottomTabs MainComponent={ReceiverTabs} {...props} />
 );
+// Admin wrapper
+const AdminTabsWrapper = (props) => (
+  <AdminBottomTabs MainComponent={AdminTabs} {...props} />
+);
+
 
 const MainApp = () => {
   const { role, loading } = useAuth();
@@ -85,15 +109,20 @@ const MainApp = () => {
   if (loading) {
     return <Text style={{ textAlign: "center", marginTop: 20 }}>Yükleniyor...</Text>;
   }
+  // Rol bazlı ilk yönlendirme
+  let initialScreen = "LoginScreen";
+  if (role === "donor") initialScreen = "DonorTabs";
+  else if (role === "receiver") initialScreen = "ReceiverTabs";
+  else if (role === "admin") initialScreen = "AdminTabs"; // <-- admin panel yönlendirme
+
 
   return (
     <Stack.Navigator 
       screenOptions={{ headerShown: false }}
-      initialRouteName={role ? (role === "donor" ? "DonorTabs" : "ReceiverTabs") : "LoginScreen"}
-    >
+      initialRouteName={initialScreen}
+      >
       <Stack.Screen name="LoginScreen" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
-      <Stack.Screen name="AdminPanel" component={AdminPanel} />
 
       {/* Bottom tab'li ana ekranlar */}
       <Stack.Screen 
@@ -105,7 +134,8 @@ const MainApp = () => {
         component={ReceiverTabsWrapper}
         options={{ headerShown: false }}
       />
-      
+       <Stack.Screen name="AdminTabs" component={AdminTabsWrapper} />
+       
       {/* Diğer ekranlar (modal olarak açılacak) */}
       <Stack.Screen name="EtkinlikEkle" component={EtkinlikEkle} options={{ presentation: 'modal' }} />
       <Stack.Screen name="BagisAlanNakdiBagisTalebi" component={BagisAlanNakdiBagisTalebi} />

@@ -9,6 +9,28 @@ import Profile from '../components/Profile';
 
 const Tab = createBottomTabNavigator();
 
+export const AdminBottomTabs = ({ MainComponent }) => (
+  <Tab.Navigator
+    screenOptions={{
+      tabBarStyle: { backgroundColor: '#FEF7FF' },
+      tabBarActiveTintColor: '#65558F',
+      tabBarInactiveTintColor: '#999999',
+    }}
+  >
+    <Tab.Screen
+      name="AdminMainTabs"
+      component={MainComponent}
+      options={{
+        headerShown: false,
+        tabBarLabel: 'Yönetim',
+        tabBarIcon: ({ color }) => (
+          <Icon name="admin-panel-settings" size={24} color={color} />
+        ),
+      }}
+    />
+  </Tab.Navigator>
+);
+
 // Bağışçı Bottom Tabs
 export const DonorBottomTabs = ({ MainComponent }) => (
   <Tab.Navigator
