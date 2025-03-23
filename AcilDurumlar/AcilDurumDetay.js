@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView, ScrollView, Alert } from 'react-native';
-import { db, auth } from '../firebase';
+import { db, auth, storage } from '../firebase';
 import { doc, deleteDoc } from 'firebase/firestore';
+import { ref, deleteObject } from 'firebase/storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const BagisciAcilDurumDetay = ({ route, navigation }) => {
@@ -23,7 +24,19 @@ const BagisciAcilDurumDetay = ({ route, navigation }) => {
           text: "Evet",
           onPress: async () => {
             try {
+              // Önce Firestore'dan dökümanı sil
               await deleteDoc(doc(db, "emergencies", emergency.id));
+              
+              // Eğer fotoğraf varsa, Storage'dan da sil
+              if (emergency.imageUrl) {
+                const imageRef = ref(storage, emergency.imageUrl);
+                try {
+                  await deleteObject(imageRef);
+                } catch (error) {
+                  console.log("Fotoğraf silinirken hata:", error);
+                }
+              }
+              
               Alert.alert("Başarılı", "Talep başarıyla kapatıldı.");
               navigation.goBack();
             } catch (error) {
@@ -76,20 +89,7 @@ const BagisciAcilDurumDetay = ({ route, navigation }) => {
         )}
       </ScrollView>
 
-      <View style={styles.footer}>
-              <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisciAnaMenu')}>
-                <Icon name="home" size={24} color="#65558F" />
-                <Text style={styles.footerButtonText}>Ana Menü</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisciBagislarim')}>
-                <Icon name="donut-large" size={24} color="#65558F" />
-                <Text style={styles.footerButtonText}>Bağışlarım</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('BagisciProfilim')}>
-                <Icon name="person" size={24} color="#65558F" />
-                <Text style={styles.footerButtonText}>Profilim</Text>
-              </TouchableOpacity>
-            </View>
+     
     </SafeAreaView>
   );
 };

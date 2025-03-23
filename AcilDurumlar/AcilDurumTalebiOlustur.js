@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { db, storage, auth } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import MaskInput from 'react-native-mask-input';
 
 const BagisciAcilDurumTalebiOlustur = ({ navigation }) => {
   const [name, setName] = useState('');
@@ -30,25 +31,39 @@ const BagisciAcilDurumTalebiOlustur = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
-    const user = auth.currentUser; // Giriş yapan kullanıcının kimliğini al
+    const user = auth.currentUser;
 
     if (!user) {
       Alert.alert("Hata", "Lütfen giriş yapın.");
       return;
     }
 
-    if (!name || !phone || !requestTitle || !description || !image || !requestType || 
-        (requestType !== 'Diğer' && !additionalInfo) || (requestType === 'Afet' && !disasterLocation)) {
-      Alert.alert("Hata", "Lütfen tüm alanları doldurun!");
+    // Temel alan kontrolü
+    if (!name || !phone || !requestTitle || !description || !requestType) {
+      Alert.alert("Hata", "Lütfen zorunlu alanları doldurun: Ad Soyad, İletişim Numarası, Talep Adı, Açıklama ve Talep Türü!");
+      return;
+    }
+
+    // Talep türüne göre özel kontroller
+    if (requestType === 'Afet' && !disasterLocation) {
+      Alert.alert("Hata", "Lütfen afet bölgesi konumunu girin!");
+      return;
+    }
+
+    if (requestType !== 'Diğer' && !additionalInfo) {
+      Alert.alert("Hata", "Lütfen ek bilgi alanını doldurun!");
       return;
     }
 
     try {
-      const response = await fetch(image);
-      const blob = await response.blob();
-      const storageRef = ref(storage, `emergency_images/${Date.now()}.jpg`);
-      await uploadBytes(storageRef, blob);
-      const imageUrl = await getDownloadURL(storageRef);
+      let imageUrl = null;
+      if (image) {
+        const response = await fetch(image);
+        const blob = await response.blob();
+        const storageRef = ref(storage, `emergency_images/${Date.now()}.jpg`);
+        await uploadBytes(storageRef, blob);
+        imageUrl = await getDownloadURL(storageRef);
+      }
 
       await addDoc(collection(db, "emergencies"), {
         userId: user.uid, // Kullanıcı kimliğini kaydet
@@ -70,6 +85,24 @@ const BagisciAcilDurumTalebiOlustur = ({ navigation }) => {
     }
   };
 
+  const turkishPhoneMask = [
+    '(',
+    /\d/,
+    /\d/,
+    /\d/,
+    ')',
+    ' ',
+    /\d/,
+    /\d/,
+    /\d/,
+    ' ',
+    /\d/,
+    /\d/,
+    ' ',
+    /\d/,
+    /\d/
+  ];
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>Acil Durum Talebi Oluştur</Text>
@@ -78,7 +111,14 @@ const BagisciAcilDurumTalebiOlustur = ({ navigation }) => {
         <TextInput style={styles.input} placeholder="Ad Soyad" value={name} onChangeText={setName} />
 
         <Text style={styles.label}>İletişim Numarası</Text>
-        <TextInput style={styles.input} placeholder="Zorunlu" keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
+        <MaskInput
+          style={styles.input}
+          placeholder="(5XX) XXX XX XX"
+          keyboardType="numeric"
+          value={phone}
+          onChangeText={(masked, unmasked) => setPhone(masked)}
+          mask={turkishPhoneMask}
+        />
 
        <Text style={styles.label}>Talep Adı</Text>
         <TextInput style={styles.input} placeholder="Talep Adı" value={requestTitle} onChangeText={setRequestTitle} /> 
@@ -88,6 +128,7 @@ const BagisciAcilDurumTalebiOlustur = ({ navigation }) => {
           selectedValue={requestType}
           style={styles.picker}
           onValueChange={(itemValue) => setRequestType(itemValue)}>
+          <Picker.Item label="Seçiniz" value="" />
           <Picker.Item label="Acil Kan Bağışı" value="Acil Kan Bağışı" />
           <Picker.Item label="Afet Yardımı" value="Afet" />
           <Picker.Item label="Hayati İlaç" value="Hayati İlaç" />
