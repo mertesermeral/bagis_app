@@ -5,6 +5,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { db, auth } from '../firebase';
 import { collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, where, getDoc } from 'firebase/firestore';
+import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 
 const defaultProfileImage = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
 
@@ -20,6 +21,17 @@ const BagisAlanEtkinliklerDetay = ({ route, navigation }) => {
   const [editedText, setEditedText] = useState('');
   const userId = auth.currentUser?.uid;
 
+  const fetchUserProfileImage = async (userId) => {
+    try {
+      const storage = getStorage();
+      const imageRef = ref(storage, `profileImages/${userId}/profile.jpg`);
+      const url = await getDownloadURL(imageRef);
+      return url;
+    } catch (error) {
+      return defaultProfileImage;
+    }
+  };
+
   useEffect(() => {
     const fetchComments = async () => {
       const q = query(collection(db, 'comments'), where('eventId', '==', event.id));
@@ -32,17 +44,15 @@ const BagisAlanEtkinliklerDetay = ({ route, navigation }) => {
 
         const userData = userDoc.exists() 
           ? userDoc.data() 
-          : { 
-              firstName: 'Bilinmeyen', 
-              lastName: 'Kullanıcı', 
-              photoURL: defaultProfileImage 
-            };
+          : { firstName: 'Bilinmeyen', lastName: 'Kullanıcı' };
+
+        const profileImage = await fetchUserProfileImage(commentData.userId);
 
         return {
           id: docSnap.id,
           ...commentData,
           userName: `${userData.firstName} ${userData.lastName}`,
-          userProfileImage: userData.photoURL || defaultProfileImage,
+          userProfileImage: profileImage,
         };
       }));
 
@@ -63,11 +73,9 @@ const BagisAlanEtkinliklerDetay = ({ route, navigation }) => {
       const userDoc = await getDoc(userDocRef);
       const userData = userDoc.exists() 
         ? userDoc.data() 
-        : { 
-            firstName: 'Bilinmeyen', 
-            lastName: 'Kullanıcı', 
-            photoURL: defaultProfileImage 
-          };
+        : { firstName: 'Bilinmeyen', lastName: 'Kullanıcı' };
+
+      const profileImage = await fetchUserProfileImage(userId);
 
       const docRef = await addDoc(collection(db, 'comments'), {
         eventId: event.id,
@@ -83,7 +91,7 @@ const BagisAlanEtkinliklerDetay = ({ route, navigation }) => {
           userId, 
           text: newComment, 
           userName: `${userData.firstName} ${userData.lastName}`,
-          userProfileImage: userData.photoURL || defaultProfileImage,
+          userProfileImage: profileImage,
         }
       ]);
 

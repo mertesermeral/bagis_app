@@ -5,13 +5,28 @@ import { useAuth } from '../AuthContext';
 
 const Profile = ({ navigation }) => {
   const { user, role, userDetails, logout } = useAuth();
-  const [profileImage, setProfileImage] = useState(userDetails?.photoURL || 'https://via.placeholder.com/100');
+  const [profileImage, setProfileImage] = useState('https://via.placeholder.com/100');
 
-  // userDetails değiştiğinde profil fotoğrafını güncelle
   useEffect(() => {
-    if (userDetails?.photoURL) {
-      setProfileImage(userDetails.photoURL);
-    }
+    const loadProfileImage = async () => {
+      if (userDetails?.photoURL) {
+        try {
+          // URL'nin hala geçerli olup olmadığını kontrol et
+          const response = await fetch(userDetails.photoURL);
+          if (response.ok) {
+            setProfileImage(userDetails.photoURL);
+          } else {
+            setProfileImage('https://via.placeholder.com/100');
+          }
+        } catch (error) {
+          setProfileImage('https://via.placeholder.com/100');
+        }
+      } else {
+        setProfileImage('https://via.placeholder.com/100');
+      }
+    };
+
+    loadProfileImage();
   }, [userDetails]);
 
   const handleLogout = async () => {
