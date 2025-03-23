@@ -65,15 +65,16 @@ const LoginScreen = ({ navigation }) => {
       }
 
       const userData = docSnap.data();
+       // Admin her tab'dan giriş yapabilir!
+    if (userData.role !== activeTab && userData.role !== "admin") {
+      Alert.alert(
+        "Hata",
+        `Bu hesap ${userData.role === "donor" ? "Bağışçı" : "Bağış Alan"} rolüne aittir. Lütfen doğru sekmeyi seçin.`
+      );
+      await auth.signOut();
+      return;
+    }
       
-      if (userData.role !== activeTab) {
-        Alert.alert(
-          "Hata",
-          `Bu hesap ${userData.role === "donor" ? "Bağışçı" : "Bağış Alan"} rolüne aittir. Lütfen doğru sekmeyi seçin.`
-        );
-        await auth.signOut();
-        return;
-      }
 
       // Remember Me işlemi
       if (rememberMe) {
@@ -86,23 +87,36 @@ const LoginScreen = ({ navigation }) => {
         await SecureStore.setItemAsync("rememberMe", "false");
       }
 
-      // Önce navigation yap
-      const targetScreen = userData.role === "donor" ? 'DonorTabs' : 'ReceiverTabs';
-      navigation.reset({
-        index: 0,
-        routes: [{ name: targetScreen }],
-      });
+    // Giriş sonrası yönlendirme
+    let targetScreen = "ReceiverTabs";
+    if (userData.role === "donor") {
+      targetScreen = "DonorTabs";
+    } else if (userData.role === "admin") {
+      targetScreen = "AdminPanel"; // Admin panel route
+    }
+
+    navigation.reset({
+      index: 0,
+      routes: [{ name: targetScreen }],
+    });
+
 
       // Rol bilgisini set et
       setRole(userData.role);
 
       // En son bildirim göster
       setTimeout(() => {
-        Alert.alert(
-          "Başarılı", 
-          `${userData.role === "donor" ? "Bağışçı" : "Bağış Alan"} olarak giriş yapıldı!`
-        );
+        let rolMetni = "Bağış Alan";
+      
+        if (userData.role === "donor") {
+          rolMetni = "Bağışçı";
+        } else if (userData.role === "admin") {
+          rolMetni = "Admin";
+        }
+      
+        Alert.alert("Başarılı", `${rolMetni} olarak giriş yapıldı!`);
       }, 100);
+      
 
     } catch (error) {
       console.error("Giriş sırasında hata oluştu:", error);
