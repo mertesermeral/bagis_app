@@ -25,6 +25,7 @@ import BagisciOzelBagisDetay from "./donor/BagisciOzelBagisDetay";
 import { DonorBottomTabs, ReceiverBottomTabs } from './navigation/BottomTabs';
 import AdminPanel from "./Admin/AdminPanel";
 import Profile from "./components/Profile";
+import HesapAyarlari from './components/HesapAyarlari';
 
 const Stack = createStackNavigator();
 const Tab = createMaterialTopTabNavigator();
@@ -118,6 +119,15 @@ const MainApp = () => {
       <Stack.Screen name="AcilDurumDetay" component={AcilDurumDetay} options={{ presentation: 'modal' }} />
       <Stack.Screen name="BagisciOzelBagisDetay" component={BagisciOzelBagisDetay} />
       <Stack.Screen name="Profile" component={Profile} />
+      <Stack.Screen 
+        name="HesapAyarlari" 
+        component={HesapAyarlari}
+        options={{ 
+          headerShown: true,
+          title: 'Hesap Ayarları',
+          headerTintColor: '#65558F'
+        }} 
+      />
     </Stack.Navigator>
   );
 };

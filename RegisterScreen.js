@@ -25,7 +25,30 @@ const RegisterScreen = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  
+
+  const formatPhoneNumber = (text) => {
+    const cleaned = text.replace(/\D/g, '');
+    let formatted = cleaned;
+    if (cleaned.length > 0) {
+      formatted = `(${cleaned.slice(0, 3)}`;
+      if (cleaned.length > 3) {
+        formatted += `) ${cleaned.slice(3, 6)}`;
+      }
+      if (cleaned.length > 6) {
+        formatted += ` ${cleaned.slice(6, 8)}`;
+      }
+      if (cleaned.length > 8) {
+        formatted += ` ${cleaned.slice(8, 10)}`;
+      }
+    }
+    return formatted;
+  };
+
+  const handlePhoneChange = (text) => {
+    const formatted = formatPhoneNumber(text);
+    setPhone(formatted);
+  };
+
   const handleRegister = async () => {
     if (isLoading) return;
     setIsLoading(true);
@@ -117,7 +140,13 @@ const RegisterScreen = ({ navigation }) => {
           <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
           
           <Text style={styles.label}>Telefon</Text>
-          <TextInput style={styles.input} value={phone} onChangeText={setPhone} keyboardType="phone-pad" maxLength={10} />
+          <TextInput
+            style={styles.input}
+            value={phone}
+            onChangeText={handlePhoneChange}
+            placeholder="(5XX) XXX XX XX"
+            keyboardType="phone-pad"
+          />
           
           <Text style={styles.label}>Rol Seçiniz</Text>
           <View style={styles.roleContainer}>
@@ -197,7 +226,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
- 
   roleButtonText: {
     color: "black",
     fontSize: 16,

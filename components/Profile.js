@@ -1,116 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Image, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../AuthContext';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase';
 
 const Profile = ({ navigation }) => {
   const { user, role, userDetails, logout } = useAuth();
   const [profileImage, setProfileImage] = useState(userDetails?.photoURL || 'https://via.placeholder.com/100');
 
+  // userDetails değiştiğinde profil fotoğrafını güncelle
   useEffect(() => {
     if (userDetails?.photoURL) {
       setProfileImage(userDetails.photoURL);
     }
   }, [userDetails]);
-
-  const showImagePickerOptions = () => {
-    Alert.alert(
-      "Profil Fotoğrafı",
-      "Lütfen bir seçenek belirleyin",
-      [
-        {
-          text: "İptal",
-          style: "cancel"
-        },
-        {
-          text: "Fotoğraf Çek",
-          onPress: () => pickFromCamera()
-        },
-        {
-          text: "Galeriden Seç",
-          onPress: () => pickFromGallery()
-        }
-      ]
-    );
-  };
-
-  const uploadImageToFirebase = async (uri) => {
-    try {
-      // URI'yi blob'a çevir
-      const response = await fetch(uri);
-      const blob = await response.blob();
-
-      // Storage referansı oluştur
-      const storage = getStorage();
-      const filename = `profileImages/${user.uid}/profile.jpg`;
-      const storageRef = ref(storage, filename);
-
-      // Storage'a yükle
-      await uploadBytes(storageRef, blob);
-
-      // Download URL al
-      const downloadURL = await getDownloadURL(storageRef);
-
-      // Firestore'da kullanıcı dokümanını güncelle
-      const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, {
-        photoURL: downloadURL
-      });
-
-      return downloadURL;
-    } catch (error) {
-      console.error("Image upload error:", error);
-      Alert.alert('Hata', 'Fotoğraf yüklenirken bir hata oluştu');
-      return null;
-    }
-  };
-
-  const pickFromCamera = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Üzgünüz', 'Kamera erişim izni gerekiyor');
-      return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      const downloadURL = await uploadImageToFirebase(result.assets[0].uri);
-      if (downloadURL) {
-        setProfileImage(downloadURL);
-      }
-    }
-  };
-
-  const pickFromGallery = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Üzgünüz', 'Galeriye erişim izni gerekiyor');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      const downloadURL = await uploadImageToFirebase(result.assets[0].uri);
-      if (downloadURL) {
-        setProfileImage(downloadURL);
-      }
-    }
-  };
 
   const handleLogout = async () => {
     Alert.alert(
@@ -155,15 +57,10 @@ const Profile = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.content}>
         <View style={styles.profileContainer}>
-          <TouchableOpacity onPress={showImagePickerOptions}>
-            <Image
-              source={{ uri: profileImage }}
-              style={styles.profileImage}
-            />
-            <View style={styles.editIconContainer}>
-              <Icon name="edit" size={16} color="#fff" />
-            </View>
-          </TouchableOpacity>
+          <Image
+            source={{ uri: profileImage }}
+            style={styles.profileImage}
+          />
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>{getDisplayName()}</Text>
             <Text style={styles.profileRole}>{getRoleDisplay()}</Text>
@@ -286,16 +183,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: 'bold',
-  },
-  editIconContainer: {
-    position: 'absolute',
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#65558F',
-    borderRadius: 12,
-    padding: 4,
-    borderWidth: 2,
-    borderColor: '#fff',
   },
 });
 

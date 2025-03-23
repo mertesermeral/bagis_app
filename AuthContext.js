@@ -40,6 +40,20 @@ export const AuthProvider = ({ children }) => {
         return () => unsubscribe();
     }, []);
 
+    const updateUserDetails = async () => {
+        if (user) {
+            const docRef = doc(db, "users", user.uid);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const userData = docSnap.data();
+                setUserDetails({
+                    ...userData,
+                    photoURL: userData.photoURL || 'https://via.placeholder.com/100'
+                });
+            }
+        }
+    };
+
     const logout = async () => {
         try {
             await signOut(auth);
@@ -60,7 +74,8 @@ export const AuthProvider = ({ children }) => {
             setRole, 
             loading, 
             logout,
-            userDetails // Kullanıcı detaylarını context'e ekledik
+            userDetails,
+            updateUserDetails // Yeni fonksiyonu ekledik
         }}>
             {children}
         </AuthContext.Provider>
