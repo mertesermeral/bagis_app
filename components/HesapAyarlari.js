@@ -15,7 +15,7 @@ import { useAuth } from '../AuthContext';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import * as ImagePicker from 'expo-image-picker';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 const HesapAyarlari = ({ navigation }) => {
   const { user, userDetails, updateUserDetails } = useAuth();
@@ -23,7 +23,33 @@ const HesapAyarlari = ({ navigation }) => {
   const [lastName, setLastName] = useState(userDetails?.lastName || '');
   const [phone, setPhone] = useState(userDetails?.phone || '');
   const [email, setEmail] = useState(userDetails?.email || '');
-  const [profileImage, setProfileImage] = useState(userDetails?.photoURL || 'https://via.placeholder.com/100');
+  const [tcNo, setTcNo] = useState(userDetails?.tcNo || '');
+  const [profileImage, setProfileImage] = useState('https://via.placeholder.com/100');
+
+  useEffect(() => {
+    const fetchProfileImage = async () => {
+      if (user) {
+        try {
+          const storage = getStorage();
+          const imageRef = ref(storage, `profileImages/${user.uid}/profile.jpg`);
+          const url = await getDownloadURL(imageRef);
+          setProfileImage(url);
+        } catch (error) {
+          setProfileImage('https://via.placeholder.com/100');
+        }
+      }
+    };
+
+    fetchProfileImage();
+  }, [user]);
+
+  useEffect(() => {
+    if (userDetails?.photoURL) {
+      setProfileImage(userDetails.photoURL);
+    } else {
+      setProfileImage('https://via.placeholder.com/100');
+    }
+  }, [userDetails]);
 
   const formatPhoneNumber = (text) => {
     const cleaned = text.replace(/\D/g, '');
@@ -69,8 +95,23 @@ const HesapAyarlari = ({ navigation }) => {
     );
   };
 
+  const deleteExistingProfileImage = async () => {
+    if (userDetails?.photoURL && userDetails.photoURL !== 'https://via.placeholder.com/100') {
+      try {
+        const storage = getStorage();
+        const imageRef = ref(storage, `profileImages/${user.uid}/profile.jpg`);
+        await deleteObject(imageRef);
+      } catch (error) {
+        console.error("Error deleting old image:", error);
+      }
+    }
+  };
+
   const uploadImageToFirebase = async (uri) => {
     try {
+      // Önce eski fotoğrafı sil
+      await deleteExistingProfileImage();
+
       const response = await fetch(uri);
       const blob = await response.blob();
       const storage = getStorage();
@@ -127,14 +168,23 @@ const HesapAyarlari = ({ navigation }) => {
   const handleSave = async () => {
     try {
       const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, {
+      const updateData = {
         firstName,
         lastName,
         phone,
         email,
-        photoURL: profileImage,
-      });
-      await updateUserDetails(); // Kullanıcı bilgilerini güncelle
+      };
+      
+      if (profileImage !== 'https://via.placeholder.com/100') {
+        updateData.photoURL = profileImage;
+      } else {
+        // Eğer varsayılan fotoğraf kullanılıyorsa, eski fotoğrafı sil ve photoURL'i güncelle
+        await deleteExistingProfileImage();
+        updateData.photoURL = 'https://via.placeholder.com/100';
+      }
+
+      await updateDoc(userRef, updateData);
+      await updateUserDetails();
       Alert.alert('Başarılı', 'Bilgileriniz güncellendi!');
       navigation.goBack();
     } catch (error) {
@@ -161,20 +211,28 @@ const HesapAyarlari = ({ navigation }) => {
         </View>
 
         <View style={styles.form}>
+          <Text style={styles.label}>TC Kimlik Numarası</Text>
+          <TextInput
+            style={[styles.input, styles.readOnlyInput]}
+            value={tcNo}
+            editable={false}
+            selectTextOnFocus={false}
+          />
+
           <Text style={styles.label}>Ad</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, styles.readOnlyInput]}
             value={firstName}
-            onChangeText={setFirstName}
-            placeholder="Adınız"
+            editable={false}
+            selectTextOnFocus={false}
           />
 
           <Text style={styles.label}>Soyad</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, styles.readOnlyInput]}
             value={lastName}
-            onChangeText={setLastName}
-            placeholder="Soyadınız"
+            editable={false}
+            selectTextOnFocus={false}
           />
 
           <Text style={styles.label}>Telefon</Text>
@@ -259,6 +317,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  readOnlyInput: {
+    backgroundColor: '#f5f5f5',
+    color: '#666',
   },
 });
 
