@@ -12,7 +12,6 @@ import EtkinlikEkle from './Etkinlikler/EtkinlikEkle';
 import BagisAlanNakdiBagisTalebi from "./receiver/BagisAlanNakdiBagisTalebi";
 import BagisAlanEgitimYardimTalebi from "./receiver/BagisAlanEgitimYardimTalebi";
 import BagisAlanBagisDurumu from "./receiver/BagisAlanBagisDurumu";
-import BagisAlanProfilim from "./receiver/BagisAlanProfilim";
 import BagisAlanEtkinliklerDetay from "./Etkinlikler/EtkinliklerDetay";
 import BagisciAnaMenu from "./donor/BagisciAnaMenu";
 import BagisciOzelBagis from "./donor/BagisciOzelBagis";
@@ -20,12 +19,12 @@ import AcilDurumlar from "./AcilDurumlar/AcilDurumlar";
 import BagisciEgitimYardimlari from "./donor/BagisciEgitimYardimlari";
 import BagisciEgitimOdeme from "./donor/BagisciEgitimOdeme";
 import BagisciBagislarim from "./donor/BagisciBagislarim";
-import BagisciProfilim from "./donor/BagisciProfilim";
 import AcilDurumTalebiOlustur from "./AcilDurumlar/AcilDurumTalebiOlustur";
 import AcilDurumDetay from "./AcilDurumlar/AcilDurumDetay";
 import BagisciOzelBagisDetay from "./donor/BagisciOzelBagisDetay";
 import { DonorBottomTabs, ReceiverBottomTabs } from './navigation/BottomTabs';
 import AdminPanel from "./Admin/AdminPanel";
+import Profile from "./components/Profile";
 
 const Stack = createStackNavigator();
 const Tab = createMaterialTopTabNavigator();
@@ -111,15 +110,14 @@ const MainApp = () => {
       <Stack.Screen name="BagisAlanNakdiBagisTalebi" component={BagisAlanNakdiBagisTalebi} />
       <Stack.Screen name="BagisAlanEgitimYardimTalebi" component={BagisAlanEgitimYardimTalebi} />
       <Stack.Screen name="BagisAlanBagisDurumu" component={BagisAlanBagisDurumu} />
-      <Stack.Screen name="BagisAlanProfilim" component={BagisAlanProfilim} />
       <Stack.Screen name="BagisAlanEtkinliklerDetay" component={BagisAlanEtkinliklerDetay} />
       <Stack.Screen name="BagisciEgitimYardimlari" component={BagisciEgitimYardimlari} />
       <Stack.Screen name="BagisciEgitimOdeme" component={BagisciEgitimOdeme} />
       <Stack.Screen name="BagisciBagislarim" component={BagisciBagislarim} />
-      <Stack.Screen name="BagisciProfilim" component={BagisciProfilim} />
       <Stack.Screen name="AcilDurumTalebiOlustur" component={AcilDurumTalebiOlustur} options={{ presentation: 'modal' }} />
       <Stack.Screen name="AcilDurumDetay" component={AcilDurumDetay} options={{ presentation: 'modal' }} />
       <Stack.Screen name="BagisciOzelBagisDetay" component={BagisciOzelBagisDetay} />
+      <Stack.Screen name="Profile" component={Profile} />
     </Stack.Navigator>
   );
 };

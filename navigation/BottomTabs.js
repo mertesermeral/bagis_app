@@ -5,6 +5,7 @@ import BagisciBagislarim from '../donor/BagisciBagislarim';
 import BagisciProfilim from '../donor/BagisciProfilim';
 import BagisAlanBagisDurumu from '../receiver/BagisAlanBagisDurumu';
 import BagisAlanProfilim from '../receiver/BagisAlanProfilim';
+import Profile from '../components/Profile';
 
 const Tab = createBottomTabNavigator();
 
@@ -46,7 +47,7 @@ export const DonorBottomTabs = ({ MainComponent }) => (
           <Icon name="person" size={24} color={color} />
         ),
       }}
-      component={BagisciProfilim}
+      component={Profile}
     />
   </Tab.Navigator>
 );
@@ -87,7 +88,7 @@ export const ReceiverBottomTabs = ({ MainComponent }) => (
     />
     <Tab.Screen
       name="BagisAlanProfilim"
-      component={BagisAlanProfilim}
+      component={Profile}
       options={{
         headerShown: false,
         title: 'Profilim',

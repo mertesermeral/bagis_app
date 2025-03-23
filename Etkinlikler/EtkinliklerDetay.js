@@ -32,13 +32,17 @@ const BagisAlanEtkinliklerDetay = ({ route, navigation }) => {
 
         const userData = userDoc.exists() 
           ? userDoc.data() 
-          : { firstName: 'Bilinmeyen', lastName: 'Kullanıcı', profileImage: defaultProfileImage };
+          : { 
+              firstName: 'Bilinmeyen', 
+              lastName: 'Kullanıcı', 
+              photoURL: defaultProfileImage 
+            };
 
         return {
           id: docSnap.id,
           ...commentData,
           userName: `${userData.firstName} ${userData.lastName}`,
-          userProfileImage: userData.profileImage || defaultProfileImage,
+          userProfileImage: userData.photoURL || defaultProfileImage,
         };
       }));
 
@@ -59,7 +63,11 @@ const BagisAlanEtkinliklerDetay = ({ route, navigation }) => {
       const userDoc = await getDoc(userDocRef);
       const userData = userDoc.exists() 
         ? userDoc.data() 
-        : { firstName: 'Bilinmeyen', lastName: 'Kullanıcı', profileImage: defaultProfileImage };
+        : { 
+            firstName: 'Bilinmeyen', 
+            lastName: 'Kullanıcı', 
+            photoURL: defaultProfileImage 
+          };
 
       const docRef = await addDoc(collection(db, 'comments'), {
         eventId: event.id,
@@ -75,7 +83,7 @@ const BagisAlanEtkinliklerDetay = ({ route, navigation }) => {
           userId, 
           text: newComment, 
           userName: `${userData.firstName} ${userData.lastName}`,
-          userProfileImage: userData.profileImage || defaultProfileImage,
+          userProfileImage: userData.photoURL || defaultProfileImage,
         }
       ]);
 

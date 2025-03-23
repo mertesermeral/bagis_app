@@ -79,6 +79,7 @@ const RegisterScreen = ({ navigation }) => {
         tcNo,
         birthYear,
         role,
+        photoURL: 'https://via.placeholder.com/100' // Varsayılan profil fotoğrafı
       });
 
       Alert.alert("Başarılı", "Kayıt işlemi tamamlandı!");
