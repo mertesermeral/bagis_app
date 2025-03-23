@@ -27,6 +27,7 @@ import { AdminBottomTabs } from './navigation/BottomTabs';
 import AdminPanel from "./Admin/AdminPanel";
 import Fonlar from "./Admin/Fonlar";
 import BekleyenTalepler from "./Admin/BekleyenTalepler";
+import TalepDetay from "./Admin/TalepDetay";
 import OnaylananTalepler from "./Admin/OnaylananTalepler";
 import Profile from "./components/Profile";
 import HesapAyarlari from './components/HesapAyarlari';
@@ -135,7 +136,7 @@ const MainApp = () => {
         options={{ headerShown: false }}
       />
        <Stack.Screen name="AdminTabs" component={AdminTabsWrapper} />
-       
+
       {/* Diğer ekranlar (modal olarak açılacak) */}
       <Stack.Screen name="EtkinlikEkle" component={EtkinlikEkle} options={{ presentation: 'modal' }} />
       <Stack.Screen name="BagisAlanNakdiBagisTalebi" component={BagisAlanNakdiBagisTalebi} />
@@ -149,6 +150,8 @@ const MainApp = () => {
       <Stack.Screen name="AcilDurumDetay" component={AcilDurumDetay} options={{ presentation: 'modal' }} />
       <Stack.Screen name="BagisciOzelBagisDetay" component={BagisciOzelBagisDetay} />
       <Stack.Screen name="Profile" component={Profile} />
+      <Stack.Screen name="TalepDetay" component={TalepDetay} />
+
       <Stack.Screen 
         name="HesapAyarlari" 
         component={HesapAyarlari}

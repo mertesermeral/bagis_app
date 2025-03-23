@@ -6,6 +6,7 @@ import { AntDesign } from '@expo/vector-icons';
 import { db, storage } from '../firebase.js';
 import { collection, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getAuth } from 'firebase/auth';
 
 const BagisTalepFormu = () => {
   const [bagisTuru, setBagisTuru] = useState('');
@@ -64,6 +65,8 @@ const BagisTalepFormu = () => {
   };
 
   const handleSubmit = async () => {
+    const user = getAuth().currentUser;
+    
     if (bagisTuru === '') {
       Alert.alert("Eksik Bilgi", "Lütfen bağış türünü seçin.");
       return;
@@ -191,9 +194,17 @@ const BagisTalepFormu = () => {
     
   
     try {
-      await addDoc(collection(db, 'bagisBasvurulari'), basvuruData);
-
-      Alert.alert("Başarılı", "Başvurunuz başarıyla gönderildi!");
+      await addDoc(collection(db, 'bagisBasvurulari'), {
+        ...basvuruData,
+        onay: false,
+        kullaniciId: user?.uid || null,
+      });
+      
+      
+      Alert.alert(
+        "Başarılı",
+        "Talebiniz alınmıştır ve onay için yöneticilere iletilmiştir. Onaylandıktan sonra bağışçılar tarafından görüntülenecektir."
+      );
       
       setBagisTuru('');
       setEgitimSeviyesi('');
