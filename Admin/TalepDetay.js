@@ -1,8 +1,14 @@
 import React from "react";
-import { View, Text, ScrollView, StyleSheet } from "react-native";
+import { View, Text, ScrollView, StyleSheet, Linking, TouchableOpacity } from "react-native";
 
 const TalepDetay = ({ route }) => {
   const { talep } = route.params;
+
+  const handlePdfOpen = () => {
+    if (talep.belgeURL) {
+      Linking.openURL(talep.belgeURL);
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -21,8 +27,11 @@ const TalepDetay = ({ route }) => {
       {talep.digerBaslik && <Text style={styles.label}>Başlık: {talep.digerBaslik}</Text>}
       {talep.digerAciklama && <Text style={styles.label}>Açıklama: {talep.digerAciklama}</Text>}
 
+      {/* PDF varsa göster */}
       {talep.belgeURL && (
-        <Text style={styles.label}>Belge Linki: {talep.belgeURL}</Text>
+        <TouchableOpacity style={styles.pdfButton} onPress={handlePdfOpen}>
+          <Text style={styles.pdfButtonText}>PDF'yi Görüntüle</Text>
+        </TouchableOpacity>
       )}
     </ScrollView>
   );
@@ -41,6 +50,17 @@ const styles = StyleSheet.create({
   label: {
     marginTop: 6,
     fontSize: 15,
+  },
+  pdfButton: {
+    marginTop: 20,
+    backgroundColor: "#65558F",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  pdfButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
 
