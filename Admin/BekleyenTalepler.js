@@ -1,33 +1,40 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
-import { db } from "../firebase";
+import React, { useState } from "react";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { useNavigation } from "@react-navigation/native";
+import { db } from "../firebase";
 
 const BekleyenTalepler = () => {
+  const navigation = useNavigation(); // ⬅️ her zaman ilk hooklardan biri olmalı
   const [talepler, setTalepler] = useState([]);
-  const navigation = useNavigation();
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchTalepler = async () => {
-      try {
-        const q = query(collection(db, "bagisBasvurulari"), where("onay", "==", false));
-        const querySnapshot = await getDocs(q);
-        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setTalepler(data);
-      } catch (err) {
-        console.error("Bekleyen talepler alınırken hata:", err);
-      }
-    };
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchTalepler = async () => {
+        try {
+          setLoading(true);
+          const q = query(collection(db, "bagisBasvurulari"), where("onay", "==", false));
+          const querySnapshot = await getDocs(q);
+          const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setTalepler(data);
+        } catch (err) {
+          console.error("Bekleyen talepler alınırken hata:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
 
-    fetchTalepler();
-  }, []);
+      fetchTalepler();
+
+      return () => {}; // cleanup boş
+    }, [])
+  );
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
       <Text style={styles.tur}>{item.bagisTuru}</Text>
       <Text style={styles.tarih}>Tarih: {new Date(item.tarih).toLocaleDateString()}</Text>
-      
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate("TalepDetay", { talep: item })}
@@ -37,12 +44,21 @@ const BekleyenTalepler = () => {
     </View>
   );
 
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#65558F" />
+      </View>
+    );
+  }
+
   return (
     <FlatList
       data={talepler}
       keyExtractor={(item) => item.id}
       renderItem={renderItem}
       contentContainerStyle={{ padding: 16 }}
+      ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20 }}>Bekleyen talep bulunmamaktadır.</Text>}
     />
   );
 };

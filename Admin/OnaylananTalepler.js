@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,33 +9,53 @@ import {
 } from "react-native";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
+import { useFocusEffect } from "@react-navigation/native";
 
 const OnaylananTalepler = ({ navigation }) => {
   const [onaylananlar, setOnaylananlar] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchOnaylananlar = async () => {
-      try {
-        const q = query(
-          collection(db, "bagisBasvurulari"),
-          where("onay", "==", true)
-        );
-        const snapshot = await getDocs(q);
-
-        const data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setOnaylananlar(data);
-      } catch (error) {
-        console.error("Veri çekme hatası:", error);
-      }
+  const fetchOnaylananlar = useCallback(async () => {
+    try {
+      setLoading(true);
+      const q = query(collection(db, "bagisBasvurulari"), where("onay", "==", true));
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setOnaylananlar(data);
+    } catch (error) {
+      console.error("Veri çekme hatası:", error);
+    } finally {
       setLoading(false);
-    };
-
-    fetchOnaylananlar();
+    }
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchOnaylananlar = async () => {
+        try {
+          setLoading(true);
+          const q = query(collection(db, "bagisBasvurulari"), where("onay", "==", true));
+          const snapshot = await getDocs(q);
+          const data = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setOnaylananlar(data);
+        } catch (error) {
+          console.error("Veri çekme hatası:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchOnaylananlar(); // Burada çağırıyoruz
+  
+    }, []) // Dependency array burada
+  );
+  
 
   if (loading) {
     return (
