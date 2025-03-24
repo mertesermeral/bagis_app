@@ -151,6 +151,7 @@ const MainApp = () => {
       <Stack.Screen name="BagisciOzelBagisDetay" component={BagisciOzelBagisDetay} />
       <Stack.Screen name="Profile" component={Profile} />
       <Stack.Screen name="TalepDetay" component={TalepDetay} />
+      <Stack.Screen name="OnaylananTalepler" component={OnaylananTalepler} />
 
       <Stack.Screen 
         name="HesapAyarlari" 
