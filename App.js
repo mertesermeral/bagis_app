@@ -7,12 +7,12 @@ import { useAuth, AuthProvider } from "./AuthContext";
 import LoginScreen from "./LoginScreen";
 import RegisterScreen from "./RegisterScreen";
 import BagisAlanAnaMenu from "./receiver/BagisAlanAnaMenu";
-import BagisAlanEtkinlikler from "./Etkinlikler/Etkinlikler";
+import Etkinlikler from "./Etkinlikler/Etkinlikler";
 import EtkinlikEkle from './Etkinlikler/EtkinlikEkle';
 import BagisAlanNakdiBagisTalebi from "./receiver/BagisAlanNakdiBagisTalebi";
 import BagisAlanEgitimYardimTalebi from "./receiver/BagisAlanEgitimYardimTalebi";
 import BagisAlanBagisDurumu from "./receiver/BagisAlanBagisDurumu";
-import BagisAlanEtkinliklerDetay from "./Etkinlikler/EtkinliklerDetay";
+import EtkinliklerDetay from "./Etkinlikler/EtkinliklerDetay";
 import BagisciAnaMenu from "./donor/BagisciAnaMenu";
 import BagisciOzelBagis from "./donor/BagisciOzelBagis";
 import AcilDurumlar from "./AcilDurumlar/AcilDurumlar";
@@ -41,8 +41,13 @@ const DonorTabs = () => (
   <Tab.Navigator 
     initialRouteName="AnaMenu"
     screenOptions={{ 
-      tabBarLabelStyle: { fontSize: 14 }, 
-      tabBarStyle: { backgroundColor: "#FEF7FF" } 
+      tabBarLabelStyle: { fontSize: 14, paddingHorizontal: 5 }, 
+      tabBarStyle: { backgroundColor: "#FEF7FF" },
+      tabBarIndicatorStyle: { 
+        backgroundColor: "#65558F",
+        alignSelf: "center",
+        tabBarItemStyle: {   }, // 🔥 Sekme genişliğini sabitle
+      }
     }}
   >
     <Tab.Screen 
@@ -52,7 +57,7 @@ const DonorTabs = () => (
     />
     <Tab.Screen name="Özel Bağış" component={BagisciOzelBagis} />
     <Tab.Screen name="Acil Durumlar" component={AcilDurumlar} />
-    <Tab.Screen name="Etkinlikler" component={BagisAlanEtkinlikler} />
+    <Tab.Screen name="Etkinlikler" component={Etkinlikler} />
   </Tab.Navigator>
 );
 
@@ -72,7 +77,7 @@ const ReceiverTabs = () => (
       options={{ title: 'Yardım Ekranı' }}
     />
     <Tab.Screen name="Acil Durumlar" component={AcilDurumlar} />
-    <Tab.Screen name="Etkinlikler" component={BagisAlanEtkinlikler} />
+    <Tab.Screen name="Etkinlikler" component={Etkinlikler} />
   </Tab.Navigator>
 );
 
@@ -144,7 +149,7 @@ const MainApp = () => {
       <Stack.Screen name="BagisAlanNakdiBagisTalebi" component={BagisAlanNakdiBagisTalebi} />
       <Stack.Screen name="BagisAlanEgitimYardimTalebi" component={BagisAlanEgitimYardimTalebi} />
       <Stack.Screen name="BagisAlanBagisDurumu" component={BagisAlanBagisDurumu} />
-      <Stack.Screen name="BagisAlanEtkinliklerDetay" component={BagisAlanEtkinliklerDetay} />
+      <Stack.Screen name="EtkinliklerDetay" component={EtkinliklerDetay} />
       <Stack.Screen name="BagisciEgitimYardimlari" component={BagisciEgitimYardimlari} />
       <Stack.Screen name="BagisciEgitimOdeme" component={BagisciEgitimOdeme} />
       <Stack.Screen name="BagisciBagislarim" component={BagisciBagislarim} />

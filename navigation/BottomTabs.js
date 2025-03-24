@@ -1,10 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { Text } from 'react-native';
 import BagisciBagislarim from '../donor/BagisciBagislarim';
-import BagisciProfilim from '../donor/BagisciProfilim';
 import BagisAlanBagisDurumu from '../receiver/BagisAlanBagisDurumu';
-import BagisAlanProfilim from '../receiver/BagisAlanProfilim';
 import Profile from '../components/Profile';
 
 const Tab = createBottomTabNavigator();

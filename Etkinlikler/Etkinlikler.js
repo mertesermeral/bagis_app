@@ -67,7 +67,7 @@ const BagisAlanEtkinlikler = ({ navigation }) => {
                 <Text style={styles.date}>Tarih: {event.date}</Text>
                 <TouchableOpacity 
                   style={styles.detailsButton} 
-                  onPress={() => navigation.navigate('BagisAlanEtkinliklerDetay', { event })}>
+                  onPress={() => navigation.navigate('EtkinliklerDetay', { event })}>
                   <Text style={styles.detailsButtonText}>Detayları Gör</Text>
                 </TouchableOpacity>
               </View>

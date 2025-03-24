@@ -9,7 +9,7 @@ import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 
 const defaultProfileImage = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
 
-const BagisAlanEtkinliklerDetay = ({ route, navigation }) => {
+const EtkinliklerDetay = ({ route, navigation }) => {
   if (!route || !route.params || !route.params.event) {
     return <Text>Hata: Etkinlik bilgisi bulunamadı.</Text>;
   }
@@ -268,4 +268,4 @@ const styles = StyleSheet.create({
   
 });
 
-export default BagisAlanEtkinliklerDetay;
+export default EtkinliklerDetay;
