@@ -29,6 +29,7 @@ import Fonlar from "./Admin/Fonlar";
 import BekleyenTalepler from "./Admin/BekleyenTalepler";
 import TalepDetay from "./Admin/TalepDetay";
 import OnaylananTalepler from "./Admin/OnaylananTalepler";
+import ReddedilenTalepler from "./Admin/ReddedilenTalepler";
 import Profile from "./components/Profile";
 import HesapAyarlari from './components/HesapAyarlari';
 
@@ -87,6 +88,7 @@ const AdminTabs = () => (
     <Tab.Screen name="Fonlar" component={Fonlar} />
     <Tab.Screen name="Bekleyen Talepler" component={BekleyenTalepler} />
     <Tab.Screen name="Onaylanan Talepler" component={OnaylananTalepler} />
+    <Tab.Screen name="ReddedilenTalepler" component={ReddedilenTalepler} />
   </Tab.Navigator>
 );
 
