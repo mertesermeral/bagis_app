@@ -14,7 +14,7 @@ const BekleyenTalepler = () => {
       const fetchTalepler = async () => {
         try {
           setLoading(true);
-          const q = query(collection(db, "bagisBasvurulari"), where("onay", "==", false));
+          const q = query(collection(db, "bagisBasvurulari"), where("onay", "==", "beklemede"));
           const querySnapshot = await getDocs(q);
           const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           setTalepler(data);

@@ -202,10 +202,10 @@ const BagisTalepFormu = () => {
     try {
       await addDoc(collection(db, 'bagisBasvurulari'), {
         ...basvuruData,
-        onay: false,
+        onay: "beklemede",
         kullaniciId: user?.uid || null,
       });
-      
+          
       
       Alert.alert(
         "Başarılı",

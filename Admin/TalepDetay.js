@@ -9,6 +9,7 @@ import {
   Image,
   ActivityIndicator,
   Alert,
+  TextInput 
 } from "react-native";
 import { doc, updateDoc, getDoc  } from "firebase/firestore";
 import { db } from "../firebase";
@@ -17,6 +18,9 @@ const TalepDetay = ({ route, navigation }) => {
   const { talep } = route.params;
   const [kullanici, setKullanici] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [redModalVisible, setRedModalVisible] = useState(false);
+  const [redSebep, setRedSebep] = useState("");
+
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -44,16 +48,38 @@ const TalepDetay = ({ route, navigation }) => {
 
   const handleOnayla = async () => {
     try {
-      const talepRef = doc(db, 'bagisBasvurulari', talep.id);
-      await updateDoc(talepRef, { onay: true });
-
+      const talepRef = doc(db, "bagisBasvurulari", talep.id);
+      await updateDoc(talepRef, { onay: "onaylandi" });
       Alert.alert("Başarılı", "Talep başarıyla onaylandı.");
-      navigation.goBack(); // opsiyonel: detaydan listeye dönüş
+      navigation.goBack();
     } catch (error) {
       console.error("Onaylama hatası:", error);
       Alert.alert("Hata", "Talep onaylanamadı.");
     }
   };
+  
+
+  const handleReddet = async () => {
+    if (!redSebep.trim()) {
+      Alert.alert("Hata", "Lütfen red sebebini girin.");
+      return;
+    }
+  
+    try {
+      const talepRef = doc(db, "bagisBasvurulari", talep.id);
+      await updateDoc(talepRef, {
+        onay: "reddedildi",
+        redAciklamasi: redSebep.trim(),
+      });
+      Alert.alert("Reddedildi", "Talep başarıyla reddedildi.");
+      setRedModalVisible(false);
+      navigation.goBack();
+    } catch (error) {
+      console.error("Red hatası:", error);
+      Alert.alert("Hata", "Talep reddedilirken bir hata oluştu.");
+    }
+  };
+
   
 
   return (
@@ -104,13 +130,42 @@ const TalepDetay = ({ route, navigation }) => {
         <Text style={styles.pdfButton}>Görüntüle</Text>
       </TouchableOpacity>
     )}
+    {redModalVisible && (
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContainer}>
+      <Text style={styles.modalTitle}>Red Sebebi</Text>
+      <TextInput
+        style={styles.modalInput}
+        placeholder="Neden reddediyorsunuz?"
+        value={redSebep}
+        onChangeText={setRedSebep}
+        multiline
+      />
+      <TouchableOpacity style={styles.modalButton} onPress={handleReddet}>
+        <Text style={styles.modalButtonText}>Gönder</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => setRedModalVisible(false)}>
+        <Text style={styles.modalCancel}>İptal</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+)}
 
     {/* Onay butonu sadece henüz onaylanmamışsa gösterilir */}
-    {talep.onay === false && (
-      <TouchableOpacity style={styles.onayButton} onPress={handleOnayla}>
-        <Text style={styles.onayButtonText}>Onayla</Text>
-      </TouchableOpacity>
-    )}
+    {talep.onay === "beklemede" && (
+  <>
+    <TouchableOpacity style={styles.onayButton} onPress={handleOnayla}>
+      <Text style={styles.onayButtonText}>Onayla</Text>
+    </TouchableOpacity>
+
+    <TouchableOpacity style={styles.redButton} onPress={() => setRedModalVisible(true)}>
+        <Text style={styles.redButtonText}>Reddet</Text>
+    </TouchableOpacity>
+
+  </>
+)}
+
+  
     </ScrollView>
   );
 };
@@ -193,6 +248,62 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  redButton: {
+    backgroundColor: '#c62828',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
+    alignItems: 'center',
+  },
+  redButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  modalOverlay: {
+    position: "absolute",
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 999,
+  },
+  modalContainer: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    width: "85%",
+    elevation: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  modalInput: {
+    height: 80,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+    textAlignVertical: "top",
+  },
+  modalButton: {
+    backgroundColor: "#c62828",
+    padding: 10,
+    borderRadius: 6,
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  modalButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  modalCancel: {
+    textAlign: "center",
+    color: "#65558F",
   },
   
 });
