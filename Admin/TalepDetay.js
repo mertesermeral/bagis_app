@@ -8,11 +8,12 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  Alert,
 } from "react-native";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc  } from "firebase/firestore";
 import { db } from "../firebase";
 
-const TalepDetay = ({ route }) => {
+const TalepDetay = ({ route, navigation }) => {
   const { talep } = route.params;
   const [kullanici, setKullanici] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -41,56 +42,75 @@ const TalepDetay = ({ route }) => {
     }
   };
 
+  const handleOnayla = async () => {
+    try {
+      const talepRef = doc(db, 'bagisBasvurulari', talep.id);
+      await updateDoc(talepRef, { onay: true });
+
+      Alert.alert("Başarılı", "Talep başarıyla onaylandı.");
+      navigation.goBack(); // opsiyonel: detaydan listeye dönüş
+    } catch (error) {
+      console.error("Onaylama hatası:", error);
+      Alert.alert("Hata", "Talep onaylanamadı.");
+    }
+  };
+  
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Bağış Türü: {talep.bagisTuru}</Text>
-      <Text style={styles.date}>Tarih: {new Date(talep.tarih).toLocaleDateString()}</Text>
+    <Text style={styles.title}>Bağış Türü: {talep.bagisTuru}</Text>
+    <Text style={styles.date}>Tarih: {new Date(talep.tarih).toLocaleDateString('tr-TR')}</Text>
 
-      {loading ? (
-        <ActivityIndicator size="small" color="#65558F" style={{ marginVertical: 10 }} />
-      ) : (
-        kullanici && (
-          <View style={styles.userInfo}>
-            <Image
-              source={{ uri: kullanici.photoURL || 'https://via.placeholder.com/100' }}
-              style={styles.userImage}
-            />
-            <View style={{ flex: 1, marginLeft: 12 }}>
-              <Text style={styles.userTitle}>Başvuru Sahibi:</Text>
-              <Text style={styles.userText}>
-                Ad Soyad: {kullanici.firstName} {kullanici.lastName}
-              </Text>
-              <Text style={styles.userText}>Email: {kullanici.email}</Text>
-              {kullanici.phone && (
-                <Text style={styles.userText}>Telefon: {kullanici.phone}</Text>
-              )}
-            </View>
+    {loading ? (
+      <ActivityIndicator size="small" color="#65558F" style={{ marginVertical: 10 }} />
+    ) : (
+      kullanici && (
+        <View style={styles.userInfo}>
+          <Image
+            source={{ uri: kullanici.photoURL || 'https://via.placeholder.com/100' }}
+            style={styles.userImage}
+          />
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text style={styles.userTitle}>Başvuru Sahibi:</Text>
+            <Text style={styles.userText}>
+              Ad Soyad: {kullanici.firstName || ''} {kullanici.lastName || ''}
+            </Text>
+            <Text style={styles.userText}>Email: {kullanici.email || '-'}</Text>
+            <Text style={styles.userText}>Telefon: {kullanici.phone || '-'}</Text>
           </View>
-        )
-      )}
+        </View>
+      )
+    )}
 
-      {/* Talep detayları */}
-      {talep.aciklama && <Text style={styles.label}>Açıklama: {talep.aciklama}</Text>}
-      {talep.miktar && <Text style={styles.label}>Miktar: {talep.miktar} TL</Text>}
-      {talep.tcNo && <Text style={styles.label}>TC No: {talep.tcNo}</Text>}
-      {talep.adres && <Text style={styles.label}>Adres: {talep.adres}</Text>}
-      {talep.gidaTuru && <Text style={styles.label}>Gıda Türü: {talep.gidaTuru}</Text>}
-      {talep.gelirDurumu && <Text style={styles.label}>Gelir Durumu: {talep.gelirDurumu}</Text>}
-      {talep.faturaTuru && <Text style={styles.label}>Fatura Türü: {talep.faturaTuru}</Text>}
-      {talep.faturaTutari && <Text style={styles.label}>Fatura Tutarı: {talep.faturaTutari} TL</Text>}
-      {talep.digerBaslik && <Text style={styles.label}>Başlık: {talep.digerBaslik}</Text>}
-      {talep.digerAciklama && <Text style={styles.label}>Açıklama: {talep.digerAciklama}</Text>}
+    {/* Talep detayları */}
+    {talep.aciklama && <Text style={styles.label}>Açıklama: {talep.aciklama}</Text>}
+    {talep.miktar && <Text style={styles.label}>Miktar: {talep.miktar} TL</Text>}
+    {talep.tcNo && <Text style={styles.label}>TC No: {talep.tcNo}</Text>}
+    {talep.adres && <Text style={styles.label}>Adres: {talep.adres}</Text>}
+    {talep.gidaTuru && <Text style={styles.label}>Gıda Türü: {talep.gidaTuru}</Text>}
+    {talep.gelirDurumu && <Text style={styles.label}>Gelir Durumu: {talep.gelirDurumu}</Text>}
+    {talep.faturaTuru && <Text style={styles.label}>Fatura Türü: {talep.faturaTuru}</Text>}
+    {talep.faturaTutari && <Text style={styles.label}>Fatura Tutarı: {talep.faturaTutari} TL</Text>}
+    {talep.digerBaslik && <Text style={styles.label}>Başlık: {talep.digerBaslik}</Text>}
+    {talep.digerAciklama && <Text style={styles.label}>Açıklama: {talep.digerAciklama}</Text>}
 
-      {/* PDF varsa göster */}
-      {talep.belgeURL && (
-        <TouchableOpacity style={styles.pdfBox} onPress={handlePdfOpen}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={styles.pdfIcon}>📄</Text>
-            <Text style={styles.pdfName}>{talep.belgeAdi || 'PDF Belgesi'}</Text>
-          </View>
-          <Text style={styles.pdfButton}>Görüntüle</Text>
-        </TouchableOpacity>
-      )}
+    {/* PDF varsa göster */}
+    {talep.belgeURL && (
+      <TouchableOpacity style={styles.pdfBox} onPress={handlePdfOpen}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.pdfIcon}>📄</Text>
+          <Text style={styles.pdfName}>{talep.belgeAdi || 'PDF Belgesi'}</Text>
+        </View>
+        <Text style={styles.pdfButton}>Görüntüle</Text>
+      </TouchableOpacity>
+    )}
+
+    {/* Onay butonu sadece henüz onaylanmamışsa gösterilir */}
+    {talep.onay === false && (
+      <TouchableOpacity style={styles.onayButton} onPress={handleOnayla}>
+        <Text style={styles.onayButtonText}>Onayla</Text>
+      </TouchableOpacity>
+    )}
     </ScrollView>
   );
 };
@@ -162,6 +182,19 @@ const styles = StyleSheet.create({
     color: "#65558F",
     fontWeight: "bold",
   },
+  onayButton: {
+    backgroundColor: '#2e7d32',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  onayButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  
 });
 
 export default TalepDetay;
