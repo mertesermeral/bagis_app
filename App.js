@@ -26,6 +26,7 @@ import { DonorBottomTabs, ReceiverBottomTabs } from './navigation/BottomTabs';
 import { AdminBottomTabs } from './navigation/BottomTabs'; 
 import AdminPanel from "./Admin/AdminPanel";
 import Fonlar from "./Admin/Fonlar";
+import FonDetay from "./Admin/FonDetay";
 import YeniFonEkle from "./Admin/YeniFonEkle";
 import BekleyenTalepler from "./Admin/BekleyenTalepler";
 import TalepDetay from "./Admin/TalepDetay";
@@ -161,7 +162,7 @@ const MainApp = () => {
       <Stack.Screen name="TalepDetay" component={TalepDetay} />
       <Stack.Screen name="OnaylananTalepler" component={OnaylananTalepler} />
       <Stack.Screen name="YeniFonEkle" component={YeniFonEkle} />
-
+      <Stack.Screen name="FonDetay" component={FonDetay} />
       <Stack.Screen 
         name="HesapAyarlari" 
         component={HesapAyarlari}
