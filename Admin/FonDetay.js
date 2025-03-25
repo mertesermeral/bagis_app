@@ -113,8 +113,8 @@ const FonDetay = ({ route }) => {
       <View style={styles.adminButtons}>
         <TouchableOpacity
           style={[styles.adminButton, { backgroundColor: "#ffa726" }]}
-          onPress={() => navigation.navigate("FonGuncelle", { fon: fonDetay })}
-        >
+          onPress={() => navigation.navigate("FonGuncelle", { fonId: fonDetay.id })}
+          >
           <Icon name="pencil" size={20} color="#fff" />
           <Text style={styles.adminButtonText}>Güncelle</Text>
         </TouchableOpacity>
