@@ -1,21 +1,15 @@
 import React from "react";
 import { Text } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
-import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import { useAuth, AuthProvider } from "./AuthContext";  
 import LoginScreen from "./LoginScreen";
 import RegisterScreen from "./RegisterScreen";
-import BagisAlanAnaMenu from "./receiver/BagisAlanAnaMenu";
-import Etkinlikler from "./Etkinlikler/Etkinlikler";
 import EtkinlikEkle from './Etkinlikler/EtkinlikEkle';
 import BagisAlanNakdiBagisTalebi from "./receiver/BagisAlanNakdiBagisTalebi";
 import BagisAlanEgitimYardimTalebi from "./receiver/BagisAlanEgitimYardimTalebi";
 import BagisAlanBagisDurumu from "./receiver/BagisAlanBagisDurumu";
 import EtkinliklerDetay from "./Etkinlikler/EtkinliklerDetay";
-import BagisciAnaMenu from "./donor/BagisciAnaMenu";
-import BagisciOzelBagis from "./donor/BagisciOzelBagis";
-import AcilDurumlar from "./AcilDurumlar/AcilDurumlar";
 import BagisciEgitimYardimlari from "./donor/BagisciEgitimYardimlari";
 import BagisciEgitimOdeme from "./donor/BagisciEgitimOdeme";
 import BagisciBagislarim from "./donor/BagisciBagislarim";
@@ -24,81 +18,11 @@ import AcilDurumDetay from "./AcilDurumlar/AcilDurumDetay";
 import BagisciOzelBagisDetay from "./donor/BagisciOzelBagisDetay";
 import { DonorBottomTabs, ReceiverBottomTabs } from './navigation/BottomTabs';
 import { AdminBottomTabs } from './navigation/BottomTabs'; 
-import AdminPanel from "./Admin/AdminPanel";
-import Fonlar from "./Admin/Fonlar";
-import FonDetay from "./Admin/FonDetay";
-import FonGuncelle from "./Admin/FonGuncelle";
-import YeniFonEkle from "./Admin/YeniFonEkle";
-import BekleyenTalepler from "./Admin/BekleyenTalepler";
-import TalepDetay from "./Admin/TalepDetay";
-import OnaylananTalepler from "./Admin/OnaylananTalepler";
-import ReddedilenTalepler from "./Admin/ReddedilenTalepler";
+import { DonorTabs, ReceiverTabs, AdminTabs } from './navigation/TopTabs'; // Yeni import
 import Profile from "./components/Profile";
 import HesapAyarlari from './components/HesapAyarlari';
 
 const Stack = createStackNavigator();
-const Tab = createMaterialTopTabNavigator();
-
-// **Bağışçı (donor) için navigation sekmeleri**
-const DonorTabs = () => (
-  <Tab.Navigator 
-    initialRouteName="AnaMenu"
-    screenOptions={{ 
-      tabBarLabelStyle: { fontSize: 14, paddingHorizontal: 5 }, 
-      tabBarStyle: { backgroundColor: "#FEF7FF" },
-      tabBarIndicatorStyle: { 
-        backgroundColor: "#65558F",
-        alignSelf: "center",
-        tabBarItemStyle: {   }, // 🔥 Sekme genişliğini sabitle
-      }
-    }}
-  >
-    <Tab.Screen 
-      name="AnaMenu" 
-      component={BagisciAnaMenu} 
-      options={{ title: 'Nakdi Bağış' }}
-    />
-    <Tab.Screen name="Özel Bağış" component={BagisciOzelBagis} />
-    <Tab.Screen name="Acil Durumlar" component={AcilDurumlar} />
-    <Tab.Screen name="Etkinlikler" component={Etkinlikler} />
-  </Tab.Navigator>
-);
-
-// **Bağış Alan (receiver) için navigation sekmeleri**
-const ReceiverTabs = () => (
-  <Tab.Navigator 
-    initialRouteName="AnaMenu"
-    screenOptions={{ 
-      tabBarLabelStyle: { fontSize: 14 }, 
-      tabBarStyle: { backgroundColor: "#FEF7FF" },
-      tabBarIndicatorStyle: { backgroundColor: "#65558F" }
-    }}
-  >
-    <Tab.Screen 
-      name="AnaMenu" 
-      component={BagisAlanAnaMenu} 
-      options={{ title: 'Yardım Ekranı' }}
-    />
-    <Tab.Screen name="Acil Durumlar" component={AcilDurumlar} />
-    <Tab.Screen name="Etkinlikler" component={Etkinlikler} />
-  </Tab.Navigator>
-);
-
-const AdminTabs = () => (
-  <Tab.Navigator
-    initialRouteName="Fonlar"
-    screenOptions={{
-      tabBarLabelStyle: { fontSize: 14 },
-      tabBarStyle: { backgroundColor: "#FEF7FF" },
-      tabBarIndicatorStyle: { backgroundColor: "#65558F" },
-    }}
-  >
-    <Tab.Screen name="Fonlar" component={Fonlar} />
-    <Tab.Screen name="Bekleyen Talepler" component={BekleyenTalepler} />
-    <Tab.Screen name="Onaylanan Talepler" component={OnaylananTalepler} />
-    <Tab.Screen name="ReddedilenTalepler" component={ReddedilenTalepler} />
-  </Tab.Navigator>
-);
 
 // Wrapper bileşenleri
 const DonorTabsWrapper = (props) => (
@@ -108,11 +32,10 @@ const DonorTabsWrapper = (props) => (
 const ReceiverTabsWrapper = (props) => (
   <ReceiverBottomTabs MainComponent={ReceiverTabs} {...props} />
 );
-// Admin wrapper
+
 const AdminTabsWrapper = (props) => (
   <AdminBottomTabs MainComponent={AdminTabs} {...props} />
 );
-
 
 const MainApp = () => {
   const { role, loading } = useAuth();
@@ -125,7 +48,6 @@ const MainApp = () => {
   if (role === "donor") initialScreen = "DonorTabs";
   else if (role === "receiver") initialScreen = "ReceiverTabs";
   else if (role === "admin") initialScreen = "AdminTabs"; // <-- admin panel yönlendirme
-
 
   return (
     <Stack.Navigator 
@@ -160,21 +82,7 @@ const MainApp = () => {
       <Stack.Screen name="AcilDurumDetay" component={AcilDurumDetay} options={{ presentation: 'modal' }} />
       <Stack.Screen name="BagisciOzelBagisDetay" component={BagisciOzelBagisDetay} />
       <Stack.Screen name="Profile" component={Profile} />
-      <Stack.Screen name="TalepDetay" component={TalepDetay} />
-      <Stack.Screen name="OnaylananTalepler" component={OnaylananTalepler} />
-      <Stack.Screen name="YeniFonEkle" component={YeniFonEkle} />
-      <Stack.Screen name="FonDetay" component={FonDetay} />
-      <Stack.Screen name="FonGuncelle" component={FonGuncelle} />
-
-      <Stack.Screen 
-        name="HesapAyarlari" 
-        component={HesapAyarlari}
-        options={{ 
-          headerShown: true,
-          title: 'Hesap Ayarları',
-          headerTintColor: '#65558F'
-        }} 
-      />
+      <Stack.Screen name="HesapAyarlari" component={HesapAyarlari} />
     </Stack.Navigator>
   );
 };
