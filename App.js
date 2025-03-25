@@ -21,7 +21,10 @@ import { AdminBottomTabs } from './navigation/BottomTabs';
 import { DonorTabs, ReceiverTabs, AdminTabs } from './navigation/TopTabs'; // Yeni import
 import Profile from "./components/Profile";
 import HesapAyarlari from './components/HesapAyarlari';
-
+import FonDetay from "./Admin/FonDetay";
+import FonGuncelle from "./Admin/FonGuncelle";
+import YeniFonEkle from "./Admin/YeniFonEkle";
+import TalepDetay from "./Admin/TalepDetay";
 const Stack = createStackNavigator();
 
 // Wrapper bileşenleri
@@ -83,6 +86,10 @@ const MainApp = () => {
       <Stack.Screen name="BagisciOzelBagisDetay" component={BagisciOzelBagisDetay} />
       <Stack.Screen name="Profile" component={Profile} />
       <Stack.Screen name="HesapAyarlari" component={HesapAyarlari} />
+      <Stack.Screen name="TalepDetay" component={TalepDetay} />
+      <Stack.Screen name="YeniFonEkle" component={YeniFonEkle} />
+      <Stack.Screen name="FonDetay" component={FonDetay} />
+      <Stack.Screen name="FonGuncelle" component={FonGuncelle} />
     </Stack.Navigator>
   );
 };
