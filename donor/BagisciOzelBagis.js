@@ -1,172 +1,128 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Image, ScrollView } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
+import { useNavigation } from "@react-navigation/native";
 
-const BagisAlanOzelBagis = ({ navigation }) => {
-  const donations = [
-    {
-      id: 1,
-      title: 'Köy Okulu İçin Kitap ve Kırtasiye Desteği',
-      donor: 'Zeynep Karaca',
-      image: require('../assets/egitim.jpg'), // Replace with your image path
-    },
-    {
-      id: 2,
-      title: 'Kışlık Giyisi Desteği',
-      donor: 'Fatma Koç',
-      image: require('../assets/kislik.jpg'), // Replace with your image path
-    },
-    {
-      id: 3,
-      title: 'Tedavi Masrafları İçin Destek',
-      donor: 'Mehmet Ulus',
-      image: require('../assets/tedavi.jpg'), // Replace with your image path
-    },
-  ];
+const BagisciOzelBagis = () => {
+  const [onaylananTalepler, setOnaylananTalepler] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    const fetchOnaylananTalepler = async () => {
+      try {
+        const q = query(collection(db, "bagisBasvurulari"), where("onay", "==", "onaylandi"));
+        const snapshot = await getDocs(q);
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setOnaylananTalepler(data);
+      } catch (error) {
+        console.error("Veri çekme hatası:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOnaylananTalepler();
+  }, []); // Burada dependencies boş çünkü sadece ilk renderda çalışması gerekiyor.
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#65558F" />
+      </View>
+    );
+  }
+
+  if (onaylananTalepler.length === 0) {
+    return (
+      <View style={styles.centered}>
+        <Text style={{ color: "#555" }}>Henüz bağış yapılabilecek bir talep yok.</Text>
+      </View>
+    );
+  }
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Üst Başlık */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Vedat Doğan</Text>
-      </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      {onaylananTalepler.map((talep) => (
+        <View key={talep.id} style={styles.card}>
+          <Text style={styles.title}>{talep.bagisTuru}</Text>
+          <Text style={styles.subtitle}>Tarih: {new Date(talep.tarih).toLocaleDateString()}</Text>
 
-      {/* Bağışlar Listesi */}
-      <ScrollView style={styles.content}>
-        {donations.map((donation) => (
-          <View key={donation.id} style={styles.card}>
-            <Image source={donation.image} style={styles.cardImage} />
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>{donation.title}</Text>
-              <Text style={styles.cardSubtitle}>{donation.donor}</Text>
-              <TouchableOpacity
-                style={styles.detailButton}
-                onPress={() => navigation.navigate('BagisciOzelBagisDetay', { id: donation.id })}
-              >
-                <Text style={styles.detailButtonText}>Detay</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
+          {/* Talep Detayları Gör Butonu */}
+          <TouchableOpacity
+            style={styles.detailButton}
+            onPress={() => navigation.navigate("BagisciOzelBagisDetay", { talep })}
+          >
+            <Text style={styles.buttonText}>Detayları Gör</Text>
+          </TouchableOpacity>
 
-      
-    </SafeAreaView>
+          {/* Yeni eklenen Bağış Yap Butonu */}
+          <TouchableOpacity
+            style={styles.donateButton}
+            onPress={() => navigation.navigate("OdemeEkrani", { talep })}
+          >
+            <Text style={styles.buttonText}>Bağış Yap</Text>
+          </TouchableOpacity>
+        </View>
+      ))}
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  header: {
-    backgroundColor: '#FEF7FF',
-    paddingVertical: 30,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  headerText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#65558F',
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FEF7FF',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  tabButton: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 10,
-  },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#65558F',
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#65558F',
-  },
-  activeTabText: {
-    color: '#65558F',
-    fontWeight: 'bold',
-  },
-  content: {
-    flex: 1,
     padding: 16,
   },
-  card: {
-    flexDirection: 'row',
-    marginBottom: 16,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    overflow: 'hidden',
-  },
-  cardImage: {
-    width: 100,
-    height: 100,
-    resizeMode: 'cover',
-  },
-  cardContent: {
+  centered: {
     flex: 1,
-    padding: 8,
-    justifyContent: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
-  cardTitle: {
+  card: {
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 12,
+    elevation: 2,
+  },
+  title: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
-  cardSubtitle: {
+  subtitle: {
     fontSize: 14,
-    color: '#555',
-    marginVertical: 4,
+    color: "#666",
+    marginBottom: 8,
   },
   detailButton: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: '#65558F',
-    borderRadius: 4,
+    backgroundColor: "#65558F",
+    paddingVertical: 8,
+    borderRadius: 6,
+    alignItems: "center",
+    marginBottom: 6,
   },
-  detailButtonText: {
-    fontSize: 14,
-    color: '#fff',
-    fontWeight: 'bold',
+  donateButton: {
+    backgroundColor: "#2e7d32",
+    paddingVertical: 8,
+    borderRadius: 6,
+    alignItems: "center",
   },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FEF7FF',
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
-  },
-  footerButton: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 5,
-  },
-  footerButtonText: {
-    fontSize: 12,
-    color: '#65558F',
-    marginTop: 4,
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
 
-export default BagisAlanOzelBagis;
+export default BagisciOzelBagis;
