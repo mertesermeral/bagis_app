@@ -1,29 +1,93 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+  Image,
+  ActivityIndicator,
+} from "react-native";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
+import { useNavigation } from "@react-navigation/native";
 
-const BagisAlanAnaMenu = ({ navigation }) => {
+const BagisAlanAnaMenu = () => {
+  const navigation = useNavigation();
+  const [fonlar, setFonlar] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFonlar = async () => {
+      setLoading(true);
+      try {
+        const querySnapshot = await getDocs(collection(db, "fonlar"));
+        const fonListesi = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setFonlar(fonListesi);
+      } catch (error) {
+        console.error("Fonlar alınırken hata oluştu:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFonlar();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Orta Butonlar */}
-      <View style={styles.buttonContainer}>
-        {[ 
-          { label: 'NAKDİ BAĞIŞ TALEBİ', route: 'BagisAlanNakdiBagisTalebi' },
-          { label: 'ÖZEL BAĞIŞ TALEBİ', route: 'OzelBagis' },
-          { label: 'ACİL DURUM TALEBİ', route: 'AcilDurum' },
-        ].map((button, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.row}
-            onPress={() => navigation.navigate(button.route)}
-          >
-            <Text style={styles.rowText}>{button.label}</Text>
-            <Icon name="chevron-right" size={24} color="#333" />
-          </TouchableOpacity>
-        ))}
-      </View>
+      <ScrollView>
+        {/* Hoş Geldin Mesajı */}
+        <View style={styles.header}>
+          <Image
+            source={require("../assets/indir.png")}
+            style={styles.headerImage}
+          />
+          <Text style={styles.welcomeText}>
+            Yardım almak için bağış taleplerinizi oluşturun!
+          </Text>
+        </View>
 
-      
+        {/* Nakdi Bağış Butonu */}
+        <TouchableOpacity
+          style={styles.donationButton}
+          onPress={() => navigation.navigate("BagisAlanNakdiBagisTalebi")}
+        >
+          <Text style={styles.donationButtonText}>💰 Bağış Talebi Oluştur</Text>
+        </TouchableOpacity>
+
+        {/* Öne Çıkan Fonlar Başlık */}
+        <Text style={styles.fonHeader}>Öne Çıkan Fonlar</Text>
+
+        {/* Öne Çıkan Fonlar */}
+        {loading ? (
+          <ActivityIndicator size="small" color="#65558F" />
+        ) : (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.fonContainer}>
+            {fonlar.slice(0, 3).map((fon) => (
+              <View key={fon.id} style={styles.fonCard}>
+                <Image
+                  source={{ uri: fon.resimURL || "https://via.placeholder.com/150" }}
+                  style={styles.fonImage}
+                />
+                <Text style={styles.fonTitle}>{fon.ad}</Text>
+                <Text style={styles.fonAmount}>Mevcut: {fon.mevcutMiktar} TL</Text>
+                <TouchableOpacity
+                  style={styles.fonButton}
+                  onPress={() => navigation.navigate("FonDetay", { fon })}
+                >
+                  <Text style={styles.fonButtonText}>Bağış Talep Et</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </ScrollView>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -31,46 +95,80 @@ const BagisAlanAnaMenu = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
-  buttonContainer: {
-    flex: 1,
-    marginTop: 20,
-    paddingHorizontal: 16,
+  header: {
+    alignItems: "center",
+    padding: 20,
   },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+  headerImage: {
+    width: 80,
+    height: 80,
+    marginBottom: 10,
   },
-  rowText: {
+  welcomeText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#65558F",
+    textAlign: "center",
+  },
+  donationButton: {
+    backgroundColor: "#65558F",
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    marginHorizontal: 20,
+    marginTop: 10,
+  },
+  donationButtonText: {
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-    paddingLeft: 8,
+    fontWeight: "bold",
   },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FEF7FF',
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
+  fonHeader: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 16,
+    marginTop: 40, 
+    marginBottom: 10,
+    color: "#333",
   },
-  footerButton: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 5,
+  fonContainer: {
+    paddingLeft: 16,
   },
-  footerButtonText: {
+  fonCard: {
+    backgroundColor: "#f9f9f9",
+    borderRadius: 10,
+    padding: 10,
+    marginHorizontal: 10,
+    width: 150,
+    alignItems: "center",
+  },
+  fonImage: {
+    width: "100%",
+    height: 70,
+    borderRadius: 6,
+  },
+  fonTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginTop: 6,
+  },
+  fonAmount: {
     fontSize: 12,
-    color: '#65558F',
-    marginTop: 4,
+    color: "#666",
+    marginBottom: 4,
+  },
+  fonButton: {
+    backgroundColor: "#65558F",
+    padding: 6,
+    borderRadius: 6,
+    marginTop: 6,
+  },
+  fonButtonText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
   },
 });
 
