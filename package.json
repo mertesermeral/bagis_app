@@ -17,12 +17,18 @@
     "@react-navigation/material-top-tabs": "^7.1.1",
     "@react-navigation/native": "^7.0.14",
     "@react-navigation/stack": "^7.1.1",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "expo": "~52.0.23",
     "expo-document-picker": "~13.0.3",
     "expo-image-picker": "~16.0.6",
     "expo-secure-store": "^14.0.1",
     "expo-status-bar": "~2.0.1",
+    "express": "^4.21.2",
     "firebase": "^11.4.0",
+    "firebase-admin": "^13.2.0",
+    "iyzipay": "^2.0.64",
     "react": "18.3.1",
     "react-native": "0.76.7",
     "react-native-dotenv": "^3.4.11",
@@ -31,7 +37,8 @@
     "react-native-pager-view": "^6.5.1",
     "react-native-progress": "^5.0.1",
     "react-native-tab-view": "^4.0.5",
-    "react-native-vector-icons": "^10.2.0"
+    "react-native-vector-icons": "^10.2.0",
+    "react-native-webview": "^13.13.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
