@@ -25,6 +25,7 @@ import FonDetay from "./Admin/FonDetay";
 import FonGuncelle from "./Admin/FonGuncelle";
 import YeniFonEkle from "./Admin/YeniFonEkle";
 import TalepDetay from "./Admin/TalepDetay";
+import OdemeEkrani from "./donor/OdemeEkrani";
 const Stack = createStackNavigator();
 
 // Wrapper bileşenleri
@@ -90,6 +91,8 @@ const MainApp = () => {
       <Stack.Screen name="YeniFonEkle" component={YeniFonEkle} />
       <Stack.Screen name="FonDetay" component={FonDetay} />
       <Stack.Screen name="FonGuncelle" component={FonGuncelle} />
+      <Stack.Screen name="OdemeEkrani" component={OdemeEkrani} />
+
     </Stack.Navigator>
   );
 };
