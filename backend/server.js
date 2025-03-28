@@ -1,113 +1,85 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const iyzipay = require('iyzipay');
 
-require("dotenv").config(); // .env dosyasını kullanmak için
-console.log("API Key:", process.env.PAYMENT_API_KEY);
-console.log("Secret Key:", process.env.PAYMENT_SECRET_KEY);
-const express = require("express");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const iyzipay = require("iyzipay");
-const { db } = require("./firebaseAdmin"); // 🔥 Backend için Firebase bağlantısı
-
+require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// 🔑 Iyzico API Anahtarlarını Kullan
-const iyzipayInstance = new iyzipay({
-    apiKey: process.env.PAYMENT_API_KEY, 
-    secretKey: process.env.PAYMENT_SECRET_KEY, 
-  uri: "https://sandbox-api.iyzipay.com", // Test için sandbox kullanıyoruz
+const iyzi = new iyzipay({
+  apiKey: process.env.PAYMENT_API_KEY,
+  secretKey: process.env.PAYMENT_SECRET_KEY,
+  uri: process.env.PAYMENT_BASE_URL
 });
 
-// 🚀 Sunucunun Çalışıp Çalışmadığını Test Etmek İçin
-app.get("/", (req, res) => {
-  res.send("Iyzico Ödeme API Çalışıyor!");
-});
+app.post('/api/odeme', (req, res) => {
+  const { price, cardNumber, expireMonth, expireYear, cvc, cardHolderName } = req.body;
 
-// 📌 **Ödeme Oluşturma Endpoint**
-app.post("/odeme", async (req, res) => {
-    try {
-      const { ad, soyad, email, fiyat, telefon, paymentCard } = req.body; 
-  
-      const paymentRequest = {
-        locale: "tr",
-        conversationId: "123456789",
-        price: fiyat,
-        paidPrice: fiyat,
-        currency: "TRY",
-        installment: "1",
-        basketId: "B67832",
-        paymentGroup: "PRODUCT",
-        callbackUrl: "https://example.com/odeme-sonucu",
-        paymentCard: paymentCard, 
-        buyer: {
-          id: "BY789",
-          name: ad,
-          surname: soyad,
-          gsmNumber: telefon,
-          email: email,
-          identityNumber: "74300864791",
-          registrationAddress: "İstanbul, Türkiye",
-          city: "İstanbul",
-          country: "Türkiye",
-          ip: "85.34.78.112",
-        },
-        billingAddress: { // ✅ Yeni eklenen kısım
-          contactName: `${ad} ${soyad}`,
-          city: "İstanbul",
-          country: "Türkiye",
-          address: "Örnek Mah. Örnek Sok. No:5",
-          zipCode: "34000"
-        },
-        basketItems: [
-          {
-            id: "BI101",
-            name: "Bağış",
-            category1: "Bağış",
-            itemType: "VIRTUAL",
-            price: fiyat,
-          },
-        ],
-      };
-  
-      iyzipayInstance.payment.create(paymentRequest, async function (err, result) {
-        if (err) {
-          return res.status(400).json({ success: false, error: err });
-        }
-  
-        // 📌 Ödeme başarılıysa Firebase'e kaydet
-        if (result.status === "success") {
-            const paymentRef = db.collection("odemeKayitlari").doc(result.paymentId);
-          await paymentRef.set({
-            ad: ad,
-            soyad: soyad,
-            email: email,
-            telefon: telefon,
-            fiyat: fiyat,
-            tarih: new Date(),
-            transactionId: result.paymentId,
-            iyziCommissionFee: result.iyziCommissionFee || null, // 🔥 Eğer undefined ise null yap
-            merchantPayoutAmount: result.merchantPayoutAmount || null, // 🔥 Eğer undefined ise null yap
-            cardType: result.cardType || null, 
-            cardAssociation: result.cardAssociation || null, 
-            lastFourDigits: result.lastFourDigits || null, 
-            status: "success",
-          });
-  
-          console.log("Ödeme başarıyla kaydedildi:", result.paymentId);
-        }
-  
-        res.status(200).json({ success: true, data: result });
-      });
-    } catch (error) {
-      console.error("Ödeme hatası:", error);
-      res.status(500).json({ success: false, message: "Sunucu hatası", error });
-    }
+  const request = {
+    locale: 'tr',
+    conversationId: '123456789',
+    price: price,
+    paidPrice: price,
+    currency: 'TRY',
+    installment: '1',
+    basketId: 'B67832',
+    paymentChannel: 'WEB',
+    paymentGroup: 'PRODUCT',
+    paymentCard: {
+      cardHolderName,
+      cardNumber,
+      expireMonth,
+      expireYear,
+      cvc,
+      registerCard: '0'
+    },
+    buyer: {
+      id: 'BY789',
+      name: 'Ad',
+      surname: 'Soyad',
+      gsmNumber: '+905350000000',
+      email: 'email@ornek.com',
+      identityNumber: '74300864791',
+      lastLoginDate: '2020-10-05 12:43:35',
+      registrationDate: '2013-04-21 15:12:09',
+      registrationAddress: 'Adres bilgisi',
+      ip: '85.34.78.112',
+      city: 'Istanbul',
+      country: 'Turkey',
+      zipCode: '34732'
+    },
+    shippingAddress: {
+      contactName: 'Ad Soyad',
+      city: 'Istanbul',
+      country: 'Turkey',
+      address: 'Kargo adresi',
+      zipCode: '34742'
+    },
+    billingAddress: {
+      contactName: 'Ad Soyad',
+      city: 'Istanbul',
+      country: 'Turkey',
+      address: 'Fatura adresi',
+      zipCode: '34742'
+    },
+    basketItems: [
+      {
+        id: 'BI101',
+        name: 'Test Ürünü',
+        category1: 'Elektronik',
+        itemType: 'PHYSICAL',
+        price: price
+      }
+    ]
+  };
+
+  iyzi.payment.create(request, (err, result) => {
+    if (err) return res.status(500).json({ error: err });
+    res.json(result);
   });
+});
 
-  
-
-// **Sunucuyu Çalıştır**
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server ${PORT} portunda çalışıyor...`));
+app.listen(3000, () => console.log('Sunucu 3000 portunda çalışıyor...'));
