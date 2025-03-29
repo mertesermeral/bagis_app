@@ -11,8 +11,9 @@ import {
   Platform,
 } from 'react-native';
 import axios from 'axios';
-import { doc, updateDoc, increment } from "firebase/firestore";
+import { collection, addDoc,doc, updateDoc, increment } from "firebase/firestore";
 import { db } from "../firebase"; // Firestore bağlantısı
+import { getAuth } from "firebase/auth"; 
 
 export default function OdemeEkrani({ route }) {
   const { fon } = route.params; // ✅ Fon verisini al
@@ -53,6 +54,19 @@ export default function OdemeEkrani({ route }) {
       await updateDoc(doc(db, "fonlar", fon.id), {
         mevcutMiktar: increment(Number(price)) // Bağış tutarı kadar artır
       });
+      
+      // 🆕 Bağışı "bagislar" koleksiyonuna ekle
+      const auth = getAuth();
+      const user = auth.currentUser;
+      
+      await addDoc(collection(db, "bagislar"), {
+        kullaniciId: user.uid,
+        fonId: fon.id,
+        fonAdi: fon.ad,
+        tutar: Number(price),
+        tarih: new Date(),
+      });
+      
       
       Alert.alert('Başarılı', 'Bağışınız için teşekkür ederiz!');
     } catch (error) {
