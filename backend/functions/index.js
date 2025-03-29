@@ -34,7 +34,9 @@ exports.iyzicoOdeme = functions
       expireMonth,
       expireYear,
       cvc,
-      cardHolderName
+      cardHolderName,
+      firstName,       
+      lastName         
     } = req.body;
 
     const request = {
@@ -57,8 +59,8 @@ exports.iyzicoOdeme = functions
       },
       buyer: {
         id: 'BY789',
-        name: 'Ad',
-        surname: 'Soyad',
+        name: firstName || 'Ad',
+        surname: lastName || 'Soyad',
         gsmNumber: '+905350000000',
         email: 'email@ornek.com',
         identityNumber: '74300864791',
