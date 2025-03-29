@@ -72,10 +72,10 @@ const BagisciAnaMenu = () => {
               {/* Bağış Yap Butonu */}
               <TouchableOpacity
                 style={styles.donateButton}
-                onPress={() => navigation.navigate("OdemeEkrani", { fon: item })}
+                onPress={() => navigation.navigate("BagisciFonDetay", { fon: item })}
               >
                 <Icon name="cash" size={18} color="#fff" />
-                <Text style={styles.donateButtonText}>Bağış Yap</Text>
+                <Text style={styles.donateButtonText}>Detayları Gör</Text>
               </TouchableOpacity>
             </View>
           )}
