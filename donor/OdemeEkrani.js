@@ -62,15 +62,15 @@ export default function OdemeEkrani({ route }) {
       const auth = getAuth();
       const user = auth.currentUser;
       
-      if (fon?.id) {
-        await addDoc(collection(db, "bagislar"), {
-          kullaniciId: user.uid,
-          fonId: fon.id,
-          fonAdi: fon.ad,
-          tutar: Number(price),
-          tarih: new Date(),
-        });
-      }
+      await addDoc(collection(db, "bagislar"), {
+        kullaniciId: user.uid,
+        fonId: fon?.id || null,
+        fonAdi: fon?.ad || (talep?.bagisTuru || "Özel Bağış"),
+        talepId: talep?.id || null, // 🔹 özel bağışlar için!
+        tutar: Number(price),
+        tarih: new Date(),
+      });
+      
       if (talep?.id) {
         await updateDoc(doc(db, "bagisBasvurulari", talep.id), {
           status: "tamamlandi"

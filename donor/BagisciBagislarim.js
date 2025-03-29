@@ -7,7 +7,14 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { getAuth } from "firebase/auth";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 import { db } from "../firebase";
 
 const BagisciBagislarim = () => {
@@ -26,7 +33,39 @@ const BagisciBagislarim = () => {
           where("kullaniciId", "==", user.uid)
         );
         const querySnapshot = await getDocs(q);
-        const data = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const data = await Promise.all(
+          querySnapshot.docs.map(async (docSnap) => {
+            const data = docSnap.data();
+
+            // Özel bağış (talep üzerinden yapılan)
+            if (data.talepId) {
+              try {
+                const talepRef = doc(db, "bagisBasvurulari", data.talepId);
+                const talepSnap = await getDoc(talepRef);
+                const talepData = talepSnap.exists() ? talepSnap.data() : {};
+                return {
+                  id: docSnap.id,
+                  fonAdi: talepData.bagisTuru || "Özel Bağış",
+                  ...data,
+                };
+              } catch (error) {
+                console.warn("Talep verisi alınamadı", error);
+                return {
+                  id: docSnap.id,
+                  fonAdi: "Özel Bağış",
+                  ...data,
+                };
+              }
+            }
+
+            // Fon üzerinden yapılan bağış
+            return {
+              id: docSnap.id,
+              fonAdi: data.fonAdi || "Fon Bağışı",
+              ...data,
+            };
+          })
+        );
         setBagislar(data);
       } catch (error) {
         console.error("Bağışlar alınırken hata: ", error);
@@ -42,7 +81,9 @@ const BagisciBagislarim = () => {
     <View style={styles.card}>
       <Text style={styles.fonAdi}>{item.fonAdi}</Text>
       <Text style={styles.tutar}>Tutar: {item.tutar} TL</Text>
-      <Text style={styles.tarih}>Tarih: {new Date(item.tarih.seconds * 1000).toLocaleString()}</Text>
+      <Text style={styles.tarih}>
+        Tarih: {new Date(item.tarih?.seconds * 1000).toLocaleString()}
+      </Text>
     </View>
   );
 
