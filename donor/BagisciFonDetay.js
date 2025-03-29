@@ -17,6 +17,8 @@ const screenWidth = Dimensions.get("window").width;
 const BagisciFonDetay = ({ route, navigation }) => {
   const { fon } = route.params;
   const [digerFonlar, setDigerFonlar] = useState([]);
+  const progress = Math.min(fon.mevcutMiktar / fon.hedefMiktar, 1);
+
 
   useEffect(() => {
     const fetchFonlar = async () => {
@@ -43,6 +45,13 @@ const BagisciFonDetay = ({ route, navigation }) => {
         <Text style={styles.infoText}>🎯 Hedef: {fon.hedefMiktar} TL</Text>
         <Text style={styles.infoText}>💰 Toplanan: {fon.mevcutMiktar} TL</Text>
       </View>
+
+      {/* ✅ İlerleme Çubuğu */}
+      <View style={styles.progressContainer}>
+        <View style={[styles.progressBar, { width: `${progress * 100}%` }]} />
+      </View>
+      <Text style={styles.progressText}>%{Math.floor(progress * 100)} tamamlandı</Text>
+
 
       <TouchableOpacity
         style={styles.donateButton}
@@ -156,6 +165,25 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 5,
   },
+  progressBarContainer: {
+    width: '100%',
+    height: 16,
+    backgroundColor: '#eee',
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginVertical: 10,
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#4caf50',
+  },
+  progressText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  
 });
 
 export default BagisciFonDetay;
