@@ -11,8 +11,11 @@ import {
   Platform,
 } from 'react-native';
 import axios from 'axios';
+import { doc, updateDoc, increment } from "firebase/firestore";
+import { db } from "../firebase"; // Firestore bağlantısı
 
-export default function OdemeEkrani() {
+export default function OdemeEkrani({ route }) {
+  const { fon } = route.params; // ✅ Fon verisini al
 
   const [price, setPrice] = useState('');
   const [cardNumber, setCardNumber] = useState('');
@@ -45,7 +48,13 @@ export default function OdemeEkrani() {
           
         }
       );
-      Alert.alert('Başarılı', JSON.stringify(response.data));
+      
+      // 🔄 Başarılı ise veritabanında ilgili fonun mevcut miktarını artır
+      await updateDoc(doc(db, "fonlar", fon.id), {
+        mevcutMiktar: increment(Number(price)) // Bağış tutarı kadar artır
+      });
+      
+      Alert.alert('Başarılı', 'Bağışınız için teşekkür ederiz!');
     } catch (error) {
       console.error(error);
       Alert.alert('Hata', 'Ödeme sırasında bir hata oluştu.');

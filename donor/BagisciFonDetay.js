@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -9,53 +9,63 @@ import {
   FlatList,
   Dimensions,
 } from "react-native";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
 const screenWidth = Dimensions.get("window").width;
 
 const BagisciFonDetay = ({ route, navigation }) => {
-  const { fon } = route.params;
+  const [aktifFon, setAktifFon] = useState(route.params.fon);
   const [digerFonlar, setDigerFonlar] = useState([]);
-  const progress = Math.min(fon.mevcutMiktar / fon.hedefMiktar, 1);
 
+  const progress = useMemo(() => {
+    return Math.min(aktifFon.mevcutMiktar / aktifFon.hedefMiktar, 1);
+  }, [aktifFon]);
 
   useEffect(() => {
     const fetchFonlar = async () => {
       const querySnapshot = await getDocs(collection(db, "fonlar"));
       const fetchedFonlar = querySnapshot.docs
         .map((doc) => ({ id: doc.id, ...doc.data() }))
-        .filter((item) => item.id !== fon.id); // Aynı fonu tekrar gösterme
+        .filter((item) => item.id !== aktifFon.id);
       setDigerFonlar(fetchedFonlar);
     };
 
+    const fetchUpdatedFon = async () => {
+      const docRef = doc(db, "fonlar", aktifFon.id);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setAktifFon({ id: docSnap.id, ...docSnap.data() });
+      }
+    };
+
     fetchFonlar();
-  }, []);
+    fetchUpdatedFon();
+  }, [aktifFon.id]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Image
-        source={{ uri: fon.resimURL || "https://via.placeholder.com/150" }}
+        source={{ uri: aktifFon.resimURL || "https://via.placeholder.com/150" }}
         style={styles.image}
       />
-      <Text style={styles.title}>{fon.ad}</Text>
-      <Text style={styles.description}>{fon.aciklama}</Text>
+      <Text style={styles.title}>{aktifFon.ad}</Text>
+      <Text style={styles.description}>{aktifFon.aciklama}</Text>
 
       <View style={styles.infoBox}>
-        <Text style={styles.infoText}>🎯 Hedef: {fon.hedefMiktar} TL</Text>
-        <Text style={styles.infoText}>💰 Toplanan: {fon.mevcutMiktar} TL</Text>
+        <Text style={styles.infoText}>🎯 Hedef: {aktifFon.hedefMiktar} TL</Text>
+        <Text style={styles.infoText}>💰 Toplanan: {aktifFon.mevcutMiktar} TL</Text>
       </View>
 
       {/* ✅ İlerleme Çubuğu */}
-      <View style={styles.progressContainer}>
-        <View style={[styles.progressBar, { width: `${progress * 100}%` }]} />
+      <View style={styles.progressBarContainer}>
+        <View style={[styles.progressBarFill, { width: `${progress * 100}%` }]} />
       </View>
       <Text style={styles.progressText}>%{Math.floor(progress * 100)} tamamlandı</Text>
 
-
       <TouchableOpacity
         style={styles.donateButton}
-        onPress={() => navigation.navigate("OdemeEkrani", { fon })}
+        onPress={() => navigation.navigate("OdemeEkrani", { fon: aktifFon })}
       >
         <Text style={styles.buttonText}>Bağış Yap</Text>
       </TouchableOpacity>
@@ -73,12 +83,11 @@ const BagisciFonDetay = ({ route, navigation }) => {
               <TouchableOpacity
                 style={styles.otherCard}
                 onPress={() => {
-                    navigation.goBack();
-                    setTimeout(() => {
-                      navigation.navigate("BagisciFonDetay", { fon: item });
-                    }, 100);
-                  }}
-                  
+                  navigation.goBack();
+                  setTimeout(() => {
+                    navigation.navigate("BagisciFonDetay", { fon: item });
+                  }, 100);
+                }}
               >
                 <Image source={{ uri: item.resimURL }} style={styles.otherImage} />
                 <Text style={styles.otherTitle}>{item.ad}</Text>
@@ -128,6 +137,24 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: "#444",
   },
+  progressBarContainer: {
+    width: '100%',
+    height: 16,
+    backgroundColor: '#eee',
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginVertical: 10,
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#4caf50',
+  },
+  progressText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
   donateButton: {
     backgroundColor: "#2e7d32",
     paddingVertical: 12,
@@ -165,25 +192,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 5,
   },
-  progressBarContainer: {
-    width: '100%',
-    height: 16,
-    backgroundColor: '#eee',
-    borderRadius: 10,
-    overflow: 'hidden',
-    marginVertical: 10,
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: '#4caf50',
-  },
-  progressText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  
 });
 
 export default BagisciFonDetay;
