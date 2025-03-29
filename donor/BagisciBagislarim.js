@@ -1,142 +1,124 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Image } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
+import { getAuth } from "firebase/auth";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
 
-const BagisciBagislarim = ({ navigation }) => {
-  const donations = [
-    {
-      id: 1,
-      title: 'Eğitim Bağışı',
-      amount: '1000₺',
-      image: require('../assets/egitim.jpg'), // Replace with your image path
-    },
-    {
-      id: 2,
-      title: 'Fatura Yardımı',
-      amount: '1500₺',
-      image: require('../assets/fatura.jpg'), // Replace with your image path
-    },
-  ];
+const BagisciBagislarim = () => {
+  const [bagislar, setBagislar] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBagislar = async () => {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) return;
+
+      try {
+        const q = query(
+          collection(db, "bagislar"),
+          where("kullaniciId", "==", user.uid)
+        );
+        const querySnapshot = await getDocs(q);
+        const data = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setBagislar(data);
+      } catch (error) {
+        console.error("Bağışlar alınırken hata: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBagislar();
+  }, []);
+
+  const renderItem = ({ item }) => (
+    <View style={styles.card}>
+      <Text style={styles.fonAdi}>{item.fonAdi}</Text>
+      <Text style={styles.tutar}>Tutar: {item.tutar} TL</Text>
+      <Text style={styles.tarih}>Tarih: {new Date(item.tarih.seconds * 1000).toLocaleString()}</Text>
+    </View>
+  );
+
+  if (loading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#65558F" />
+      </View>
+    );
+  }
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Üst Başlık */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Vedat Doğan</Text>
-      </View>
-
-      {/* Bağışlarım Listesi */}
-      <ScrollView style={styles.content}>
-        {donations.map((donation) => (
-          <View key={donation.id} style={styles.card}>
-            <Image source={donation.image} style={styles.cardImage} />
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>{donation.title}</Text>
-              <Text style={styles.cardAmount}>{donation.amount}</Text>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
-
-      
-    </SafeAreaView>
+    <View style={styles.container}>
+      <Text style={styles.header}>Bağışlarım</Text>
+      {bagislar.length === 0 ? (
+        <Text style={styles.noData}>Hiç bağış yapmadınız.</Text>
+      ) : (
+        <FlatList
+          data={bagislar}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContainer}
+        />
+      )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    padding: 20,
+    backgroundColor: "#fff",
   },
   header: {
-    backgroundColor: '#FEF7FF',
-    paddingVertical: 30,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  headerText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#65558F',
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FEF7FF',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  tabButton: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 10,
-  },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#65558F',
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#65558F',
-  },
-  activeTabText: {
-    color: '#65558F',
-    fontWeight: 'bold',
-  },
-  content: {
-    flex: 1,
-    padding: 16,
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 16,
+    textAlign: "center",
+    color: "#333",
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    overflow: 'hidden',
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#ddd',
+    backgroundColor: "#f2f2f2",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 12,
+    elevation: 2,
   },
-  cardImage: {
-    width: '100%',
-    height: 150,
-    resizeMode: 'cover',
+  fonAdi: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
   },
-  cardContent: {
-    padding: 16,
-  },
-  cardTitle: {
+  tutar: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  cardAmount: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#65558F',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FEF7FF',
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
-  },
-  footerButton: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 5,
-  },
-  footerButtonText: {
-    fontSize: 12,
-    color: '#65558F',
+    color: "#444",
     marginTop: 4,
+  },
+  tarih: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 2,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noData: {
+    fontSize: 16,
+    textAlign: "center",
+    color: "#777",
+    marginTop: 20,
+  },
+  listContainer: {
+    paddingBottom: 20,
   },
 });
 
