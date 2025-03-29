@@ -10,6 +10,7 @@ import {
   Dimensions,
 } from "react-native";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { useFocusEffect } from '@react-navigation/native';
 import { db } from "../firebase";
 
 const screenWidth = Dimensions.get("window").width;
@@ -22,26 +23,28 @@ const BagisciFonDetay = ({ route, navigation }) => {
     return Math.min(aktifFon.mevcutMiktar / aktifFon.hedefMiktar, 1);
   }, [aktifFon]);
 
-  useEffect(() => {
-    const fetchFonlar = async () => {
-      const querySnapshot = await getDocs(collection(db, "fonlar"));
-      const fetchedFonlar = querySnapshot.docs
-        .map((doc) => ({ id: doc.id, ...doc.data() }))
-        .filter((item) => item.id !== aktifFon.id);
-      setDigerFonlar(fetchedFonlar);
-    };
+  const fetchFonlar = async () => {
+    const querySnapshot = await getDocs(collection(db, "fonlar"));
+    const fetchedFonlar = querySnapshot.docs
+      .map((doc) => ({ id: doc.id, ...doc.data() }))
+      .filter((item) => item.id !== aktifFon.id);
+    setDigerFonlar(fetchedFonlar);
+  };
 
-    const fetchUpdatedFon = async () => {
-      const docRef = doc(db, "fonlar", aktifFon.id);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setAktifFon({ id: docSnap.id, ...docSnap.data() });
-      }
-    };
+  const fetchUpdatedFon = async () => {
+    const docRef = doc(db, "fonlar", aktifFon.id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      setAktifFon({ id: docSnap.id, ...docSnap.data() });
+    }
+  };
 
-    fetchFonlar();
-    fetchUpdatedFon();
-  }, [aktifFon.id]);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchFonlar();
+      fetchUpdatedFon();
+    }, [aktifFon.id])
+  );
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -83,14 +86,12 @@ const BagisciFonDetay = ({ route, navigation }) => {
               <TouchableOpacity
                 style={styles.otherCard}
                 onPress={() => {
-                  navigation.goBack();
-                  setTimeout(() => {
-                    navigation.navigate("BagisciFonDetay", { fon: item });
-                  }, 100);
+                  navigation.push("BagisciFonDetay", { fon: item });
                 }}
               >
                 <Image source={{ uri: item.resimURL }} style={styles.otherImage} />
                 <Text style={styles.otherTitle}>{item.ad}</Text>
+                <Text style={styles.otherButton}>Detay</Text>
               </TouchableOpacity>
             )}
           />
@@ -181,16 +182,28 @@ const styles = StyleSheet.create({
     width: 140,
     marginRight: 10,
     alignItems: "center",
+    backgroundColor: "#f0f0f0",
+    borderRadius: 10,
+    padding: 10,
+    elevation: 2,
   },
   otherImage: {
     width: 130,
     height: 90,
     borderRadius: 8,
+    marginBottom: 5,
   },
   otherTitle: {
     fontSize: 14,
     textAlign: "center",
-    marginTop: 5,
+    fontWeight: "600",
+    color: "#333",
+  },
+  otherButton: {
+    marginTop: 4,
+    fontSize: 12,
+    color: "#2e7d32",
+    fontWeight: "bold",
   },
 });
 
