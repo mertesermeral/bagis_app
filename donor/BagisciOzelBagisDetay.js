@@ -89,6 +89,11 @@ const BagisciOzelBagisDetay = ({ route, navigation }) => {
       {talepDetay.gidaTuru && <Text style={styles.label}>Gıda Türü: {talepDetay.gidaTuru}</Text>}
       {talepDetay.faturaTuru && <Text style={styles.label}>Fatura Türü: {talepDetay.faturaTuru}</Text>}
       {talepDetay.faturaTutari && <Text style={styles.label}>Fatura Tutarı: {talepDetay.faturaTutari} TL</Text>}
+      {talepDetay.adminTutar && (
+          <Text style={styles.label}>
+           💵 Belirlenen Tutar: {talepDetay.adminTutar} TL
+          </Text>
+      )}
       {talepDetay.digerBaslik && <Text style={styles.label}>Başlık: {talepDetay.digerBaslik}</Text>}
       {talepDetay.digerAciklama && <Text style={styles.label}>Açıklama: {talepDetay.digerAciklama}</Text>}
 

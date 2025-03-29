@@ -16,9 +16,9 @@ import { db } from "../firebase"; // Firestore bağlantısı
 import { getAuth } from "firebase/auth"; 
 
 export default function OdemeEkrani({ route }) {
-  const { fon } = route.params; // ✅ Fon verisini al
+  const { fon, talep } = route.params || {}; // ✅ Fon verisini al
 
-  const [price, setPrice] = useState('');
+  const [price, setPrice] = useState(talep?.adminTutar?.toString() || '');
   const [cardNumber, setCardNumber] = useState('');
   const [expireMonth, setExpireMonth] = useState('');
   const [expireYear, setExpireYear] = useState('');
@@ -51,21 +51,31 @@ export default function OdemeEkrani({ route }) {
       );
       
       // 🔄 Başarılı ise veritabanında ilgili fonun mevcut miktarını artır
-      await updateDoc(doc(db, "fonlar", fon.id), {
-        mevcutMiktar: increment(Number(price)) // Bağış tutarı kadar artır
-      });
+      if (fon?.id) {
+        await updateDoc(doc(db, "fonlar", fon.id), {
+          mevcutMiktar: increment(Number(price))
+        });
+      }
+      
       
       // 🆕 Bağışı "bagislar" koleksiyonuna ekle
       const auth = getAuth();
       const user = auth.currentUser;
       
-      await addDoc(collection(db, "bagislar"), {
-        kullaniciId: user.uid,
-        fonId: fon.id,
-        fonAdi: fon.ad,
-        tutar: Number(price),
-        tarih: new Date(),
-      });
+      if (fon?.id) {
+        await addDoc(collection(db, "bagislar"), {
+          kullaniciId: user.uid,
+          fonId: fon.id,
+          fonAdi: fon.ad,
+          tutar: Number(price),
+          tarih: new Date(),
+        });
+      }
+      if (talep?.id) {
+        await updateDoc(doc(db, "bagisBasvurulari", talep.id), {
+          status: "tamamlandi"
+        });
+      }      
       
       
       Alert.alert('Başarılı', 'Bağışınız için teşekkür ederiz!');
@@ -81,13 +91,14 @@ export default function OdemeEkrani({ route }) {
       style={{ flex: 1 }}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.label}>Tutar (₺)</Text>
-        <TextInput
-          style={styles.input}
-          value={price}
-          onChangeText={setPrice}
-          keyboardType="numeric"
-        />
+      <Text style={styles.label}>Tutar (₺)</Text>
+      <TextInput
+         style={[styles.input, talep?.adminTutar && { backgroundColor: "#eee" }]}
+         value={price}
+         onChangeText={setPrice}
+         keyboardType="numeric"
+         editable={!talep?.adminTutar} // AdminTutar varsa düzenlenemez
+      />
 
         <Text style={styles.label}>Kart Numarası</Text>
         <TextInput

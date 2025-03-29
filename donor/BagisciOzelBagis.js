@@ -19,12 +19,15 @@ const BagisciOzelBagis = () => {
   useEffect(() => {
     const fetchOnaylananTalepler = async () => {
       try {
-        const q = query(collection(db, "bagisBasvurulari"), where("onay", "==", "onaylandi"));
+        const q = query(
+          collection(db, "bagisBasvurulari"),
+          where("onay", "==", "onaylandi")
+        );
         const snapshot = await getDocs(q);
-        const data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const data = snapshot.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .filter((item) => item.status !== "tamamlandi"); // 👈 client-side filtre
+        
         setOnaylananTalepler(data);
       } catch (error) {
         console.error("Veri çekme hatası:", error);
