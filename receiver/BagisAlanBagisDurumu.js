@@ -19,7 +19,7 @@ const BagisAlanBagisDurumu = () => {
       try {
         const user = getAuth().currentUser;
         if (!user) return;
-  
+
         const q = query(
           collection(db, "bagisBasvurulari"),
           where("kullaniciId", "==", user.uid)
@@ -36,10 +36,9 @@ const BagisAlanBagisDurumu = () => {
         setLoading(false);
       }
     };
-  
-    fetchTalepler(); // burada çağır
+
+    fetchTalepler();
   }, []);
-  
 
   if (loading) {
     return (
@@ -66,11 +65,18 @@ const BagisAlanBagisDurumu = () => {
             Talep Tarihi: {new Date(talep.tarih).toLocaleDateString('tr-TR')}
           </Text>
           <Text style={[styles.durum, getDurumStyle(talep.onay)]}>
-            Durum: {talep.onay}
+            Durum: {talep.status === 'tamamlandi' ? 'Tamamlandı' : talep.onay}
           </Text>
+
           {talep.onay === 'reddedildi' && talep.redAciklamasi && (
             <Text style={styles.redNedeni}>
               ❌ Red Sebebi: {talep.redAciklamasi}
+            </Text>
+          )}
+
+          {talep.status === 'tamamlandi' && (
+            <Text style={styles.tamamlandiInfo}>
+              ✅ Bağışınız tamamlandı. En kısa zamanda sizinle iletişime geçilecektir.
             </Text>
           )}
         </View>
@@ -127,6 +133,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFEBEE',
     padding: 8,
     borderRadius: 6,
+  },
+  tamamlandiInfo: {
+    marginTop: 8,
+    fontSize: 13,
+    color: '#2e7d32',
+    fontStyle: 'italic',
   },
 });
 
