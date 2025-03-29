@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
@@ -14,32 +15,38 @@ import { useNavigation } from "@react-navigation/native";
 const BagisciOzelBagis = () => {
   const [onaylananTalepler, setOnaylananTalepler] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
 
+  const fetchOnaylananTalepler = async () => {
+    try {
+      const q = query(
+        collection(db, "bagisBasvurulari"),
+        where("onay", "==", "onaylandi")
+      );
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((item) => item.status !== "tamamlandi");
+
+      setOnaylananTalepler(data);
+    } catch (error) {
+      console.error("Veri çekme hatası:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchOnaylananTalepler = async () => {
-      try {
-        const q = query(
-          collection(db, "bagisBasvurulari"),
-          where("onay", "==", "onaylandi")
-        );
-        const snapshot = await getDocs(q);
-        const data = snapshot.docs
-          .map((doc) => ({ id: doc.id, ...doc.data() }))
-          .filter((item) => item.status !== "tamamlandi"); // 👈 client-side filtre
-        
-        setOnaylananTalepler(data);
-      } catch (error) {
-        console.error("Veri çekme hatası:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchOnaylananTalepler();
-  }, []); // Burada dependencies boş çünkü sadece ilk renderda çalışması gerekiyor.
+  }, []);
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchOnaylananTalepler();
+  }, []);
 
-  if (loading) {
+  if (loading && !refreshing) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color="#65558F" />
@@ -56,7 +63,12 @@ const BagisciOzelBagis = () => {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }
+        >
       {onaylananTalepler.map((talep) => (
         <View key={talep.id} style={styles.card}>
           <Text style={styles.title}>{talep.bagisTuru}</Text>
