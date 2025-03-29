@@ -20,7 +20,7 @@ const TalepDetay = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [redModalVisible, setRedModalVisible] = useState(false);
   const [redSebep, setRedSebep] = useState("");
-
+  const [adminTutar, setAdminTutar] = useState(talep.adminTutar ? talep.adminTutar.toString() : "");
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -47,9 +47,17 @@ const TalepDetay = ({ route, navigation }) => {
   };
 
   const handleOnayla = async () => {
+    if (!adminTutar || isNaN(adminTutar)) {
+      Alert.alert("Hata", "Lütfen geçerli bir tutar girin.");
+      return;
+    }
+
     try {
       const talepRef = doc(db, "bagisBasvurulari", talep.id);
-      await updateDoc(talepRef, { onay: "onaylandi" });
+      await updateDoc(talepRef, {
+        onay: "onaylandi",
+        adminTutar: parseFloat(adminTutar)
+      });
       Alert.alert("Başarılı", "Talep başarıyla onaylandı.");
       navigation.goBack();
     } catch (error) {
@@ -57,14 +65,13 @@ const TalepDetay = ({ route, navigation }) => {
       Alert.alert("Hata", "Talep onaylanamadı.");
     }
   };
-  
 
   const handleReddet = async () => {
     if (!redSebep.trim()) {
       Alert.alert("Hata", "Lütfen red sebebini girin.");
       return;
     }
-  
+
     try {
       const talepRef = doc(db, "bagisBasvurulari", talep.id);
       await updateDoc(talepRef, {
@@ -80,111 +87,108 @@ const TalepDetay = ({ route, navigation }) => {
     }
   };
 
-  
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
-    <Text style={styles.title}>Bağış Türü: {talep.bagisTuru}</Text>
-    <Text style={styles.date}>Tarih: {new Date(talep.tarih).toLocaleDateString('tr-TR')}</Text>
+      <Text style={styles.title}>Bağış Türü: {talep.bagisTuru}</Text>
+      <Text style={styles.date}>Tarih: {new Date(talep.tarih).toLocaleDateString('tr-TR')}</Text>
 
-    {loading ? (
-      <ActivityIndicator size="small" color="#65558F" style={{ marginVertical: 10 }} />
-    ) : (
-      kullanici && (
-        <View style={styles.userInfo}>
-          <Image
-            source={{ uri: kullanici.photoURL || 'https://via.placeholder.com/100' }}
-            style={styles.userImage}
+      {loading ? (
+        <ActivityIndicator size="small" color="#65558F" style={{ marginVertical: 10 }} />
+      ) : (
+        kullanici && (
+          <View style={styles.userInfo}>
+            <Image
+              source={{ uri: kullanici.photoURL || 'https://via.placeholder.com/100' }}
+              style={styles.userImage}
+            />
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={styles.userTitle}>Başvuru Sahibi:</Text>
+              <Text style={styles.userText}>
+                Ad Soyad: {kullanici.firstName || ''} {kullanici.lastName || ''}
+              </Text>
+              <Text style={styles.userText}>Email: {kullanici.email || '-'}</Text>
+              <Text style={styles.userText}>Telefon: {kullanici.phone || '-'}</Text>
+            </View>
+          </View>
+        )
+      )}
+
+      {/* Talep detayları */}
+      {talep.aciklama && <Text style={styles.label}>Açıklama: {talep.aciklama}</Text>}
+      {talep.miktar && <Text style={styles.label}>Miktar: {talep.miktar} TL</Text>}
+      {talep.tcNo && <Text style={styles.label}>TC No: {talep.tcNo}</Text>}
+      {talep.adres && <Text style={styles.label}>Adres: {talep.adres}</Text>}
+      {talep.gidaTuru && <Text style={styles.label}>Gıda Türü: {talep.gidaTuru}</Text>}
+      {talep.gelirDurumu && <Text style={styles.label}>Gelir Durumu: {talep.gelirDurumu}</Text>}
+      {talep.faturaTuru && <Text style={styles.label}>Fatura Türü: {talep.faturaTuru}</Text>}
+      {talep.faturaTutari && <Text style={styles.label}>Fatura Tutarı: {talep.faturaTutari} TL</Text>}
+      {talep.digerBaslik && <Text style={styles.label}>Başlık: {talep.digerBaslik}</Text>}
+      {talep.digerAciklama && <Text style={styles.label}>Açıklama: {talep.digerAciklama}</Text>}
+
+      {/* Admin fiyat girişi */}
+      {talep.onay === "beklemede" && (
+        <>
+          <Text style={[styles.label, { marginTop: 16 }]}>Tutar Belirle (₺)</Text>
+          <TextInput
+            style={styles.input}
+            value={adminTutar}
+            onChangeText={setAdminTutar}
+            placeholder="Örn: 250"
+            keyboardType="numeric"
           />
-          <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.userTitle}>Başvuru Sahibi:</Text>
-            <Text style={styles.userText}>
-              Ad Soyad: {kullanici.firstName || ''} {kullanici.lastName || ''}
-            </Text>
-            <Text style={styles.userText}>Email: {kullanici.email || '-'}</Text>
-            <Text style={styles.userText}>Telefon: {kullanici.phone || '-'}</Text>
+        </>
+      )}
+
+      {talep.belgeURL && (
+        <TouchableOpacity style={styles.pdfBox} onPress={handlePdfOpen}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={styles.pdfIcon}>📄</Text>
+            <Text style={styles.pdfName}>{talep.belgeAdi || 'PDF Belgesi'}</Text>
+          </View>
+          <Text style={styles.pdfButton}>Görüntüle</Text>
+        </TouchableOpacity>
+      )}
+
+      {redModalVisible && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Red Sebebi</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Neden reddediyorsunuz?"
+              value={redSebep}
+              onChangeText={setRedSebep}
+              multiline
+            />
+            <TouchableOpacity style={styles.modalButton} onPress={handleReddet}>
+              <Text style={styles.modalButtonText}>Gönder</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setRedModalVisible(false)}>
+              <Text style={styles.modalCancel}>İptal</Text>
+            </TouchableOpacity>
           </View>
         </View>
-      )
-    )}
+      )}
 
-    {/* Talep detayları */}
-    {talep.aciklama && <Text style={styles.label}>Açıklama: {talep.aciklama}</Text>}
-    {talep.miktar && <Text style={styles.label}>Miktar: {talep.miktar} TL</Text>}
-    {talep.tcNo && <Text style={styles.label}>TC No: {talep.tcNo}</Text>}
-    {talep.adres && <Text style={styles.label}>Adres: {talep.adres}</Text>}
-    {talep.gidaTuru && <Text style={styles.label}>Gıda Türü: {talep.gidaTuru}</Text>}
-    {talep.gelirDurumu && <Text style={styles.label}>Gelir Durumu: {talep.gelirDurumu}</Text>}
-    {talep.faturaTuru && <Text style={styles.label}>Fatura Türü: {talep.faturaTuru}</Text>}
-    {talep.faturaTutari && <Text style={styles.label}>Fatura Tutarı: {talep.faturaTutari} TL</Text>}
-    {talep.digerBaslik && <Text style={styles.label}>Başlık: {talep.digerBaslik}</Text>}
-    {talep.digerAciklama && <Text style={styles.label}>Açıklama: {talep.digerAciklama}</Text>}
+      {talep.onay === "beklemede" && (
+        <>
+          <TouchableOpacity style={styles.onayButton} onPress={handleOnayla}>
+            <Text style={styles.onayButtonText}>Onayla</Text>
+          </TouchableOpacity>
 
-    {/* PDF varsa göster */}
-    {talep.belgeURL && (
-      <TouchableOpacity style={styles.pdfBox} onPress={handlePdfOpen}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={styles.pdfIcon}>📄</Text>
-          <Text style={styles.pdfName}>{talep.belgeAdi || 'PDF Belgesi'}</Text>
-        </View>
-        <Text style={styles.pdfButton}>Görüntüle</Text>
-      </TouchableOpacity>
-    )}
-    {redModalVisible && (
-  <View style={styles.modalOverlay}>
-    <View style={styles.modalContainer}>
-      <Text style={styles.modalTitle}>Red Sebebi</Text>
-      <TextInput
-        style={styles.modalInput}
-        placeholder="Neden reddediyorsunuz?"
-        value={redSebep}
-        onChangeText={setRedSebep}
-        multiline
-      />
-      <TouchableOpacity style={styles.modalButton} onPress={handleReddet}>
-        <Text style={styles.modalButtonText}>Gönder</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => setRedModalVisible(false)}>
-        <Text style={styles.modalCancel}>İptal</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-)}
-
-    {/* Onay butonu sadece henüz onaylanmamışsa gösterilir */}
-    {talep.onay === "beklemede" && (
-  <>
-    <TouchableOpacity style={styles.onayButton} onPress={handleOnayla}>
-      <Text style={styles.onayButtonText}>Onayla</Text>
-    </TouchableOpacity>
-
-    <TouchableOpacity style={styles.redButton} onPress={() => setRedModalVisible(true)}>
-        <Text style={styles.redButtonText}>Reddet</Text>
-    </TouchableOpacity>
-
-  </>
-)}
-
-  
+          <TouchableOpacity style={styles.redButton} onPress={() => setRedModalVisible(true)}>
+            <Text style={styles.redButtonText}>Reddet</Text>
+          </TouchableOpacity>
+        </>
+      )}
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    backgroundColor: "#fff",
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  date: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 10,
-  },
+  container: { padding: 16, backgroundColor: "#fff" },
+  title: { fontSize: 18, fontWeight: "bold", marginBottom: 4 },
+  date: { fontSize: 14, color: "#666", marginBottom: 10 },
   userInfo: {
     flexDirection: "row",
     backgroundColor: "#F3EFFF",
@@ -200,19 +204,16 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#65558F",
   },
-  userTitle: {
-    fontWeight: "bold",
-    marginBottom: 4,
-    color: "#65558F",
-  },
-  userText: {
-    fontSize: 14,
-    color: "#333",
-  },
-  label: {
+  userTitle: { fontWeight: "bold", marginBottom: 4, color: "#65558F" },
+  userText: { fontSize: 14, color: "#333" },
+  label: { marginTop: 6, fontSize: 15, color: "#444" },
+  input: {
+    height: 50,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
     marginTop: 6,
-    fontSize: 15,
-    color: "#444",
   },
   pdfBox: {
     marginTop: 16,
@@ -225,18 +226,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  pdfIcon: {
-    fontSize: 18,
-    marginRight: 8,
-  },
-  pdfName: {
-    fontSize: 15,
-    color: "#333",
-  },
-  pdfButton: {
-    color: "#65558F",
-    fontWeight: "bold",
-  },
+  pdfIcon: { fontSize: 18, marginRight: 8 },
+  pdfName: { fontSize: 15, color: "#333" },
+  pdfButton: { color: "#65558F", fontWeight: "bold" },
   onayButton: {
     backgroundColor: '#2e7d32',
     padding: 12,
@@ -276,11 +268,7 @@ const styles = StyleSheet.create({
     width: "85%",
     elevation: 10,
   },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
+  modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
   modalInput: {
     height: 80,
     borderColor: "#ccc",
@@ -297,15 +285,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 8,
   },
-  modalButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  modalCancel: {
-    textAlign: "center",
-    color: "#65558F",
-  },
-  
+  modalButtonText: { color: "#fff", fontWeight: "bold" },
+  modalCancel: { textAlign: "center", color: "#65558F" },
 });
 
 export default TalepDetay;
