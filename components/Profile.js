@@ -1,20 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Image, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+  Image,
+  Alert,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from '../AuthContext';
+import { useIsFocused } from '@react-navigation/native';
 
 const Profile = ({ navigation }) => {
   const { user, role, userDetails, logout } = useAuth();
   const [profileImage, setProfileImage] = useState('https://via.placeholder.com/100');
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     const loadProfileImage = async () => {
       if (userDetails?.photoURL) {
         try {
-          // URL'nin hala geçerli olup olmadığını kontrol et
           const response = await fetch(userDetails.photoURL);
           if (response.ok) {
-            setProfileImage(userDetails.photoURL);
+            const timestampedUrl = `${userDetails.photoURL}?t=${Date.now()}`;
+            setProfileImage(timestampedUrl);
           } else {
             setProfileImage('https://via.placeholder.com/100');
           }
@@ -26,21 +37,20 @@ const Profile = ({ navigation }) => {
       }
     };
 
-    loadProfileImage();
-  }, [userDetails]);
+    if (isFocused) {
+      loadProfileImage();
+    }
+  }, [isFocused, userDetails?.photoURL]);
 
   const handleLogout = async () => {
     Alert.alert(
-      "Çıkış Yap",
-      "Çıkış yapmak istediğinizden emin misiniz?",
+      'Çıkış Yap',
+      'Çıkış yapmak istediğinizden emin misiniz?',
       [
+        { text: 'İptal', style: 'cancel' },
         {
-          text: "İptal",
-          style: "cancel"
-        },
-        {
-          text: "Çıkış Yap",
-          style: "destructive",
+          text: 'Çıkış Yap',
+          style: 'destructive',
           onPress: async () => {
             try {
               const success = await logout();
@@ -48,11 +58,11 @@ const Profile = ({ navigation }) => {
                 navigation.replace('LoginScreen');
               }
             } catch (error) {
-              console.error("Logout error:", error);
+              console.error('Logout error:', error);
               Alert.alert('Hata', 'Çıkış yapılırken bir hata oluştu. Lütfen tekrar deneyin.');
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -61,7 +71,7 @@ const Profile = ({ navigation }) => {
     if (userDetails?.firstName && userDetails?.lastName) {
       return `${userDetails.firstName} ${userDetails.lastName}`;
     }
-    return "İsim Bulunamadı";
+    return 'İsim Bulunamadı';
   };
 
   const getRoleDisplay = () => {
@@ -72,10 +82,7 @@ const Profile = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.content}>
         <View style={styles.profileContainer}>
-          <Image
-            source={{ uri: profileImage }}
-            style={styles.profileImage}
-          />
+          <Image source={{ uri: profileImage }} style={styles.profileImage} />
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>{getDisplayName()}</Text>
             <Text style={styles.profileRole}>{getRoleDisplay()}</Text>
@@ -85,12 +92,18 @@ const Profile = ({ navigation }) => {
         <ScrollView contentContainerStyle={styles.contentContainer}>
           <Text style={styles.sectionTitle}>AYARLAR</Text>
           <View style={styles.section}>
-            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('HesapAyarlari')}>
+            <TouchableOpacity
+              style={styles.row}
+              onPress={() => navigation.navigate('HesapAyarlari')}
+            >
               <Icon name="settings" size={20} color="#333" />
               <Text style={styles.rowText}>Hesap Ayarları</Text>
               <Icon name="chevron-right" size={24} color="#333" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Gizlilik')}>
+            <TouchableOpacity
+              style={styles.row}
+              onPress={() => navigation.navigate('Gizlilik')}
+            >
               <Icon name="security" size={20} color="#333" />
               <Text style={styles.rowText}>Gizlilik ve Güvenlik</Text>
               <Icon name="chevron-right" size={24} color="#333" />
@@ -133,7 +146,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    paddingTop: 40, // Add more padding to move it down
+    paddingTop: 40,
     backgroundColor: '#f8f8f8',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',

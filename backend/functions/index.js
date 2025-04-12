@@ -21,7 +21,7 @@ exports.iyzicoOdeme = functions
     .runWith({
   timeoutSeconds: 30,
   memory: "256MB",
-  serviceAccount: "bagis-app@appspot.gserviceaccount.com"  // Burası yeni
+  serviceAccount: "bagis-app@appspot.gserviceaccount.com"  
     })
   .https.onRequest((req, res) => {
     if (req.method !== 'POST') {
