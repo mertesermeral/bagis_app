@@ -15,11 +15,22 @@ import * as ImagePicker from "expo-image-picker";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const FonGuncelle = ({ route, navigation }) => {
-  const { fonId } = route.params; // ✅ Sadece fonId alıyoruz
+  const { fonId } = route.params;
   const [loading, setLoading] = useState(true);
   const [fon, setFon] = useState(null);
   const [image, setImage] = useState(null);
 
+  // 📌 Galeri izni kontrolü
+  useEffect(() => {
+    (async () => {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert("İzin Gerekli", "Resim seçmek için galeri erişimine izin verin.");
+      }
+    })();
+  }, []);
+
+  // Fon verisini getir
   useEffect(() => {
     const fetchFon = async () => {
       try {
@@ -42,11 +53,10 @@ const FonGuncelle = ({ route, navigation }) => {
         setFon({
           ad: fonData.ad || "",
           aciklama: fonData.aciklama || "",
-          hedefMiktar: fonData.hedefMiktar ? fonData.hedefMiktar.toString() : "0",
-          mevcutMiktar: fonData.mevcutMiktar ? fonData.mevcutMiktar.toString() : "0",
+          hedefMiktar: fonData.hedefMiktar?.toString() || "0",
+          mevcutMiktar: fonData.mevcutMiktar?.toString() || "0",
           resimURL: fonData.resimURL || "",
         });
-
       } catch (error) {
         console.error("Fon yükleme hatası:", error);
         Alert.alert("Hata", "Veri çekilirken bir hata oluştu.");
@@ -62,31 +72,59 @@ const FonGuncelle = ({ route, navigation }) => {
     setFon((prev) => ({ ...prev, [field]: value }));
   };
 
+  // ✅ Yeni sürüm uyumlu image picker
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setImage(result.uri);
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images, // ✅ eski sürüm uyumlu
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+  
+      console.log("Image picker sonucu:", result);
+  
+      if (!result.canceled && result.assets?.length > 0) {
+        const selectedUri = result.assets[0].uri;
+        console.log("Seçilen resim URI:", selectedUri);
+        setImage(selectedUri);
+      } else {
+        console.log("Resim seçilmedi ya da işlem iptal edildi.");
+      }
+    } catch (err) {
+      console.error("Image picker hatası:", err);
     }
   };
+  
 
+  // ✅ Resim yükleme
   const uploadImage = async () => {
-    if (!image) return fon.resimURL;
-
-    const response = await fetch(image);
-    const blob = await response.blob();
-    const storage = getStorage();
-    const imageRef = ref(storage, `fonlar/${fonId}.jpg`);
-
-    await uploadBytes(imageRef, blob);
-    return await getDownloadURL(imageRef);
+    if (!image) {
+      console.log("Resim seçilmedi.");
+      return fon.resimURL;
+    }
+  
+    try {
+      const response = await fetch(image);
+      const blob = await response.blob();
+      const storage = getStorage();
+  
+      // ✅ Aynı dosya adıyla overwrite
+      const fileName = `fonResimleri/${fonId}.jpg`;
+      const imageRef = ref(storage, fileName);
+  
+      await uploadBytes(imageRef, blob);
+  
+      const downloadURL = await getDownloadURL(imageRef);
+      return `${downloadURL}?t=${Date.now()}`; // 🔁 Cache bypass
+    } catch (error) {
+      console.error("Resim yükleme hatası:", error);
+      return fon.resimURL;
+    }
   };
+  
 
+  // ✅ Güncelle
   const handleGuncelle = async () => {
     if (!fon.ad || !fon.aciklama || !fon.hedefMiktar) {
       Alert.alert("Hata", "Lütfen tüm alanları doldurun.");
@@ -162,9 +200,9 @@ const FonGuncelle = ({ route, navigation }) => {
             <Text style={styles.imagePickerText}>📷 Resim Seç</Text>
           </TouchableOpacity>
 
-          {image || fon.resimURL ? (
+          {(image || fon.resimURL) && (
             <Image source={{ uri: image || fon.resimURL }} style={styles.image} />
-          ) : null}
+          )}
 
           <TouchableOpacity style={styles.updateButton} onPress={handleGuncelle}>
             <Text style={styles.updateButtonText}>Güncelle</Text>
