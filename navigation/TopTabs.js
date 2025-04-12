@@ -14,11 +14,9 @@ import ReddedilenTalepler from "../Admin/ReddedilenTalepler";
 
 const Tab = createMaterialTopTabNavigator();
 
-// **Bağışçı (donor) için navigation sekmeleri**
 // **Bağışçı (Donor) için navigation sekmeleri**
 export const DonorTabs = () => (
   <View style={styles.container}>
-    {/* Navigation Bar */}
     <Tab.Navigator
       initialRouteName="AnaMenu"
       screenOptions={{
@@ -32,7 +30,7 @@ export const DonorTabs = () => (
         name="AnaMenu"
         component={BagisciAnaMenu}
         options={{
-          tabBarLabel: "Nakdi Bağış",
+          tabBarLabel: "Bağış Fonları",
           tabBarIcon: ({ color }) => <Icon name="home" size={24} color={color} />,
         }}
       />

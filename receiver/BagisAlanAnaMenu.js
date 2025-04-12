@@ -61,32 +61,7 @@ const BagisAlanAnaMenu = () => {
           <Text style={styles.donationButtonText}>💰 Bağış Talebi Oluştur</Text>
         </TouchableOpacity>
 
-        {/* Öne Çıkan Fonlar Başlık */}
-        <Text style={styles.fonHeader}>Öne Çıkan Fonlar</Text>
-
-        {/* Öne Çıkan Fonlar */}
-        {loading ? (
-          <ActivityIndicator size="small" color="#65558F" />
-        ) : (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.fonContainer}>
-            {fonlar.slice(0, 3).map((fon) => (
-              <View key={fon.id} style={styles.fonCard}>
-                <Image
-                  source={{ uri: fon.resimURL || "https://via.placeholder.com/150" }}
-                  style={styles.fonImage}
-                />
-                <Text style={styles.fonTitle}>{fon.ad}</Text>
-                <Text style={styles.fonAmount}>Mevcut: {fon.mevcutMiktar} TL</Text>
-                <TouchableOpacity
-                  style={styles.fonButton}
-                  onPress={() => navigation.navigate("FonDetay", { fon })}
-                >
-                  <Text style={styles.fonButtonText}>Bağış Talep Et</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
-          </ScrollView>
-        )}
+        
       </ScrollView>
     </SafeAreaView>
   );
