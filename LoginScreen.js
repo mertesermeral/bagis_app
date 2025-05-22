@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import * as SecureStore from "expo-secure-store"; // SecureStore import
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
 import { useAuth } from './AuthContext';
@@ -49,7 +49,7 @@ const LoginScreen = ({ navigation }) => {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Hata", "Lütfen email ve şifre alanlarını doldurun.");
+      Alert.alert("Uyarı", "Lütfen email ve şifre alanlarını doldurun.");
       return;
     }
 
@@ -60,20 +60,18 @@ const LoginScreen = ({ navigation }) => {
       const docSnap = await getDoc(docRef);
 
       if (!docSnap.exists()) {
-        Alert.alert("Hata", "Kullanıcı bilgileri bulunamadı.");
+        Alert.alert("Uyarı", "Kullanıcı bilgileri bulunamadı.");
         return;
       }
 
       const userData = docSnap.data();
-       // Admin her tab'dan giriş yapabilir!
-    if (userData.role !== activeTab && userData.role !== "admin") {
-      Alert.alert(
-        "Hata",
-        `Bu hesap ${userData.role === "donor" ? "Bağışçı" : "Bağış Alan"} rolüne aittir. Lütfen doğru sekmeyi seçin.`
-      );
-      await auth.signOut();
-      return;
-    }
+      if (userData.role !== activeTab && userData.role !== "admin") {
+        Alert.alert(
+          "Uyarı",
+          `Bu hesap ${userData.role === "donor" ? "Bağışçı" : "Bağış Alan"} rolüne aittir. Lütfen doğru sekmeyi seçin.`
+        );
+        return;
+      }
       
 
       // Remember Me işlemi
@@ -119,8 +117,7 @@ const LoginScreen = ({ navigation }) => {
       
 
     } catch (error) {
-      console.error("Giriş sırasında hata oluştu:", error);
-      Alert.alert("Hata", "Giriş yapılırken bir hata oluştu. Email ve şifrenizi kontrol edin.");
+      Alert.alert("Uyarı", "Email veya şifre hatalı.");
     }
   };
 
@@ -128,8 +125,21 @@ const LoginScreen = ({ navigation }) => {
     navigation.navigate("Register", { role: activeTab });
   };
 
-  const handleForgotPassword = () => {
-    Alert.alert("Şifremi Unuttum", "Şifre sıfırlama işlemi başlatıldı.");
+  const handleForgotPassword = async () => {
+    if (!email) {
+      Alert.alert("Uyarı", "Lütfen email adresinizi girin.");
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      Alert.alert(
+        "Uyarı",
+        "Şifre yenileme bağlantısı email adresinize gönderildi."
+      );
+    } catch (error) {
+      Alert.alert("Uyarı", "Şifre sıfırlama işlemi başarısız oldu.");
+    }
   };
 
   return (

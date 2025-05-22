@@ -102,7 +102,7 @@ const RegisterScreen = ({ navigation }) => {
         tcNo,
         birthYear,
         role,
-        photoURL: 'https://via.placeholder.com/100' // Varsayılan profil fotoğrafı
+        photoURL: 'https://via.placeholder.com/100'
       });
 
       Alert.alert("Başarılı", "Kayıt işlemi tamamlandı!");
@@ -111,7 +111,7 @@ const RegisterScreen = ({ navigation }) => {
         routes: [{ name: "LoginScreen" }]
       });
     } catch (error) {
-      Alert.alert("Hata", error.message);
+      Alert.alert("Uyarı", "Kayıt işlemi başarısız oldu. Lütfen bilgilerinizi kontrol edip tekrar deneyin.");
     }
 
     setIsLoading(false);
