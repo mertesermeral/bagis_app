@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Image, RefreshControl } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { db } from '../firebase.js';
-import {collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 
 import { useAuth } from '../AuthContext';
 
@@ -32,7 +32,18 @@ const BagisAlanEtkinlikler = ({ navigation }) => {
     try {
       setLoading(true);
       const querySnapshot = await getDocs(collection(db, "events"));
-      const eventList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const eventList = await Promise.all(querySnapshot.docs.map(async (docSnap) => {
+        const eventData = docSnap.data();
+        if (!eventData.organizer && eventData.organizerId) {
+          const userDocRef = doc(db, 'users', eventData.organizerId);
+          const userDocSnap = await getDoc(userDocRef);
+          const userData = userDocSnap.data();
+          if (userData) {
+            eventData.organizer = `${userData.firstName} ${userData.lastName}`;
+          }
+        }
+        return { id: docSnap.id, ...eventData };
+      }));
       setEvents(eventList || []);
     } catch (error) {
       console.error("Etkinlikler alınırken hata oluştu:", error);

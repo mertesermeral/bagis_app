@@ -4,6 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { db, storage, auth } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { doc, getDoc } from 'firebase/firestore';
 
 const EtkinlikEkle = ({ navigation }) => {
   const [eventName, setEventName] = useState('');
@@ -31,6 +32,12 @@ const EtkinlikEkle = ({ navigation }) => {
       return;
     }
     try {
+      // Organizatör bilgilerini al
+      const userDocRef = doc(db, 'users', userId);
+      const userDocSnap = await getDoc(userDocRef);
+      const userData = userDocSnap.data();
+      const organizerName = `${userData.firstName} ${userData.lastName}`;
+
       const response = await fetch(image);
       const blob = await response.blob();
       const storageRef = ref(storage, `event_images/${Date.now()}.jpg`);
@@ -39,7 +46,8 @@ const EtkinlikEkle = ({ navigation }) => {
 
       await addDoc(collection(db, 'events'), {
         eventName,
-        organizerId: userId, // 📌 Etkinliği oluşturan kişinin userId'si
+        organizerId: userId,
+        organizer: organizerName,
         description,
         date,
         location,
@@ -49,6 +57,7 @@ const EtkinlikEkle = ({ navigation }) => {
       Alert.alert('Başarılı', 'Etkinlik başarıyla eklendi!');
       navigation.goBack();
     } catch (error) {
+      console.error('Hata:', error);
       Alert.alert('Hata', 'Bir hata oluştu, tekrar deneyin.');
     }
   };
