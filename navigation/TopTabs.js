@@ -1,7 +1,8 @@
 import React from "react";
-import { View, StyleSheet} from "react-native";
+import { View, StyleSheet } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { useAuth } from "../AuthContext";
 import BagisciAnaMenu from "../donor/BagisciAnaMenu";
 import BagisciOzelBagis from "../donor/BagisciOzelBagis";
 import AcilDurumlar from "../AcilDurumlar/AcilDurumlar";
@@ -104,53 +105,55 @@ export const ReceiverTabs = () => (
 );
 
 // **Admin için navigation sekmeleri**
-export const AdminTabs = () => (
-  <View style={styles.container}>
-    <Tab.Navigator
-      initialRouteName="Fonlar"
-      screenOptions={{
-        tabBarStyle: styles.tabBarStyle,
-        tabBarActiveTintColor: "#65558F",
-        tabBarInactiveTintColor: "#999999",
-        tabBarLabelStyle: styles.tabBarLabelStyle,
-        headerShown: false,
-      }}
-    >
-      <Tab.Screen
-        name="Fonlar"
-        component={Fonlar}
-        options={{
-          tabBarLabel: "Fonlar",
-          tabBarIcon: ({ color }) => <Icon name="account-balance" size={24} color={color} />,
+export const AdminTabs = ({ navigation }) => {
+  return (
+    <View style={styles.container}>
+      <Tab.Navigator
+        initialRouteName="Fonlar"
+        screenOptions={{
+          tabBarStyle: styles.tabBarStyle,
+          tabBarActiveTintColor: "#65558F",
+          tabBarInactiveTintColor: "#999999",
+          tabBarLabelStyle: styles.tabBarLabelStyle,
+          headerShown: false,
         }}
-      />
-      <Tab.Screen
-        name="Bekleyen Talepler"
-        component={BekleyenTalepler}
-        options={{
-          tabBarLabel: "Bekleyen",
-          tabBarIcon: ({ color }) => <Icon name="hourglass-empty" size={24} color={color} />,
-        }}
-      />
-      <Tab.Screen
-        name="Onaylanan Talepler"
-        component={OnaylananTalepler}
-        options={{
-          tabBarLabel: "Onaylanan",
-          tabBarIcon: ({ color }) => <Icon name="check-circle" size={24} color={color} />,
-        }}
-      />
-      <Tab.Screen
-        name="Reddedilen Talepler"
-        component={ReddedilenTalepler}
-        options={{
-          tabBarLabel: "Reddedilen",
-          tabBarIcon: ({ color }) => <Icon name="cancel" size={24} color={color} />,
-        }}
-      />
-    </Tab.Navigator>
-  </View>
-);
+      >
+        <Tab.Screen
+          name="Fonlar"
+          component={Fonlar}
+          options={{
+            tabBarLabel: "Fonlar",
+            tabBarIcon: ({ color }) => <Icon name="account-balance" size={24} color={color} />,
+          }}
+        />
+        <Tab.Screen
+          name="Bekleyen Talepler"
+          component={BekleyenTalepler}
+          options={{
+            tabBarLabel: "Bekleyen",
+            tabBarIcon: ({ color }) => <Icon name="hourglass-empty" size={24} color={color} />,
+          }}
+        />
+        <Tab.Screen
+          name="Onaylanan Talepler"
+          component={OnaylananTalepler}
+          options={{
+            tabBarLabel: "Onaylanan",
+            tabBarIcon: ({ color }) => <Icon name="check-circle" size={24} color={color} />,
+          }}
+        />
+        <Tab.Screen
+          name="Reddedilen Talepler"
+          component={ReddedilenTalepler}
+          options={{
+            tabBarLabel: "Reddedilen",
+            tabBarIcon: ({ color }) => <Icon name="cancel" size={24} color={color} />,
+          }}
+        />
+      </Tab.Navigator>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {

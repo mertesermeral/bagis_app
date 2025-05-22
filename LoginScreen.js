@@ -111,7 +111,7 @@ const LoginScreen = ({ navigation }) => {
         if (userData.role === "donor") {
           rolMetni = "Bağışçı";
         } else if (userData.role === "admin") {
-          rolMetni = "AdminTabs";
+          rolMetni = "Admin";
         }
       
         Alert.alert("Başarılı", `${rolMetni} olarak giriş yapıldı!`);
