@@ -112,6 +112,8 @@ const BagisciBagislarim = () => {
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={true}
+          bounces={true}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
           }
@@ -124,51 +126,67 @@ const BagisciBagislarim = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#fff",
-  },
-  header: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 16,
-    textAlign: "center",
-    color: "#333",
+    backgroundColor: "#f5f5f5",
   },
   card: {
-    backgroundColor: "#f2f2f2",
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 12,
-    elevation: 2,
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 16,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    borderLeftWidth: 4,
+    borderLeftColor: "#65558F",
   },
   fonAdi: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
+    color: "#1a237e",
+    marginBottom: 8,
   },
   tutar: {
     fontSize: 16,
-    color: "#444",
-    marginTop: 4,
+    color: "#2e7d32",
+    marginTop: 8,
+    fontWeight: "bold",
   },
   tarih: {
     fontSize: 14,
     color: "#666",
-    marginTop: 2,
+    marginTop: 6,
+    fontStyle: "italic",
   },
   loaderContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#f5f5f5",
   },
   noData: {
     fontSize: 16,
     textAlign: "center",
-    color: "#777",
+    color: "#666",
     marginTop: 20,
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 12,
+    elevation: 2,
   },
   listContainer: {
+    padding: 20,
     paddingBottom: 20,
+    flexGrow: 1,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginTop: 40,
+    marginBottom: 20,
+    textAlign: "center",
+    color: "#1a237e",
   },
 });
 

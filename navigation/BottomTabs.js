@@ -82,6 +82,7 @@ export const AdminBottomTabs = ({ MainComponent }) => {
 export const DonorBottomTabs = ({ MainComponent }) => (
   <Tab.Navigator
     screenOptions={{
+      headerShown: false,
       tabBarStyle: { backgroundColor: '#FEF7FF' },
       tabBarActiveTintColor: '#65558F',
       tabBarInactiveTintColor: '#999999',
@@ -101,6 +102,7 @@ export const DonorBottomTabs = ({ MainComponent }) => (
     <Tab.Screen
       name="BagisciBagislarim"
       options={{
+        headerShown: false, // Header'ı kaldır
         title: 'Bağışlarım',
         tabBarIcon: ({ color }) => (
           <Icon name="donut-large" size={24} color={color} />
@@ -125,10 +127,10 @@ export const DonorBottomTabs = ({ MainComponent }) => (
 export const ReceiverBottomTabs = ({ MainComponent }) => (
   <Tab.Navigator
     screenOptions={{
+      headerShown: false,
       tabBarStyle: { backgroundColor: '#FEF7FF' },
       tabBarActiveTintColor: '#65558F',
       tabBarInactiveTintColor: '#999999',
-      headerShown: false,
       tabBarShowIcon: true,
       tabBarLabelStyle: { fontSize: 12 }
     }}

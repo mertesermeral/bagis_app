@@ -83,7 +83,11 @@ const MainApp = () => {
       <Stack.Screen name="EtkinliklerDetay" component={EtkinliklerDetay} />
       <Stack.Screen name="BagisciEgitimYardimlari" component={BagisciEgitimYardimlari} />
       <Stack.Screen name="BagisciEgitimOdeme" component={BagisciEgitimOdeme} />
-      <Stack.Screen name="BagisciBagislarim" component={BagisciBagislarim} />
+      <Stack.Screen 
+        name="BagisciBagislarim" 
+        component={BagisciBagislarim} 
+        options={{ headerShown: false }}
+      />
       <Stack.Screen name="AcilDurumTalebiOlustur" component={AcilDurumTalebiOlustur} options={{ presentation: 'modal' }} />
       <Stack.Screen name="AcilDurumDetay" component={AcilDurumDetay} options={{ presentation: 'modal' }} />
       <Stack.Screen name="BagisciOzelBagisDetay" component={BagisciOzelBagisDetay} />

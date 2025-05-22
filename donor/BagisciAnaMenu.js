@@ -93,11 +93,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   header: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 10,
-    color: "#333",
+    marginTop: 10, // Reduced from 40 to 25
+    marginBottom: 20,
     textAlign: "center",
+    color: "#1a237e",
   },
   listContainer: {
     paddingBottom: 80,
