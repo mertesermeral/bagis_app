@@ -76,6 +76,7 @@ const BagisAlanEtkinlikler = ({ navigation }) => {
                 <Text style={styles.organizer}>Düzenleyen: {event.organizer}</Text>
                 <Text style={styles.description}>{event.description}</Text>
                 <Text style={styles.date}>Tarih: {event.date}</Text>
+                <Text style={styles.location}>Konum: {event.location}</Text>
                 <TouchableOpacity 
                   style={styles.detailsButton} 
                   onPress={() => navigation.navigate('EtkinliklerDetay', { event })}>
@@ -125,6 +126,10 @@ const styles = StyleSheet.create({
   title: { fontWeight: 'bold' },
   description: { color: '#555' },
   date: { color: '#888' },
+  location: { 
+    color: '#666',
+    marginVertical: 2
+  },
   detailsButton: { backgroundColor: '#65558F', padding: 5, borderRadius: 5, marginTop: 5 },
   detailsButtonText: { color: '#FFF', textAlign: 'center' },
   tabContainer: {

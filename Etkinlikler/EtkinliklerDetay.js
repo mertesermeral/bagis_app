@@ -158,6 +158,7 @@ const EtkinliklerDetay = ({ route, navigation }) => {
                 <Text style={styles.organizer}>Düzenleyen: {event.organizer}</Text>
                 <Text style={styles.description}>{event.description}</Text>
                 <Text style={styles.date}>Tarih: {event.date}</Text>
+                <Text style={styles.location}>Konum: {event.location}</Text>
                 <Text style={styles.commentsHeader}>Yorumlar</Text>
               </View>
             }
@@ -264,7 +265,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-  
+  location: { 
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 8,
+  },
   
 });
 
