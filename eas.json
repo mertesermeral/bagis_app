@@ -1,0 +1,50 @@
+{
+  "cli": {
+    "version": ">= 16.6.2",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "distribution": "internal",
+      "env": {
+        "API_KEY": "API_KEY",
+        "AUTH_DOMAIN": "AUTH_DOMAIN",
+        "PROJECT_ID": "PROJECT_ID",
+        "STORAGE_BUCKET": "STORAGE_BUCKET",
+        "MESSAGING_SENDER_ID": "MESSAGING_SENDER_ID",
+        "APP_ID": "APP_ID",
+        "MEASUREMENT_ID": "MEASUREMENT_ID",
+        "GOOGLE_MAPS_API_KEY": "GOOGLE_MAPS_API_KEY"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "API_KEY": "API_KEY",
+        "AUTH_DOMAIN": "AUTH_DOMAIN",
+        "PROJECT_ID": "PROJECT_ID",
+        "STORAGE_BUCKET": "STORAGE_BUCKET",
+        "MESSAGING_SENDER_ID": "MESSAGING_SENDER_ID",
+        "APP_ID": "APP_ID",
+        "MEASUREMENT_ID": "MEASUREMENT_ID",
+        "GOOGLE_MAPS_API_KEY": "GOOGLE_MAPS_API_KEY"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "API_KEY": "API_KEY",
+        "AUTH_DOMAIN": "AUTH_DOMAIN",
+        "PROJECT_ID": "PROJECT_ID",
+        "STORAGE_BUCKET": "STORAGE_BUCKET",
+        "MESSAGING_SENDER_ID": "MESSAGING_SENDER_ID",
+        "APP_ID": "APP_ID",
+        "MEASUREMENT_ID": "MEASUREMENT_ID",
+        "GOOGLE_MAPS_API_KEY": "GOOGLE_MAPS_API_KEY"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
