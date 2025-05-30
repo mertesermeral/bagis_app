@@ -20,16 +20,11 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.momimec.bagis_app"
+      "package": "com.petasa.bagis_app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "efc18eba-7c3b-481d-a463-9cbdab546a70"
-      }
-    },
-    "owner": "gokipa"
+    }
+  
   }
 }

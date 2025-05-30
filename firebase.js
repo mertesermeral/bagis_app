@@ -1,17 +1,18 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { getStorage } from "firebase/storage"; // Firebase Storage eklendi
+import { getStorage } from "firebase/storage";
+import Constants from 'expo-constants';
 
-import {
+const {
   API_KEY,
   AUTH_DOMAIN,
   PROJECT_ID,
   STORAGE_BUCKET,
   MESSAGING_SENDER_ID,
   APP_ID,
-  MEASUREMENT_ID,
-} from "@env";
+  MEASUREMENT_ID
+} = Constants.expoConfig.extra;
 
 const firebaseConfig = {
   apiKey: API_KEY,
@@ -26,6 +27,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const storage = getStorage(app); // Firebase Storage servisi (Görsel yükleme)
+const storage = getStorage(app);
 
-export { app, auth, db,storage };
+export { app, auth, db, storage };
