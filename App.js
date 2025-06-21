@@ -1,5 +1,5 @@
-import React from "react";
-import { Text } from "react-native";
+import React, { useState, useEffect } from "react";
+import { Text, View, Alert } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { useAuth, AuthProvider } from "./AuthContext";  
@@ -7,11 +7,8 @@ import LoginScreen from "./LoginScreen";
 import RegisterScreen from "./RegisterScreen";
 import EtkinlikEkle from './Etkinlikler/EtkinlikEkle';
 import BagisAlanNakdiBagisTalebi from "./receiver/BagisAlanNakdiBagisTalebi";
-import BagisAlanEgitimYardimTalebi from "./receiver/BagisAlanEgitimYardimTalebi";
 import BagisAlanBagisDurumu from "./receiver/BagisAlanBagisDurumu";
 import EtkinliklerDetay from "./Etkinlikler/EtkinliklerDetay";
-import BagisciEgitimYardimlari from "./donor/BagisciEgitimYardimlari";
-import BagisciEgitimOdeme from "./donor/BagisciEgitimOdeme";
 import BagisciBagislarim from "./donor/BagisciBagislarim";
 import AcilDurumTalebiOlustur from "./AcilDurumlar/AcilDurumTalebiOlustur";
 import AcilDurumDetay from "./AcilDurumlar/AcilDurumDetay";
@@ -27,6 +24,10 @@ import YeniFonEkle from "./Admin/YeniFonEkle";
 import TalepDetay from "./Admin/TalepDetay";
 import OdemeEkrani from "./donor/OdemeEkrani";
 import BagisciFonDetay from "./donor/BagisciFonDetay";
+import Iletisim from "./components/Iletisim"; // Yeni import
+import Hakkimizda from './components/Hakkimizda';
+
+
 
 const Stack = createStackNavigator();
 
@@ -46,20 +47,18 @@ const AdminTabsWrapper = (props) => (
 const MainApp = () => {
   const { role, loading } = useAuth();
 
-  if (loading) {
-    return <Text style={{ textAlign: "center", marginTop: 20 }}>Yükleniyor...</Text>;
-  }
-  // Rol bazlı ilk yönlendirme
-  let initialScreen = "LoginScreen";
-  if (role === "donor") initialScreen = "DonorTabs";
-  else if (role === "receiver") initialScreen = "ReceiverTabs";
-  else if (role === "admin") initialScreen = "AdminTabs"; // <-- admin panel yönlendirme
-
   return (
-    <Stack.Navigator 
-      screenOptions={{ headerShown: false }}
-      initialRouteName={initialScreen}
-      >
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        cardStyle: { backgroundColor: '#fff' }
+      }}
+      initialRouteName={role ? 
+        (role === "donor" ? "DonorTabs" : 
+         role === "receiver" ? "ReceiverTabs" : 
+         role === "admin" ? "AdminTabs" : "LoginScreen") 
+        : "LoginScreen"}
+    >
       <Stack.Screen name="LoginScreen" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
 
@@ -78,11 +77,8 @@ const MainApp = () => {
       {/* Diğer ekranlar (modal olarak açılacak) */}
       <Stack.Screen name="EtkinlikEkle" component={EtkinlikEkle} options={{ presentation: 'modal' }} />
       <Stack.Screen name="BagisAlanNakdiBagisTalebi" component={BagisAlanNakdiBagisTalebi} />
-      <Stack.Screen name="BagisAlanEgitimYardimTalebi" component={BagisAlanEgitimYardimTalebi} />
       <Stack.Screen name="BagisAlanBagisDurumu" component={BagisAlanBagisDurumu} />
       <Stack.Screen name="EtkinliklerDetay" component={EtkinliklerDetay} />
-      <Stack.Screen name="BagisciEgitimYardimlari" component={BagisciEgitimYardimlari} />
-      <Stack.Screen name="BagisciEgitimOdeme" component={BagisciEgitimOdeme} />
       <Stack.Screen 
         name="BagisciBagislarim" 
         component={BagisciBagislarim} 
@@ -93,6 +89,8 @@ const MainApp = () => {
       <Stack.Screen name="BagisciOzelBagisDetay" component={BagisciOzelBagisDetay} />
       <Stack.Screen name="Profile" component={Profile} />
       <Stack.Screen name="HesapAyarlari" component={HesapAyarlari} />
+      <Stack.Screen name="Hakkimizda" component={Hakkimizda} />
+      <Stack.Screen name="Iletisim" component={Iletisim} />
       <Stack.Screen name="TalepDetay" component={TalepDetay} />
       <Stack.Screen name="YeniFonEkle" component={YeniFonEkle} />
       <Stack.Screen name="FonDetay" component={FonDetay} />
@@ -104,12 +102,28 @@ const MainApp = () => {
   );
 };
 
+const ErrorBoundary = ({ children }) => {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Bir hata oluştu. Lütfen uygulamayı yeniden başlatın.</Text>
+      </View>
+    );
+  }
+
+  return children;
+};
+
 export default function App() {
   return (
-    <AuthProvider>
-      <NavigationContainer>
-        <MainApp />  
-      </NavigationContainer>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <NavigationContainer>
+          <MainApp />
+        </NavigationContainer>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }

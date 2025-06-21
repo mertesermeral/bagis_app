@@ -7,8 +7,9 @@ import {
   StyleSheet,
   Alert,
   Switch,
+  Image,
 } from "react-native";
-import * as SecureStore from "expo-secure-store"; // SecureStore import
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
@@ -26,9 +27,9 @@ const LoginScreen = ({ navigation }) => {
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const savedEmail = await SecureStore.getItemAsync("email");
-        const savedPassword = await SecureStore.getItemAsync("password");
-        const savedRememberMe = await SecureStore.getItemAsync("rememberMe");
+        const savedEmail = await AsyncStorage.getItem("email");
+        const savedPassword = await AsyncStorage.getItem("password");
+        const savedRememberMe = await AsyncStorage.getItem("rememberMe");
 
         if (savedRememberMe === "true") {
           setEmail(savedEmail || "");
@@ -41,6 +42,25 @@ const LoginScreen = ({ navigation }) => {
     };
 
     loadUserData();
+  }, []);
+
+  // Otomatik login için ek kontrol
+  useEffect(() => {
+    const checkAutoLogin = async () => {
+      const isLoggedIn = await AsyncStorage.getItem("isLoggedIn");
+      const savedRole = await AsyncStorage.getItem("autoLoginRole");
+      if (isLoggedIn === "true" && savedRole) {
+        // Otomatik olarak ilgili ekrana yönlendir
+        let targetScreen = "ReceiverTabs";
+        if (savedRole === "donor") targetScreen = "DonorTabs";
+        else if (savedRole === "admin") targetScreen = "AdminTabs";
+        navigation.reset({
+          index: 0,
+          routes: [{ name: targetScreen }],
+        });
+      }
+    };
+    checkAutoLogin();
   }, []);
 
   const handleTabPress = (tab) => {
@@ -76,15 +96,18 @@ const LoginScreen = ({ navigation }) => {
 
       // Remember Me işlemi
       if (rememberMe) {
-        await SecureStore.setItemAsync("email", email);
-        await SecureStore.setItemAsync("password", password);
-        await SecureStore.setItemAsync("rememberMe", "true");
+        await AsyncStorage.setItem("email", email);
+        await AsyncStorage.setItem("password", password);
+        await AsyncStorage.setItem("rememberMe", "true");
+        await AsyncStorage.setItem("isLoggedIn", "true");
+        await AsyncStorage.setItem("autoLoginRole", userData.role);
       } else {
-        await SecureStore.deleteItemAsync("email");
-        await SecureStore.deleteItemAsync("password");
-        await SecureStore.setItemAsync("rememberMe", "false");
+        await AsyncStorage.removeItem("email");
+        await AsyncStorage.removeItem("password");
+        await AsyncStorage.setItem("rememberMe", "false");
+        await AsyncStorage.removeItem("isLoggedIn");
+        await AsyncStorage.removeItem("autoLoginRole");
       }
-
     // Giriş sonrası yönlendirme
     let targetScreen = "ReceiverTabs";
     if (userData.role === "donor") {
@@ -144,60 +167,71 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tabButton, activeTab === "donor" && styles.activeTabButton]}
-          onPress={() => handleTabPress("donor")}
-        >
-          <Text style={[styles.tabText, activeTab === "donor" && styles.activeTabText]}>
-            Bağışçı Giriş
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tabButton, activeTab === "receiver" && styles.activeTabButton]}
-          onPress={() => handleTabPress("receiver")}
-        >
-          <Text style={[styles.tabText, activeTab === "receiver" && styles.activeTabText]}>
-            Bağış Alan Giriş
-          </Text>
-        </TouchableOpacity>
-      </View>
-
       <View style={styles.formContainer}>
-        <Text>Email</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#ccc"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <Text>Şifre</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Şifre"
-          placeholderTextColor="#ccc"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-
-        <View style={styles.rememberMeContainer}>
-          <Switch value={rememberMe} onValueChange={setRememberMe} />
-          <Text style={{ marginLeft: 10 }}>Beni Hatırla</Text>
+        <View style={styles.logoContainer}>
+          <Image 
+            source={require("./assets/logo.png")}
+            style={styles.logo}
+          />
+          <Text style={styles.logoText}>Fonity</Text>
+          <Text style={styles.logoSubText}>Yardımlaşmayı Kolaylaştırır</Text>
         </View>
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginButtonText}>Giriş Yap</Text>
-        </TouchableOpacity>
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+            style={[styles.tabButton, activeTab === "donor" && styles.activeTabButton]}
+            onPress={() => handleTabPress("donor")}
+          >
+            <Text style={[styles.tabText, activeTab === "donor" && styles.activeTabText]}>
+              Bağışçı Giriş
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tabButton, activeTab === "receiver" && styles.activeTabButton]}
+            onPress={() => handleTabPress("receiver")}
+          >
+            <Text style={[styles.tabText, activeTab === "receiver" && styles.activeTabText]}>
+              Bağış Alan Giriş
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-        <TouchableOpacity onPress={handleForgotPassword}>
-          <Text style={styles.linkText}>Şifremi Unuttum</Text>
-        </TouchableOpacity>
+        <View style={styles.formContainer}>
+          <Text>Email</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            placeholderTextColor="#ccc"
+            value={email}
+            onChangeText={setEmail}
+          />
+          <Text>Şifre</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Şifre"
+            placeholderTextColor="#ccc"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
 
-        <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
-          <Text style={styles.registerButtonText}>Kayıt Ol</Text>
-        </TouchableOpacity>
+          <View style={styles.rememberMeContainer}>
+            <Switch value={rememberMe} onValueChange={setRememberMe} />
+            <Text style={{ marginLeft: 10 }}>Beni Hatırla</Text>
+          </View>
+
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+            <Text style={styles.loginButtonText}>Giriş Yap</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handleForgotPassword}>
+            <Text style={styles.linkText}>Şifremi Unuttum</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
+            <Text style={styles.registerButtonText}>Kayıt Ol</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -207,9 +241,39 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f4f4f4",
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "center", // flex-start yerine center kullan
     padding: 20,
+  },
+  formContainer: {
+    width: "100%",
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    marginBottom: 8,
+  },
+  logoText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#65558F',
+    marginBottom: 4,
+  },
+  logoSubText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 20,
   },
   tabContainer: {
     flexDirection: "row",
@@ -234,18 +298,6 @@ const styles = StyleSheet.create({
   activeTabText: {
     color: "#fff",
     fontSize: 14,
-  },
-  formContainer: {
-    width: "100%",
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 5,
-    paddingBottom: "30%",
   },
   input: {
     width: "100%",
@@ -297,5 +349,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
 });
+
+
 
 export default LoginScreen;

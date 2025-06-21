@@ -81,6 +81,11 @@ const OnaylananTalepler = ({ navigation }) => {
           <Text style={styles.subtitle}>
             Tarih: {new Date(talep.tarih).toLocaleDateString()}
           </Text>
+          {talep.status === "tamamlandi" && (
+            <View style={styles.statusBadge}>
+              <Text style={styles.statusText}>✅ Tamamlandı</Text>
+            </View>
+          )}
           <TouchableOpacity
             style={styles.button}
             onPress={() => navigation.navigate("TalepDetay", { talep })}
@@ -128,6 +133,18 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  statusBadge: {
+    backgroundColor: '#e8f5e9',
+    padding: 6,
+    borderRadius: 4,
+    marginBottom: 8,
+    alignSelf: 'flex-start',
+  },
+  statusText: {
+    color: '#1b5e20',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });
 

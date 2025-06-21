@@ -17,25 +17,35 @@ const ReddedilenTalepler = ({ navigation }) => {
   useEffect(() => {
     const fetchReddedilenler = async () => {
       try {
+        setLoading(true);
+        // Sorguyu düzelttik
         const q = query(
           collection(db, "bagisBasvurulari"),
           where("onay", "==", "reddedildi")
         );
         const snapshot = await getDocs(q);
-
         const data = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
+
         setReddedilenler(data);
       } catch (error) {
         console.error("Reddedilen talepler alınamadı:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchReddedilenler();
-  }, []);
+
+    // Navigation listener ekleyelim ki sayfaya her dönüşte güncel verileri alalım
+    const unsubscribe = navigation.addListener("focus", () => {
+      fetchReddedilenler();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   if (loading) {
     return (

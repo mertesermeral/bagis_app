@@ -9,6 +9,8 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Image,
+  ActivityIndicator,
 } from "react-native";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
@@ -25,6 +27,7 @@ const RegisterScreen = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formatPhoneNumber = (text) => {
     const cleaned = text.replace(/\D/g, '');
@@ -50,24 +53,24 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   const handleRegister = async () => {
-    if (isLoading) return;
-    setIsLoading(true);
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
     if (!firstName || !lastName || !email || !phone || !tcNo || !birthYear || !password || !confirmPassword || !role) {
       Alert.alert("Hata", "Lütfen tüm alanları doldurun ve bir rol seçin.");
-      setIsLoading(false);
+      setIsSubmitting(false);
       return;
     }
     
     if (password.length < 6) {
       Alert.alert("Hata", "Şifre en az 6 karakter olmalıdır.");
-      setIsLoading(false);
+      setIsSubmitting(false);
       return;
     }
 
     if (password !== confirmPassword) {
       Alert.alert("Hata", "Şifreler eşleşmiyor!");
-      setIsLoading(false);
+      setIsSubmitting(false);
       return;
     }
 
@@ -87,7 +90,7 @@ const RegisterScreen = ({ navigation }) => {
 
       if (!data.success) {
         Alert.alert("Kimlik Doğrulama Başarısız", "Girdiğiniz bilgiler doğrulanamadı.");
-        setIsLoading(false);
+        setIsSubmitting(false);
         return;
       }
 
@@ -111,10 +114,10 @@ const RegisterScreen = ({ navigation }) => {
         routes: [{ name: "LoginScreen" }]
       });
     } catch (error) {
-      Alert.alert("Uyarı", "Kayıt işlemi başarısız oldu. Lütfen bilgilerinizi kontrol edip tekrar deneyin.");
+      Alert.alert("Hata", "Kayıt sırasında bir hata oluştu.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsLoading(false);
   };
 
   return (
@@ -123,6 +126,14 @@ const RegisterScreen = ({ navigation }) => {
       style={{ flex: 1 }}
     >
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <View style={styles.logoContainer}>
+          <Image 
+            source={require("./assets/logo.png")}
+            style={styles.logo}
+          />
+          <Text style={styles.logoText}>Fonity</Text>
+          <Text style={styles.logoSubText}>Hesap Oluştur</Text>
+        </View>
         <View style={styles.formContainer}>
           <Text style={styles.label}>TC Kimlik Numarası</Text>
           <TextInput style={styles.input} value={tcNo} onChangeText={setTcNo} keyboardType="numeric" maxLength={11} />
@@ -170,8 +181,16 @@ const RegisterScreen = ({ navigation }) => {
           <Text style={styles.label}>Parola Tekrar</Text>
           <TextInput style={styles.input} value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry={true} />
           
-          <TouchableOpacity style={styles.registerButton} onPress={handleRegister} disabled={isLoading}>
-            <Text style={styles.registerButtonText}>{isLoading ? "Kayıt Yapılıyor..." : "Kayıt Ol"}</Text>
+          <TouchableOpacity 
+            style={[styles.registerButton, isSubmitting && styles.disabledButton]}
+            onPress={handleRegister}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.registerButtonText}>Kayıt Ol</Text>
+            )}
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -186,6 +205,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
     backgroundColor: "#f4f4f4",
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    marginBottom: 8,
+  },
+  logoText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#65558F',
+    marginBottom: 4,
+  },
+  logoSubText: {
+    fontSize: 14,
+    color: '#666',
   },
   formContainer: {
     width: "100%",
@@ -243,6 +281,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
+  },
+  disabledButton: {
+    backgroundColor: "#aaa",
   },
   registerButtonText: {
     color: "#fff",

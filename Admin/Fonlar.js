@@ -44,7 +44,7 @@ const Fonlar = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Fonlar</Text>
+      <Text style={styles.header}>Bağış Fonları</Text>
 
       {loading ? (
         <ActivityIndicator size="large" color="#65558F" />
@@ -93,10 +93,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   header: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 10,
-    color: "#333",
+    marginTop: 10,
+    marginBottom: 20,
+    textAlign: "center",
+    color: "#1a237e",
   },
   listContainer: {
     paddingBottom: 80,

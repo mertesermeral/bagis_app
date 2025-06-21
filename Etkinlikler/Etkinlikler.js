@@ -55,7 +55,7 @@ const BagisAlanEtkinlikler = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      
+      <Text style={styles.header}>Etkinlikler</Text>
       <ScrollView 
         style={styles.scrollContainer}
         refreshControl={
@@ -67,19 +67,24 @@ const BagisAlanEtkinlikler = ({ navigation }) => {
           />
         }
       >
-        { events && events.length > 0 ? (
+        {events && events.length > 0 ? (
           events.map(event => (
             <View key={event.id} style={styles.card}>
               <Image source={{ uri: event.imageUrl }} style={styles.eventImage} />
-              <View style={styles.infoContainer}>
-                <Text style={styles.title}>{event.eventName}</Text>
-                <Text style={styles.organizer}>Düzenleyen: {event.organizer}</Text>
-                <Text style={styles.description}>{event.description}</Text>
-                <Text style={styles.date}>Tarih: {event.date}</Text>
-                <Text style={styles.location}>Konum: {event.location}</Text>
+              <View style={styles.cardContent}>
+                <View style={styles.titleContainer}>
+                  <Text style={styles.title}>{event.eventName}</Text>
+                </View>
+                <Text style={styles.organizer}>👤 {event.organizer}</Text>
+                <Text style={styles.description} numberOfLines={2}>{event.description}</Text>
+                <View style={styles.detailsRow}>
+                  <Text style={styles.date}>📅 {event.date}</Text>
+                  <Text style={styles.location}>📍 {event.location}</Text>
+                </View>
                 <TouchableOpacity 
                   style={styles.detailsButton} 
                   onPress={() => navigation.navigate('EtkinliklerDetay', { event })}>
+                  <Icon name="arrow-forward" size={18} color="#fff" />
                   <Text style={styles.detailsButtonText}>Detayları Gör</Text>
                 </TouchableOpacity>
               </View>
@@ -91,11 +96,9 @@ const BagisAlanEtkinlikler = ({ navigation }) => {
       </ScrollView>
 
       <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('EtkinlikEkle')}>
-        <Text style={styles.addButtonText}>+ Etkinlik Ekle</Text>
+        <Icon name="add" size={24} color="#fff" />
+        <Text style={styles.addButtonText}>Etkinlik Ekle</Text>
       </TouchableOpacity>
-
-
-
     </SafeAreaView>
   );
 };
@@ -103,121 +106,105 @@ const BagisAlanEtkinlikler = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
   },
   header: {
-    backgroundColor: '#FEF7FF',
-    paddingVertical: 30,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  headerText: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
+    color: '#1a237e',
     textAlign: 'center',
-    color: '#65558F',
+    marginVertical: 16,
   },
-  addButton: { backgroundColor: '#65558F', padding: 15, margin: 10, borderRadius: 10, alignItems: 'center' },
-  addButtonText: { color: '#FFF', fontWeight: 'bold' },
-  scrollContainer: { padding: 10 },
-  card: { flexDirection: 'row', padding: 10, borderBottomWidth: 1 },
-  eventImage: { width: 80, height: 80, marginRight: 10 },
-  infoContainer: { flex: 1 },
-  title: { fontWeight: 'bold' },
-  description: { color: '#555' },
-  date: { color: '#888' },
-  location: { 
-    color: '#666',
-    marginVertical: 2
+  scrollContainer: {
+    padding: 16,
   },
-  detailsButton: { backgroundColor: '#65558F', padding: 5, borderRadius: 5, marginTop: 5 },
-  detailsButtonText: { color: '#FFF', textAlign: 'center' },
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FEF7FF',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginBottom: 16,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    overflow: 'hidden',
   },
-  tabButton: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 10,
+  eventImage: {
+    width: '100%',
+    height: 160,
+    resizeMode: 'cover',
   },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#65558F',
+  cardContent: {
+    padding: 16,
   },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#65558F',
+  titleContainer: {
+    marginBottom: 8,
   },
-  activeTabText: {
-    color: '#65558F',
+  title: {
+    fontSize: 18,
     fontWeight: 'bold',
+    color: '#333',
   },
-  buttonContainer: {
-    flex: 1,
-    marginTop: 20,
-    paddingHorizontal: 16,
+  organizer: {
+    fontSize: 14,
+    color: '#65558F',
+    marginBottom: 8,
   },
-  row: {
+  description: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 12,
+    lineHeight: 20,
+  },
+  detailsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    marginBottom: 12,
   },
-  rowText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-    paddingLeft: 8,
+  date: {
+    fontSize: 13,
+    color: '#555',
   },
-  footer: {
+  location: {
+    fontSize: 13,
+    color: '#555',
+  },
+  detailsButton: {
+    backgroundColor: '#65558F',
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FEF7FF',
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
-  },
-  footerText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#65558F',
-  },
-  activeFooter: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#65558F',
-    paddingBottom: 4,
-  },
-  footerButton: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 5,
+    paddingVertical: 10,
+    borderRadius: 8,
   },
-  footerButtonText: {
-    fontSize: 12,
-    color: '#65558F',
-    marginTop: 4, // Add some spacing between the icon and text
+  detailsButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    marginLeft: 8,
   },
-  loadingText: {
-    textAlign: 'center',
-    padding: 20,
-    color: '#65558F',
+  addButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: '#65558F',
+    borderRadius: 30,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    elevation: 4,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    marginLeft: 8,
   },
   noEventText: {
     textAlign: 'center',
     padding: 20,
     color: '#666',
+    fontSize: 16,
   },
 });
 
 export default BagisAlanEtkinlikler;
+ 

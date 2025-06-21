@@ -42,10 +42,10 @@ const BagisAlanAnaMenu = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        {/* Hoş Geldin Mesajı */}
         <View style={styles.header}>
+          <Text style={styles.logoText}>Fonity</Text>
           <Image
-            source={require("../assets/indir.png")}
+            source={require("../assets/logo.png")}
             style={styles.headerImage}
           />
           <Text style={styles.welcomeText}>
@@ -79,6 +79,12 @@ const styles = StyleSheet.create({
   headerImage: {
     width: 80,
     height: 80,
+    marginBottom: 10,
+  },
+  logoText: {
+    fontSize: 32,
+    fontWeight: "bold",
+    color: "#65558F",
     marginBottom: 10,
   },
   welcomeText: {

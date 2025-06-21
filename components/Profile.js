@@ -100,28 +100,31 @@ const Profile = ({ navigation }) => {
               <Text style={styles.rowText}>Hesap Ayarları</Text>
               <Icon name="chevron-right" size={24} color="#333" />
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.row}
-              onPress={() => navigation.navigate('Gizlilik')}
+         
+          
+
+          
+          
+            <TouchableOpacity 
+              style={styles.row} 
+              onPress={() => navigation.navigate('Iletisim')}
             >
-              <Icon name="security" size={20} color="#333" />
-              <Text style={styles.rowText}>Gizlilik ve Güvenlik</Text>
+              <Icon name="contact-support" size={20} color="#333" />
+              <Text style={styles.rowText}>İletişim</Text>
+              <Icon name="chevron-right" size={24} color="#333" />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.row} 
+              onPress={() => navigation.navigate('Hakkimizda')}
+            >
+              <Icon name="info" size={20} color="#333" />
+              <Text style={styles.rowText}>Hakkımızda</Text>
               <Icon name="chevron-right" size={24} color="#333" />
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.sectionTitle}>GENEL</Text>
-          <View style={styles.section}>
-            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Yardim')}>
-              <Icon name="help-outline" size={20} color="#333" />
-              <Text style={styles.rowText}>YARDIM</Text>
-              <Icon name="chevron-right" size={24} color="#333" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Iletisim')}>
-              <Icon name="mail-outline" size={20} color="#333" />
-              <Text style={styles.rowText}>İLETİŞİM</Text>
-              <Icon name="chevron-right" size={24} color="#333" />
-            </TouchableOpacity>
+          <View style={styles.versionContainer}>
+            <Text style={styles.versionText}>Sürüm 1.0.0</Text>
           </View>
 
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -212,6 +215,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
   },
+  versionContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  versionText: {
+    color: '#666',
+    fontSize: 12,
+  },
 });
 
+
 export default Profile;
+

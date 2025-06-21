@@ -1,9 +1,9 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 import Constants from 'expo-constants';
-
+import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const {
   API_KEY,
   AUTH_DOMAIN,
@@ -23,10 +23,18 @@ const firebaseConfig = {
   appId: APP_ID,
   measurementId: MEASUREMENT_ID,
 };
+let app, auth, db, storage;
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
-
+try {
+  if (!app) {
+    app = initializeApp(firebaseConfig);
+    auth = initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage)
+    });
+    db = getFirestore(app);
+    storage = getStorage(app);
+  }
+} catch (error) {
+  console.error("Firebase initialization error:", error);
+}
 export { app, auth, db, storage };

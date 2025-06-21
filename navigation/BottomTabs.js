@@ -6,6 +6,8 @@ import Profile from '../components/Profile';
 import { useAuth } from '../AuthContext';
 import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AdminEtkinlikler from '../Admin/AdminEtkinlikler';
+import AdminAcilDurumlar from '../Admin/AdminAcilDurumlar';
 
 const Tab = createBottomTabNavigator();
 
@@ -52,9 +54,31 @@ export const AdminBottomTabs = ({ MainComponent }) => {
         component={MainComponent}
         options={{
           headerShown: false,
-          tabBarLabel: 'Yönetim',
+          tabBarLabel: 'Bağış Yönetimi',
           tabBarIcon: ({ color }) => (
-            <Icon name="admin-panel-settings" size={24} color={color} />
+            <Icon name="volunteer-activism" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="AdminEtkinlikler"
+        component={AdminEtkinlikler}
+        options={{
+          headerShown: false,
+          tabBarLabel: 'Etkinlikler',
+          tabBarIcon: ({ color }) => (
+            <Icon name="event" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="AdminAcilDurumlar"
+        component={AdminAcilDurumlar}
+        options={{
+          headerShown: false,
+          tabBarLabel: 'Acil Durumlar',
+          tabBarIcon: ({ color }) => (
+            <Icon name="warning" size={24} color={color} />
           ),
         }}
       />

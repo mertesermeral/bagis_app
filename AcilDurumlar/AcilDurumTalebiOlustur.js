@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, TextInput, Alert, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, TextInput, Alert, Image, ActivityIndicator } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { db, storage, auth } from '../firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, getDoc, doc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import MaskInput from 'react-native-mask-input';
+import { useAuth } from '../AuthContext'; // Changed from '../AuthProvider' to '../AuthContext'
 
 const BagisciAcilDurumTalebiOlustur = ({ navigation }) => {
-  const [name, setName] = useState('');
+  const { role } = useAuth();
+  const [name, setName] = useState(role === 'admin' ? 'Fonity' : '');
   const [phone, setPhone] = useState('');
   const [requestTitle, setRequestTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -16,6 +18,28 @@ const BagisciAcilDurumTalebiOlustur = ({ navigation }) => {
   const [requestType, setRequestType] = useState('');
   const [additionalInfo, setAdditionalInfo] = useState('');
   const [disasterLocation, setDisasterLocation] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            // Admin kontrolü ve otomatik Fonity ismi
+            const fullName = role === 'admin' ? 'Fonity' : `${userData.firstName} ${userData.lastName}`;
+            setName(fullName);
+          }
+        }
+      } catch (error) {
+        console.error("Kullanıcı bilgileri alınamadı:", error);
+      }
+    };
+
+    fetchUserData();
+  }, [role]);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -31,27 +55,37 @@ const BagisciAcilDurumTalebiOlustur = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
     const user = auth.currentUser;
 
     if (!user) {
       Alert.alert("Hata", "Lütfen giriş yapın.");
+      setIsSubmitting(false);
       return;
     }
 
-    // Temel alan kontrolü
-    if (!name || !phone || !requestTitle || !description || !requestType) {
-      Alert.alert("Hata", "Lütfen zorunlu alanları doldurun: Ad Soyad, İletişim Numarası, Talep Adı, Açıklama ve Talep Türü!");
+    // Admin kontrolü ve otomatik Fonity ismi
+    const submissionName = role === 'admin' ? 'Fonity' : name;
+
+    // Temel alan kontrolü - admin için isim kontrolü kaldırıldı
+    if ((role !== 'admin' && !name) || !phone || !requestTitle || !description || !requestType) {
+      Alert.alert("Hata", "Lütfen tüm zorunlu alanları doldurun!");
+      setIsSubmitting(false);
       return;
     }
 
     // Talep türüne göre özel kontroller
     if (requestType === 'Afet' && !disasterLocation) {
       Alert.alert("Hata", "Lütfen afet bölgesi konumunu girin!");
+      setIsSubmitting(false);
       return;
     }
 
     if (requestType !== 'Diğer' && !additionalInfo) {
       Alert.alert("Hata", "Lütfen ek bilgi alanını doldurun!");
+      setIsSubmitting(false);
       return;
     }
 
@@ -65,9 +99,10 @@ const BagisciAcilDurumTalebiOlustur = ({ navigation }) => {
         imageUrl = await getDownloadURL(storageRef);
       }
 
-      await addDoc(collection(db, "emergencies"), {
-        userId: user.uid, // Kullanıcı kimliğini kaydet
-        name,
+      const docRef = await addDoc(collection(db, "emergencies"), {
+        userId: user.uid,
+        name: submissionName, // Değiştirilmiş isim kullanılıyor
+        isAdmin: role === 'admin', // Admin bilgisi ekleniyor
         phone,
         requestTitle,
         description,
@@ -82,6 +117,8 @@ const BagisciAcilDurumTalebiOlustur = ({ navigation }) => {
       navigation.goBack();
     } catch (error) {
       Alert.alert("Hata", "Bir hata oluştu, tekrar deneyin.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -107,9 +144,18 @@ const BagisciAcilDurumTalebiOlustur = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>Acil Durum Talebi Oluştur</Text>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.label}>Ad Soyad</Text>
-        <TextInput style={styles.input} placeholder="Ad Soyad" value={name} onChangeText={setName} />
-
+        {/* Ad Soyad alanını sadece admin değilse göster */}
+        {role !== 'admin' && (
+          <>
+            <Text style={styles.label}>Ad Soyad</Text>
+            <TextInput 
+              style={[styles.input, { backgroundColor: '#f5f5f5' }]} 
+              value={name} 
+              editable={false}
+            />
+          </>
+        )}
+        
         <Text style={styles.label}>İletişim Numarası</Text>
         <MaskInput
           style={styles.input}
@@ -171,8 +217,16 @@ const BagisciAcilDurumTalebiOlustur = ({ navigation }) => {
         </TouchableOpacity>
         {image && <Image source={{ uri: image }} style={styles.imagePreview} />}
 
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>Talep Oluştur</Text>
+        <TouchableOpacity 
+          style={[styles.submitButton, isSubmitting && styles.disabledButton]}
+          onPress={handleSubmit}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.submitButtonText}>Talep Oluştur</Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -191,6 +245,7 @@ const styles = StyleSheet.create({
   imagePickerText: { color: '#FFF', fontWeight: 'bold' },
   imagePreview: { width: '100%', height: 200, resizeMode: 'cover', borderRadius: 12, marginBottom: 15 },
   submitButton: { backgroundColor: '#65558F', padding: 15, borderRadius: 12, alignItems: 'center' },
+  disabledButton: { backgroundColor: '#ccc' },
   submitButtonText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
 });
 

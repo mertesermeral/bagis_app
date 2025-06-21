@@ -11,11 +11,13 @@ import {
   Platform,
   Image
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../AuthContext';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import * as ImagePicker from 'expo-image-picker';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { deleteUser } from 'firebase/auth';
 
 const HesapAyarlari = ({ navigation }) => {
   const { user, userDetails, updateUserDetails } = useAuth();
@@ -192,6 +194,51 @@ const HesapAyarlari = ({ navigation }) => {
     }
   };
 
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      "Hesap Silme",
+      "Hesabınızı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+      [
+        {
+          text: "İptal",
+          style: "cancel"
+        },
+        {
+          text: "Hesabı Sil",
+          onPress: confirmDeleteAccount,
+          style: "destructive"
+        }
+      ]
+    );
+  };
+
+  const confirmDeleteAccount = async () => {
+    try {
+      // Delete profile image
+      await deleteExistingProfileImage();
+      
+      // Delete user document from Firestore
+      const userRef = doc(db, 'users', user.uid);
+      await deleteDoc(userRef);
+      
+      // Delete Firebase Auth user
+      await deleteUser(user);
+      
+      Alert.alert("Başarılı", "Hesabınız başarıyla silindi.");
+      // Reset the navigation stack to prevent going back
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'LoginScreen' }],
+      });
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      Alert.alert(
+        "Hata",
+        "Hesap silinirken bir hata oluştu. Lütfen daha sonra tekrar deneyin."
+      );
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -257,6 +304,20 @@ const HesapAyarlari = ({ navigation }) => {
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
             <Text style={styles.saveButtonText}>Kaydet</Text>
           </TouchableOpacity>
+
+          <View style={styles.divider} />
+          
+          <View style={styles.dangerZone}>
+            <View style={styles.dangerTitleContainer}>
+              <Ionicons name="warning" size={40} color="#DC3545" style={styles.warningIcon} />
+            </View>
+            <Text style={styles.dangerDescription}>
+              Hesabınızı silmek geri alınamaz bir işlemdir. Tüm verileriniz kalıcı olarak silinecektir.
+            </Text>
+            <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAccount}>
+              <Text style={styles.deleteButtonText}>Hesabı Sil</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -321,6 +382,44 @@ const styles = StyleSheet.create({
   readOnlyInput: {
     backgroundColor: '#f5f5f5',
     color: '#666',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#e0e0e0',
+    marginVertical: 25,
+  },
+  dangerZone: {
+    backgroundColor: '#FFF5F5',
+    padding: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#FFE5E5',
+  },
+  dangerTitleContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 15,
+    width: '100%',
+  },
+  warningIcon: {
+    textAlign: 'center',
+  },
+  dangerDescription: {
+    color: '#666',
+    fontSize: 14,
+    marginBottom: 15,
+    lineHeight: 20,
+  },
+  deleteButton: {
+    backgroundColor: '#DC3545',
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

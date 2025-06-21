@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { AntDesign } from '@expo/vector-icons';
@@ -29,6 +29,7 @@ const BagisTalepFormu = () => {
   const [digerMiktar, setDigerMiktar] = useState('');
   const [belge, setBelge] = useState(null);
   const [belgeURL, setBelgeURL] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const egitimSeviyeleri = ['Üniversite Öğrencisi', 'Lise Öğrencisi', 'İlkokul Öğrencisi'];
   const faturaTurleri = ['Elektrik', 'Su', 'Doğalgaz'];
@@ -65,174 +66,182 @@ const BagisTalepFormu = () => {
   };
 
   const handleSubmit = async () => {
-    const user = getAuth().currentUser;
-    
-    if (bagisTuru === '') {
-      Alert.alert("Eksik Bilgi", "Lütfen bağış türünü seçin.");
-      return;
-    }
-  
-    let basvuruData = {
-      bagisTuru,
-      tarih: new Date().toISOString(),
-    };
-  
-    if (bagisTuru === 'Eğitim Yardım Talebi') {
-      if (
-        egitimSeviyesi === '' ||
-        tcNo.length !== 11 ||
-        isNaN(tcNo) ||
-        miktar === '' ||
-        isNaN(miktar) ||
-        aciklama.trim() === '' ||
-        !belge
-      ) {
-        Alert.alert("Eksik veya Hatalı Bilgi", "Lütfen tüm alanları doğru şekilde doldurun.");
-        return;
-      }
-  
-      basvuruData = {
-        ...basvuruData,
-        egitimSeviyesi,
-        tcNo,
-        miktar: parseFloat(miktar),
-        aciklama,
-        belgeAdi: belge?.name || '',
-        belgeURL: await uploadPDFToFirebase(belge),
-      };
-    }
-  
-    if (bagisTuru === 'Fatura Yardımı Talebi') {
-      if (
-        faturaTuru === '' ||
-        sehir === '' ||
-        aboneNo.trim() === '' ||
-        faturaTutari.trim() === '' ||
-        isNaN(faturaTutari) ||
-        !belge
-      ) {
-        Alert.alert("Eksik veya Hatalı Bilgi", "Lütfen tüm alanları doğru şekilde doldurun.");
-        return;
-      }
-  
-      basvuruData = {
-        ...basvuruData,
-        faturaTuru,
-        sehir,
-        aboneNo,
-        faturaTutari: parseFloat(faturaTutari),
-        belgeAdi: belge?.name || '',
-        belgeURL: await uploadPDFToFirebase(belge),
-      };
-    }
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
-    if (bagisTuru === 'Gıda Yardımı Talebi') {
-      if (
-        gidaTuru === '' ||
-        haneSayisi.trim() === '' ||
-        isNaN(haneSayisi) ||
-        gelirDurumu === '' ||
-        adres.trim() === ''
-      ) {
-        Alert.alert("Eksik veya Hatalı Bilgi", "Lütfen tüm alanları doğru şekilde doldurun.");
-        return;
-      }
-
-      basvuruData = {
-        ...basvuruData,
-        gidaTuru,
-        haneSayisi: parseInt(haneSayisi),
-        gelirDurumu,
-        adres,
-        belgeAdi: belge?.name || '',
-        belgeURL: await uploadPDFToFirebase(belge),
-      };
-
-      // Sadece Gıda Paketi seçildiyse özel talep alanını ekleyelim
-      if (gidaTuru === 'Gıda Paketi') {
-        basvuruData.ozelGidaTalebi = ozelGidaTalebi;
-      }
-    }
-    if (bagisTuru === 'Kira Yardımı Talebi') {
-      if (
-        sehir === '' ||
-        adres.trim() === '' ||
-        haneSayisi.trim() === '' ||
-        isNaN(haneSayisi) ||
-        gelirDurumu === '' ||
-        kiraTutari.trim() === '' ||
-        isNaN(kiraTutari) ||
-        !belge
-      ) {
-        Alert.alert("Eksik veya Hatalı Bilgi", "Lütfen tüm alanları doğru şekilde doldurun.");
-        return;
-      }
-
-      basvuruData = {
-        ...basvuruData,
-        sehir,
-        adres,
-        haneSayisi: parseInt(haneSayisi),
-        gelirDurumu,
-        kiraTutari: parseFloat(kiraTutari),
-        belgeAdi: belge?.name || '',
-        belgeURL: await uploadPDFToFirebase(belge),
-      };
-    }
-
-    if (bagisTuru === 'Diğer') {
-      if (digerBaslik.trim() === '' || digerAciklama.trim() === '') {
-        Alert.alert("Eksik Bilgi", "Lütfen başlık ve açıklama alanlarını doldurun.");
-        return;
-      }
-    
-      const uploadedBelgeURL = belge ? await uploadPDFToFirebase(belge) : '';
-    
-      basvuruData = {
-        ...basvuruData,
-        digerBaslik,
-        digerAciklama,
-        digerMiktar: digerMiktar ? parseFloat(digerMiktar) : '',
-        belgeAdi: belge?.name || '',
-        belgeURL: uploadedBelgeURL,
-      };
-    }
-    
-  
     try {
-      await addDoc(collection(db, 'bagisBasvurulari'), {
-        ...basvuruData,
-        onay: "beklemede",
-        kullaniciId: user?.uid || null,
-      });
-          
+      const user = getAuth().currentUser;
       
-      Alert.alert(
-        "Başarılı",
-        "Talebiniz alınmıştır ve onay için yöneticilere iletilmiştir. Onaylandıktan sonra bağışçılar tarafından görüntülenecektir."
-      );
-      
-      setBagisTuru('');
-      setEgitimSeviyesi('');
-      setTcNo('');
-      setMiktar('');
-      setAciklama('');
-      setFaturaTuru('');
-      setSehir('');
-      setAboneNo('');
-      setFaturaTutari('');
-      setGidaTuru('');
-      setHaneSayisi('');
-      setGelirDurumu('');
-      setOzelGidaTalebi('');
-      setAdres('');
-      setKiraTutari('');
-      setBelge(null);
-      setBelgeURL('');
+      if (bagisTuru === '') {
+        Alert.alert("Eksik Bilgi", "Lütfen bağış türünü seçin.");
+        return;
+      }
+    
+      let basvuruData = {
+        bagisTuru,
+        tarih: new Date().toISOString(),
+      };
+    
+      if (bagisTuru === 'Eğitim Yardım Talebi') {
+        if (
+          egitimSeviyesi === '' ||
+          tcNo.length !== 11 ||
+          isNaN(tcNo) ||
+          miktar === '' ||
+          isNaN(miktar) ||
+          aciklama.trim() === '' ||
+          !belge
+        ) {
+          Alert.alert("Eksik veya Hatalı Bilgi", "Lütfen tüm alanları doğru şekilde doldurun.");
+          return;
+        }
+    
+        basvuruData = {
+          ...basvuruData,
+          egitimSeviyesi,
+          tcNo,
+          miktar: parseFloat(miktar),
+          aciklama,
+          belgeAdi: belge?.name || '',
+          belgeURL: await uploadPDFToFirebase(belge),
+        };
+      }
+    
+      if (bagisTuru === 'Fatura Yardımı Talebi') {
+        if (
+          faturaTuru === '' ||
+          sehir === '' ||
+          aboneNo.trim() === '' ||
+          faturaTutari.trim() === '' ||
+          isNaN(faturaTutari) ||
+          !belge
+        ) {
+          Alert.alert("Eksik veya Hatalı Bilgi", "Lütfen tüm alanları doğru şekilde doldurun.");
+          return;
+        }
+    
+        basvuruData = {
+          ...basvuruData,
+          faturaTuru,
+          sehir,
+          aboneNo,
+          faturaTutari: parseFloat(faturaTutari),
+          belgeAdi: belge?.name || '',
+          belgeURL: await uploadPDFToFirebase(belge),
+        };
+      }
 
-    } catch (e) {
-      console.error("Kayıt hatası:", e);
-      Alert.alert("Hata", "Başvuru sırasında bir sorun oluştu.");
+      if (bagisTuru === 'Gıda Yardımı Talebi') {
+        if (
+          gidaTuru === '' ||
+          haneSayisi.trim() === '' ||
+          isNaN(haneSayisi) ||
+          gelirDurumu === '' ||
+          adres.trim() === ''
+        ) {
+          Alert.alert("Eksik veya Hatalı Bilgi", "Lütfen tüm alanları doğru şekilde doldurun.");
+          return;
+        }
+
+        basvuruData = {
+          ...basvuruData,
+          gidaTuru,
+          haneSayisi: parseInt(haneSayisi),
+          gelirDurumu,
+          adres,
+          belgeAdi: belge?.name || '',
+          belgeURL: await uploadPDFToFirebase(belge),
+        };
+
+        // Sadece Gıda Paketi seçildiyse özel talep alanını ekleyelim
+        if (gidaTuru === 'Gıda Paketi') {
+          basvuruData.ozelGidaTalebi = ozelGidaTalebi;
+        }
+      }
+      if (bagisTuru === 'Kira Yardımı Talebi') {
+        if (
+          sehir === '' ||
+          adres.trim() === '' ||
+          haneSayisi.trim() === '' ||
+          isNaN(haneSayisi) ||
+          gelirDurumu === '' ||
+          kiraTutari.trim() === '' ||
+          isNaN(kiraTutari) ||
+          !belge
+        ) {
+          Alert.alert("Eksik veya Hatalı Bilgi", "Lütfen tüm alanları doğru şekilde doldurun.");
+          return;
+        }
+
+        basvuruData = {
+          ...basvuruData,
+          sehir,
+          adres,
+          haneSayisi: parseInt(haneSayisi),
+          gelirDurumu,
+          kiraTutari: parseFloat(kiraTutari),
+          belgeAdi: belge?.name || '',
+          belgeURL: await uploadPDFToFirebase(belge),
+        };
+      }
+
+      if (bagisTuru === 'Diğer') {
+        if (digerBaslik.trim() === '' || digerAciklama.trim() === '') {
+          Alert.alert("Eksik Bilgi", "Lütfen başlık ve açıklama alanlarını doldurun.");
+          return;
+        }
+      
+        const uploadedBelgeURL = belge ? await uploadPDFToFirebase(belge) : '';
+      
+        basvuruData = {
+          ...basvuruData,
+          digerBaslik,
+          digerAciklama,
+          digerMiktar: digerMiktar ? parseFloat(digerMiktar) : '',
+          belgeAdi: belge?.name || '',
+          belgeURL: uploadedBelgeURL,
+        };
+      }
+      
+      try {
+        await addDoc(collection(db, 'bagisBasvurulari'), {
+          ...basvuruData,
+          onay: "beklemede",
+          kullaniciId: user?.uid || null,
+        });
+            
+        
+        Alert.alert(
+          "Başarılı",
+          "Talebiniz alınmıştır ve onay için yöneticilere iletilmiştir. Onaylandıktan sonra bağışçılar tarafından görüntülenecektir."
+        );
+        
+        setBagisTuru('');
+        setEgitimSeviyesi('');
+        setTcNo('');
+        setMiktar('');
+        setAciklama('');
+        setFaturaTuru('');
+        setSehir('');
+        setAboneNo('');
+        setFaturaTutari('');
+        setGidaTuru('');
+        setHaneSayisi('');
+        setGelirDurumu('');
+        setOzelGidaTalebi('');
+        setAdres('');
+        setKiraTutari('');
+        setBelge(null);
+        setBelgeURL('');
+
+      } catch (e) {
+        console.error("Kayıt hatası:", e);
+        Alert.alert("Hata", "Başvuru sırasında bir sorun oluştu.");
+      }
+    } catch (error) {
+      Alert.alert("Hata", "Başvuru gönderilirken bir hata oluştu.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
@@ -355,7 +364,7 @@ const BagisTalepFormu = () => {
             </Picker>
           </View>
 
-          <Text style={styles.label}>Hane Sayısı</Text>
+          <Text style={styles.label}>Hane Halkı Sayısı</Text>
           <TextInput style={styles.input} value={haneSayisi} onChangeText={setHaneSayisi} keyboardType="numeric" />
 
           <Text style={styles.label}>Gelir Durumu</Text>
@@ -475,8 +484,16 @@ const BagisTalepFormu = () => {
         </>
       )}  
       
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitButtonText}>Başvuruyu Gönder</Text>
+      <TouchableOpacity 
+        style={[styles.submitButton, isSubmitting && styles.disabledButton]}
+        onPress={handleSubmit}
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.submitText}>Başvuruyu Gönder</Text>
+        )}
       </TouchableOpacity>
     </ScrollView>
   );
@@ -484,62 +501,108 @@ const BagisTalepFormu = () => {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: '#fff',
-    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
   },
   label: {
     fontSize: 16,
-    fontWeight: '600',
-    marginTop: 10,
-    alignSelf: 'flex-start',
+    fontWeight: 'bold',
+    color: '#65558F',
+    marginBottom: 8,
+    marginTop: 16,
   },
   pickerWrapper: {
-    width: '100%',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 6,
-    marginBottom: 10,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    overflow: 'hidden',
   },
   input: {
-    width: '100%',
-    backgroundColor: '#f9f9f9',
-    padding: 10,
-    borderRadius: 6,
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#ccc',
-    marginBottom: 10,
+    borderColor: '#e0e0e0',
+    marginBottom: 16,
+    fontSize: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   belgeButton: {
     backgroundColor: '#65558F',
-    padding: 10,
-    borderRadius: 8,
-    marginTop: 10,
+    padding: 15,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 16,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    elevation: 2,
   },
   belgeButtonText: {
     color: '#fff',
     fontWeight: 'bold',
+    fontSize: 16,
+    marginLeft: 8,
   },
   belgeOnay: {
-    marginTop: 12,
+    backgroundColor: '#f3e5f5',
+    padding: 12,
+    borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 16,
   },
   belgeAdi: {
     marginLeft: 8,
     fontSize: 14,
-    color: '#333',
+    color: '#65558F',
+    flex: 1,
   },
   submitButton: {
     backgroundColor: '#2e7d32',
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 20,
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 24,
+    marginBottom: 32,
     alignItems: 'center',
-    width: '100%',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
-  submitButtonText: {
+  disabledButton: {
+    backgroundColor: '#ccc',
+  },
+  submitText: {
     color: '#fff',
     fontWeight: 'bold',
+    fontSize: 18,
   },
+  icerikListesi: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  icerikItem: {
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 8,
+    paddingLeft: 8,
+  }
 });
 
 export default BagisTalepFormu;

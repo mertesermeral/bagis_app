@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AuthContext = createContext();
 
@@ -12,32 +13,39 @@ export const AuthProvider = ({ children }) => {
     const [userDetails, setUserDetails] = useState(null);
 
     useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
-            if (currentUser) {
-                setUser(currentUser);
-                const docRef = doc(db, "users", currentUser.uid);
-                const docSnap = await getDoc(docRef);
+        try {
+            const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
+                try {
+                    if (currentUser) {
+                        setUser(currentUser);
+                        const docRef = doc(db, "users", currentUser.uid);
+                        const docSnap = await getDoc(docRef);
 
-                if (docSnap.exists()) {
-                    const userData = docSnap.data();
-                    setRole(userData.role);
-                    setUserDetails({
-                        ...userData,
-                        photoURL: userData.photoURL || 'https://via.placeholder.com/100'
-                    });
-                } else {
-                    setRole(null);
-                    setUserDetails(null);
+                        if (docSnap.exists()) {
+                            const userData = docSnap.data();
+                            setRole(userData.role);
+                            setUserDetails({
+                                ...userData,
+                                photoURL: userData.photoURL || 'https://via.placeholder.com/100'
+                            });
+                        }
+                    } else {
+                        setUser(null);
+                        setRole(null);
+                        setUserDetails(null);
+                    }
+                } catch (error) {
+                    console.error("Auth state change error:", error);
+                } finally {
+                    setLoading(false);
                 }
-            } else {
-                setUser(null);
-                setRole(null);
-                setUserDetails(null);
-            }
-            setLoading(false);
-        });
+            });
 
-        return () => unsubscribe();
+            return () => unsubscribe();
+        } catch (error) {
+            console.error("Auth provider error:", error);
+            setLoading(false);
+        }
     }, []);
 
     const updateUserDetails = async () => {
@@ -60,12 +68,16 @@ export const AuthProvider = ({ children }) => {
             setUser(null);
             setRole(null);
             setUserDetails(null);
+            // Otomatik login flag'lerini temizle
+            await AsyncStorage.removeItem("isLoggedIn");
+            await AsyncStorage.removeItem("autoLoginRole");
             return true;
         } catch (error) {
             console.error("Logout error:", error);
             throw error;
         }
     };
+
 
     return (
         <AuthContext.Provider value={{ 
@@ -75,7 +87,7 @@ export const AuthProvider = ({ children }) => {
             loading, 
             logout,
             userDetails,
-            updateUserDetails // Yeni fonksiyonu ekledik
+            updateUserDetails, // Yeni fonksiyonu ekledik
         }}>
             {children}
         </AuthContext.Provider>

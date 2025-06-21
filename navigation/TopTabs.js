@@ -12,6 +12,8 @@ import Fonlar from "../Admin/Fonlar";
 import BekleyenTalepler from "../Admin/BekleyenTalepler";
 import OnaylananTalepler from "../Admin/OnaylananTalepler";
 import ReddedilenTalepler from "../Admin/ReddedilenTalepler";
+import AdminEtkinlikler from "../Admin/AdminEtkinlikler";
+import AdminAcilDurumlar from "../Admin/AdminAcilDurumlar";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -23,8 +25,12 @@ export const DonorTabs = () => (
       screenOptions={{
         tabBarStyle: styles.tabBarStyle,
         tabBarActiveTintColor: "#65558F",
-        tabBarInactiveTintColor: "#999999",
+        tabBarInactiveTintColor: "#666",
         tabBarLabelStyle: styles.tabBarLabelStyle,
+        tabBarIndicatorStyle: styles.tabBarIndicatorStyle,
+        tabBarItemStyle: styles.tabBarItemStyle,
+        tabBarPressColor: "#E8E0FF",
+        tabBarShowIcon: true,
       }}
     >
       <Tab.Screen
@@ -71,8 +77,12 @@ export const ReceiverTabs = () => (
       screenOptions={{
         tabBarStyle: styles.tabBarStyle,
         tabBarActiveTintColor: "#65558F",
-        tabBarInactiveTintColor: "#999999",
+        tabBarInactiveTintColor: "#666",
         tabBarLabelStyle: styles.tabBarLabelStyle,
+        tabBarIndicatorStyle: styles.tabBarIndicatorStyle,
+        tabBarItemStyle: styles.tabBarItemStyle,
+        tabBarPressColor: "#E8E0FF",
+        tabBarShowIcon: true,
         headerShown: false,
       }}
     >
@@ -113,8 +123,12 @@ export const AdminTabs = ({ navigation }) => {
         screenOptions={{
           tabBarStyle: styles.tabBarStyle,
           tabBarActiveTintColor: "#65558F",
-          tabBarInactiveTintColor: "#999999",
+          tabBarInactiveTintColor: "#666",
           tabBarLabelStyle: styles.tabBarLabelStyle,
+          tabBarIndicatorStyle: styles.tabBarIndicatorStyle,
+          tabBarItemStyle: styles.tabBarItemStyle,
+          tabBarPressColor: "#E8E0FF",
+          tabBarShowIcon: true,
           headerShown: false,
         }}
       >
@@ -161,18 +175,34 @@ const styles = StyleSheet.create({
   },
   tabBarStyle: {
     backgroundColor: "#FEF7FF",
-    height: 70,  // 60'tan 70'e yükselttim
-    elevation: 4, // Gölge ekledim
+    height: 65,
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 1,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0E6FF',
+  },
+  tabBarIndicatorStyle: {
+    backgroundColor: "#65558F",
+    height: 3,
+    borderRadius: 3,
+  },
+  tabBarItemStyle: {
+    paddingVertical: 8,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   tabBarLabelStyle: {
-    fontSize: 12,
-    fontWeight: "bold",
+    fontSize: 11,
+    fontWeight: "600",
+    textTransform: 'none',
+    marginTop: 4,
   },
 });
+
