@@ -7,6 +7,7 @@ import { collection, addDoc, getDoc, doc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import MaskInput from 'react-native-mask-input';
 import { useAuth } from '../AuthContext'; // Changed from '../AuthProvider' to '../AuthContext'
+import * as Location from 'expo-location';
 
 const BagisciAcilDurumTalebiOlustur = ({ navigation }) => {
   const { role } = useAuth();
@@ -19,6 +20,9 @@ const BagisciAcilDurumTalebiOlustur = ({ navigation }) => {
   const [additionalInfo, setAdditionalInfo] = useState('');
   const [disasterLocation, setDisasterLocation] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [coords, setCoords] = useState(null);
+  const [locationSuggestions, setLocationSuggestions] = useState([]);
+  const [gettingLocation, setGettingLocation] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -38,7 +42,16 @@ const BagisciAcilDurumTalebiOlustur = ({ navigation }) => {
       }
     };
 
+    const getInitialCoords = async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === 'granted') {
+        const loc = await Location.getCurrentPositionAsync({});
+        setCoords(loc.coords);
+      }
+    };
+
     fetchUserData();
+    getInitialCoords();
   }, [role]);
 
   const pickImage = async () => {
@@ -51,6 +64,87 @@ const BagisciAcilDurumTalebiOlustur = ({ navigation }) => {
 
     if (!result.canceled && result.assets.length > 0) {
       setImage(result.assets[0].uri);
+    }
+  };
+
+  const handleLocationChange = async (text) => {
+    setDisasterLocation(text);
+    if (text.length < 3) {
+      setLocationSuggestions([]);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(text)}${
+          coords ? `&lat=${coords.latitude}&lon=${coords.longitude}` : ''
+        }`,
+        {
+          headers: {
+            'User-Agent': 'ReactNativeApp/1.0',
+          },
+        }
+      );
+      const data = await response.json();
+      setLocationSuggestions(data);
+    } catch (err) {
+      console.error('Adres alınamadı:', err);
+      setLocationSuggestions([]);
+    }
+  };
+
+  const handleSelectLocation = (item) => {
+    setDisasterLocation(item.display_name);
+    setLocationSuggestions([]);
+  };
+
+  const handleUseCurrentLocation = async () => {
+    setGettingLocation(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('İzin Gerekli', 'Konum izni verilmedi');
+        setGettingLocation(false);
+        return;
+      }
+
+      const locationObj = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Highest,
+        maximumAge: 10000,
+        timeout: 20000,
+      });
+
+      if (!locationObj || !locationObj.coords) {
+        Alert.alert('Hata', 'Konum alınamadı. Lütfen tekrar deneyin.');
+        setGettingLocation(false);
+        return;
+      }
+
+      const { latitude, longitude } = locationObj.coords;
+      setCoords({ latitude, longitude });
+
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+        {
+          headers: {
+            'User-Agent': 'ReactNativeApp/1.0',
+            'accept-language': 'tr',
+          },
+        }
+      );
+
+      const data = await response.json();
+      if (data.display_name) {
+        setDisasterLocation(data.display_name);
+        setLocationSuggestions([]);
+      } else {
+        Alert.alert('Hata', 'Adres alınamadı. Lütfen manuel olarak girin.');
+      }
+    } catch (error) {
+      console.error('Konum alınamadı:', error);
+      Alert.alert('Hata', 'Konum alınırken bir hata oluştu. Lütfen tekrar deneyin.');
+    } finally {
+      setGettingLocation(false);
     }
   };
 
@@ -204,8 +298,27 @@ const BagisciAcilDurumTalebiOlustur = ({ navigation }) => {
               style={styles.input}
               placeholder="Afet bölgesinin konumunu girin"
               value={disasterLocation}
-              onChangeText={setDisasterLocation}
+              onChangeText={handleLocationChange}
             />
+            <TouchableOpacity style={styles.locationButton} onPress={handleUseCurrentLocation} disabled={gettingLocation}>
+              <Text style={styles.locationButtonText}>
+                {gettingLocation ? "Konum Alınıyor..." : "Mevcut Konumumu Kullan"}
+              </Text>
+            </TouchableOpacity>
+
+            {locationSuggestions.length > 0 && (
+              <View style={styles.suggestionsContainer}>
+                {locationSuggestions.map((item) => (
+                  <TouchableOpacity 
+                    key={item.place_id} 
+                    onPress={() => handleSelectLocation(item)}
+                    style={styles.suggestionItem}
+                  >
+                    <Text style={styles.suggestionText}>{item.display_name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
           </>
         )}
 
@@ -247,6 +360,34 @@ const styles = StyleSheet.create({
   submitButton: { backgroundColor: '#65558F', padding: 15, borderRadius: 12, alignItems: 'center' },
   disabledButton: { backgroundColor: '#ccc' },
   submitButtonText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
+  locationButton: {
+    backgroundColor: '#65558F20',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  locationButtonText: {
+    color: '#65558F',
+    fontWeight: 'bold',
+  },
+  suggestionsContainer: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    marginBottom: 15,
+    maxHeight: 150,
+  },
+  suggestionItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  suggestionText: {
+    fontSize: 14,
+    color: '#333',
+  },
 });
 
 export default BagisciAcilDurumTalebiOlustur;

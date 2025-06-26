@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView, ScrollView, Alert, Linking } from 'react-native';
 import { db, auth, storage } from '../firebase';
 import { doc, deleteDoc } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
@@ -75,7 +75,16 @@ const BagisciAcilDurumDetay = ({ route, navigation }) => {
         {emergency.requestType === 'Afet' && (
           <>
             <Text style={styles.label}>Afet Bölgesi Konumu:</Text>
-            <Text style={styles.text}>{emergency.disasterLocation}</Text>
+            <TouchableOpacity 
+              onPress={() => {
+                const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(emergency.disasterLocation)}`;
+                Linking.openURL(mapUrl);
+              }}
+            >
+              <Text style={[styles.text, styles.locationText]}>
+                📍 {emergency.disasterLocation}
+              </Text>
+            </TouchableOpacity>
           </>
         )}
 
@@ -115,7 +124,10 @@ const styles = StyleSheet.create({
   footer: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', backgroundColor: '#FEF7FF', paddingVertical: 10, borderTopWidth: 1, borderTopColor: '#ddd' },
   footerButton: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 5 },
   footerButtonText: { fontSize: 12, color: '#65558F', marginTop: 4 },
-
+  locationText: {
+    textDecorationLine: 'underline',
+    color: '#65558F'
+  },
 });
 
 export default BagisciAcilDurumDetay;
