@@ -1,6 +1,6 @@
 # Fonity - Dijital Bağış ve Yardım Platformu
 
-![Fonity Logo](https://raw.githubusercontent.com/mertesermeral/bagis_app/main/assets/logo.png)
+![Fonity Logo](https://raw.githubusercontent.com/mertesermeral/bagis_app/assets/logo.png)
 
 **Fonity**, Türkiye'deki ihtiyaç sahipleri ile bağışçıları dijital bir platformda güvenli, şeffaf ve erişilebilir şekilde bir araya getiren mobil bir uygulamadır. React Native ile geliştirilen bu uygulama sayesinde sosyal dayanışma süreci dijital ortama taşınmış ve sürdürülebilir hale getirilmiştir.
 
@@ -81,6 +81,7 @@ Bu uygulama, Sakarya Üniversitesi Bilgisayar Mühendisliği bölümünde yürü
 - **Tez Başlığı:** İhtiyaç Sahipleri için Dijital Bağış ve Yardım Platformu
 - **Hazırlayanlar:** Mert Eser Meral, Vedat Doğan
 - **Danışman:** Öğr. Gör. Ahmet Şanslı
+- **🏅Destek:** Bu proje, **TÜBİTAK 2209-A** Üniversite Öğrencileri Araştırma Projeleri Destekleme Programı kapsamında desteklenmiştir.
 - [📄 Bitirme Tezi PDF (tıklayın)](./BSM498_BitirmeCalismasi_G211210047_G211210053_250626.pdf)
 
 ## 📥 Kurulum
