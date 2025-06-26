@@ -1,6 +1,6 @@
 # Fonity - Dijital Bağış ve Yardım Platformu
 
-![Fonity Logo](https://raw.githubusercontent.com/mertesermeral/bagis_app/assets/logo.png)
+![Fonity Logo](./assets/fonity.png)
 
 **Fonity**, Türkiye'deki ihtiyaç sahipleri ile bağışçıları dijital bir platformda güvenli, şeffaf ve erişilebilir şekilde bir araya getiren mobil bir uygulamadır. React Native ile geliştirilen bu uygulama sayesinde sosyal dayanışma süreci dijital ortama taşınmış ve sürdürülebilir hale getirilmiştir.
 
